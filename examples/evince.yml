@@ -1,0 +1,32 @@
+name       : evince
+version    : 3.14.1
+release    : 1
+source     :
+    - http://ftp.gnome.org/pub/gnome/sources/evince/3.14/evince-3.14.1.tar.xz : 42760595375825343bdfb1e025a270c53d60537f
+homepage   : https://wiki.gnome.org/Apps/Evince
+license    : GPLv2
+summary    : GNOME Document Viewer
+clang      : no
+builddeps  :
+    - pkgconfig(gtk+-3.0)
+    - pkgconfig(gsettings-desktop-schemas)
+    - pkgconfig(cairo-pdf)
+    - pkgconfig(libsecret-1)
+    - pkgconfig(poppler-glib)
+    - pkgconfig(libnautilus-extension)
+    - pkgconfig(libtiff-4)
+    - pkgconfig(adwaita-icon-theme)
+    - itstool
+description: |
+    Evince is a document viewer for multiple document formats. The goal
+    of evince is to replace the multiple document viewers that exist on
+    the GNOME Desktop with a single simple application.
+    Evince is specifically designed to support the file followin
+    formats: PDF, Postscript, djvu, tiff, dvi, XPS, SyncTex support with
+    gedit, comics books (cbr,cbz,cb7 and cbt).
+setup      : |
+    %configure --disable-static
+build      : |
+    %make
+install    : |
+    %make_install

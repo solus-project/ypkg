@@ -1,0 +1,24 @@
+name       : nano
+version    : 2.3.2
+release    : 1
+homepage   : http://www.nano-editor.org
+source     :
+    - http://www.nano-editor.org/dist/v2.3/nano-2.3.2.tar.gz : ff309248071486445609ad4269b798262a1324d7503dc09dea289f5b60106be8
+license    : GPLv2
+summary    : GNU nano is an easy-to-use text editor
+# Derpy build dep example..
+clang      : no
+builddeps  :
+    - ncurses-devel
+description: |
+    GNU nano is an easy-to-use text editor originally designed
+    as a replacement for Pico, the ncurses-based editor from the non-free mailer
+    package Pine (itself now available under the Apache License as Alpine).
+setup      : |
+    %configure --enable-utf8
+build      : |
+    %make
+install    : |
+    %make_install
+    install -d %installroot%/etc
+    install doc/nanorc.sample %installroot%/etc/nanorc
