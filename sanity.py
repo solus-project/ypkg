@@ -25,6 +25,9 @@ global pkger_email
 global buildDeps
 buildDeps = None
 
+global emul32
+emul32 = False
+
 def assertGetString(y, n):
     ''' Ensure string value exists '''
     if n not in y:
@@ -209,6 +212,10 @@ def sane(fpath):
     assertIsString(y, "setup")
     assertIsString(y, "build")
     assertIsString(y, "install")
+
+    if "emul32" in y:
+        global emul32
+        emul32 = bool(y['emul32'])
 
     # Saywat?
     if "setup" not in y and "build" not in y and "install" not in y:

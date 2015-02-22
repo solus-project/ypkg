@@ -68,6 +68,10 @@ def main():
 
     try:
         build.build(fpath)
+        if sanity.emul32:
+            print "Rebuilding for 32-bit"
+            build.emul32 = True
+            build.build(fpath)
     except Exception, e:
         print "Build failure: %s" % e
         return 1

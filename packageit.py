@@ -91,6 +91,10 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/share/locale"] = name
     patterns["/usr/lib64/lib*.so"] = "-devel"
     patterns["/usr/lib64/lib*.so.*"] = name
+    # Consider splitting -devel .. just not that bothered tbh
+    patterns["/usr/lib32/lib*.so"] = "-32bit"
+    patterns["/usr/lib32/lib*.so.*"] = "-32bit"
+
     patterns["/usr/share/pkgconfig"] = "-devel"
     patterns["/usr/lib64/pkgconfig"] = "-devel"
     patterns["/usr/include"] = "-devel"
@@ -104,17 +108,22 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/share/pixmaps"] = name
     patterns["/usr/share/man"] = name
     patterns["/usr/lib64/%s" % name] = name
-    patterns["/usr/lib32/%s" % name] = name
+    patterns["/usr/lib32/%s" % name] = "-32bit"
     patterns["/usr/share/%s" % name] = name
     patterns["/usr/bin"] = name
     patterns["/usr/sbin"] = name
 
     # These things are because evil.
     rtable = dict()
-    libr = re.compile("^/usr/(lib64|lib32)/[^/]*.\.so\..*") # main
-    libdr = re.compile("^/usr/(lib64|lib32)/[^/]*.\.so$")
+    libr = re.compile("^/usr/lib64/[^/]*.\.so\..*") # main
+    libdr = re.compile("^/usr/lib64/[^/]*.\.so$")
+    libr32 = re.compile("^/usr/lib32/[^/]*.\.so\..*") # main
+    libdr32 = re.compile("^/usr/lib32/[^/]*.\.so$")
     rtable["/usr/lib64/lib*.so.*"] = libr # main
     rtable["/usr/lib64/lib*.so"] = libdr
+
+    rtable["/usr/lib32/lib*.so.*"] = libr32
+    rtable["/usr/lib32/lib*.so"] = libdr32
 
     pkgFiles = dict()
     for root,dirs,files in os.walk(wdir):
@@ -150,6 +159,7 @@ def packageit(ymlFile, installDIR, outputXML):
     summaries = dict()
     summaries["-devel"] = "Development files for %s" % name
     summaries["-docs"] = "Documentation for %s" % name
+    summaries["-32bit"] = "32-bit libraries for %s" % name
 
     for pkg in pkgFiles:
         type = "data"

@@ -50,6 +50,9 @@ def which(p):
 global Clang
 Clang = which("clang")
 
+global emul32
+emul32 = False
+
 def get_path():
     path = "/usr/bin:/bin"
     if ccache:
@@ -71,9 +74,25 @@ def escape(inp, wdir, name):
     macros["%workdir%"] = wdir
 
     libdir = "lib64"
+    if emul32:
+        libdir = "lib32"
 
+    # common issues...
+    # -mtune=generic -march=x86-64
     host = conf.values.build.host
-    macros["$CONFOPTS"] = "--prefix=/usr \
+    arch = conf.values.general.architecture
+    cxxflags = conf.values.build.cxxflags
+    cflags = conf.values.build.cflags
+    if emul32:
+        if "-march=%s" % arch in cflags:
+            cflags = cflags.replace("-march=%s" % arch, "-march=i686")
+        if "-march=%s" % arch in cxxflags:
+            cxxflags = cxxflags.replace("-march=%s" % arch, "-march=i686")
+        host = "i686-pc-linux-gnu"
+
+    prefix = "/usr" if not emul32 else "/emul32"
+
+    macros["$CONFOPTS"] = "--prefix=%s \
                            --build=%s \
                            --libdir=/usr/%s \
                            --mandir=/usr/share/man \
@@ -82,9 +101,9 @@ def escape(inp, wdir, name):
                            --docdir=/usr/share/doc \
                            --sysconfdir=/etc \
                            --localstatedir=/var \
-                           --libexecdir=/usr/%s/%s" % (host, libdir, libdir, name)
-    macros["%CFLAGS%"] = conf.values.build.cflags
-    macros["%CXXFLAGS%"] = conf.values.build.cxxflags
+                           --libexecdir=/usr/%s/%s" % (prefix, host, libdir, libdir, name)
+    macros["%CFLAGS%"] = cflags
+    macros["%CXXFLAGS%"] = cxxflags
     macros["%LDFLAGS%"] = conf.values.build.ldflags
     macros["%CC%"] = "%s-gcc" % host
     macros["%CXX%"] = "%s-g++" % host
@@ -96,6 +115,13 @@ def escape(inp, wdir, name):
         macros["%CC%"] = "clang"
         macros["%CXX%"] = "clang++"
 
+    if emul32:
+        if Clang:
+            macros["%CC%"] += " -m32"
+            macros["%CXX%"] += " -m32"
+        else:
+            macros["%CC%"] = "gcc -m32"
+            macros["%CXX%"] = "g++ -m32"
     # presetup, required. Cool how we disobey our own /bin rule right?
     header = """
 #!/bin/bash
@@ -109,8 +135,17 @@ export CC="%%CC%%"
 export CXX="%%CXX%%"
 export PATH="%s"
 """ % get_path()
+    if emul32:
+        header += "\nexport EMUL32BUILD=1\n"
+
     header += inp
     inp = header
+    if emul32:
+        inp += """
+if [[ -e "%installroot%/emul32" ]]; then
+        rm -rf "%installroot%/emul32"
+fi"""
+
     while (True):
         co = False
         for macro in macros:
