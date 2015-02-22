@@ -161,6 +161,10 @@ def packageit(ymlFile, installDIR, outputXML):
                     hit = True
                     break
             if not hit:
+                # Fallback.. nasty
+                if fpath.startswith("/usr/lib32"):
+                    name = "-32bit"
+
                 if name not in pkgFiles:
                     pkgFiles[name] = list()
                 if fpath not in pkgFiles[name]:
