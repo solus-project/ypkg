@@ -45,6 +45,22 @@ def main():
     build.BuildDir += "/%s" % sanity.name
     build.InstallDir += "/%s" % sanity.name
 
+    insList = list()
+    if sanity.buildDeps:
+        for dep in sanity.buildDeps:
+            if not sanity._idb.has_package(dep) and dep not in insList:
+                insList.append(dep)
+    if len(insList) > 0:
+        cmd = "eopkg install %s" % (" ".join(insList))
+        if not build.LeRoot:
+            cmd = "sudo %s" % cmd
+        if "--force" in sys.argv:
+            cmd += " -y"
+        print "\nInstalling build dependencies...."
+        ret = subprocess.call(shlex.split(cmd))
+        if ret != 0:
+            return ret
+
     build.cleanup()
     sources = sanity.get_sources()
     tars = build.fetch_source(sources)

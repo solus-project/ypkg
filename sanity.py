@@ -22,6 +22,9 @@ global name
 global pkger_name
 global pkger_email
 
+global buildDeps
+buildDeps = None
+
 def assertGetString(y, n):
     ''' Ensure string value exists '''
     if n not in y:
@@ -215,7 +218,9 @@ def sane(fpath):
     # Obv.
     if "builddeps" in y:
         assertStringList(y, "builddeps")
-        get_build_deps(y)
+        b = get_build_deps(y)
+        global buildDeps
+        buildDeps = b
 
     f.close()
 
