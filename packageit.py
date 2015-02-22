@@ -121,12 +121,12 @@ def packageit(ymlFile, installDIR, outputXML):
 
     # These things are because evil.
     rtable = dict()
-    libr = re.compile("^/usr/lib64/[^/]*.\.so\..*") # main
-    libdr = re.compile("^/usr/lib64/[^/]*.\.so$")
-    libar = re.compile("^/usr/lib64/[^/]*.\.a$")
-    libr32 = re.compile("^/usr/lib32/[^/]*.\.so\..*") # main
-    libdr32 = re.compile("^/usr/lib32/[^/]*.\.so$")
-    libar32 = re.compile("^/usr/lib32/[^/]*.\.a$")
+    libr = re.compile("^/usr/lib64/lib[^/]*.\.so\..*") # main
+    libdr = re.compile("^/usr/lib64/lib[^/]*.\.so$")
+    libar = re.compile("^/usr/lib64/lib[^/]*.\.a$")
+    libr32 = re.compile("^/usr/lib32/lib[^/]*.\.so\..*") # main
+    libdr32 = re.compile("^/usr/lib32/lib[^/]*.\.so$")
+    libar32 = re.compile("^/usr/lib32/lib[^/]*.\.a$")
     rtable["/usr/lib64/lib*.so.*"] = libr # main
     rtable["/usr/lib64/lib*.so"] = libdr
     rtable["/usr/lib64/lib*.a"] = libar
