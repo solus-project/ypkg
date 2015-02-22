@@ -4,7 +4,7 @@ release    : 1
 source     :
     - http://ftp.gnome.org/pub/gnome/sources/evince/3.14/evince-3.14.1.tar.xz : 42760595375825343bdfb1e025a270c53d60537f
 homepage   : https://wiki.gnome.org/Apps/Evince
-license    : GPLv2
+license    : GPL-2.0
 summary    : GNOME Document Viewer
 clang      : no
 builddeps  :
