@@ -40,7 +40,7 @@ global ccache
 ccache = "ccache" in conf.values.build.buildhelper
 
 global fakeroot
-fakeroot = True
+fakeroot = False
 
 def get_path():
     path = "/usr/bin:/bin"
