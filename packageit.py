@@ -101,6 +101,7 @@ def packageit(ymlFile, installDIR, outputXML):
 
     # these just exist to speed things up tbqh.
     patterns["/usr/share/icons"] = name
+    patterns["/usr/share/pixmaps"] = name
     patterns["/usr/share/man"] = name
     patterns["/usr/lib64/%s" % name] = name
     patterns["/usr/lib32/%s" % name] = name
