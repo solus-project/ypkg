@@ -37,7 +37,7 @@ global Clang
 Clang = True
 
 global ccache
-ccache = "ccache" in conf.values.build.buildhelper
+ccache = conf.values.build.buildhelper is not None and "ccache" in conf.values.build.buildhelper
 
 global fakeroot
 fakeroot = False
