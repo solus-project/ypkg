@@ -33,8 +33,9 @@ def assertGetString(y, n):
     if n not in y:
         print "Required string '%s' missing" % n
         sys.exit(1)
-    r = y[n]
-    if not isinstance(r, str):
+    try:
+        r = str(y[n])
+    except:
         print "Key '%s' must be a string" % n
         sys.exit(1)
     return r
@@ -54,8 +55,10 @@ def assertIsString(y, n):
     ''' Ensure value is string if it exists '''
     if n not in y:
         return
-    r = y[n]
-    if not isinstance(r, str):
+    r = None
+    try:
+        r = str(y[n])
+    except:
         print "Key '%s' must be a string" % n
         sys.exit(1)
     return r
