@@ -162,13 +162,14 @@ def packageit(ymlFile, installDIR, outputXML):
                     break
             if not hit:
                 # Fallback.. nasty
+                tmpname = name
                 if fpath.startswith("/usr/lib32"):
-                    name = "-32bit"
+                    tmpname = "-32bit"
 
-                if name not in pkgFiles:
-                    pkgFiles[name] = list()
-                if fpath not in pkgFiles[name]:
-                    pkgFiles[name].append(fpath)
+                if tmpname not in pkgFiles:
+                    pkgFiles[tmpname] = list()
+                if fpath not in pkgFiles[tmpname]:
+                    pkgFiles[tmpname].append(fpath)
 
     summaries = dict()
     summaries["-devel"] = "Development files for %s" % name
