@@ -33,14 +33,23 @@ BuildDir = os.path.abspath("%s/build" % BuildPrefix)
 global InstallDir
 InstallDir = os.path.abspath("%s/install" % BuildPrefix)
 
-global Clang
-Clang = True
+
 
 global ccache
 ccache = conf.values.build.buildhelper is not None and "ccache" in conf.values.build.buildhelper
 
 global fakeroot
 fakeroot = False
+
+def which(p):
+    for i in os.environ['PATH'].split(":"):
+        p2 = os.path.join(i,p)
+        if os.path.exists(p2):
+            return True
+    return False
+
+global Clang
+Clang = which("clang")
 
 def get_path():
     path = "/usr/bin:/bin"
