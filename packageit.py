@@ -88,7 +88,6 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns = dict()
     def m(s):
         return re.compile(s)
-    #patterns["/etc/"] = "-config"
     patterns["/usr/share/locale"] = name
     patterns["/usr/lib64/lib*.so"] = "-devel"
     patterns["/usr/lib64/lib*.so.*"] = name
@@ -99,6 +98,7 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/share/gtk-doc"] = "-docs"
     patterns["/usr/share/man/man2"] = "-devel"
     patterns["/usr/share/man/man3"] = "-devel"
+
     # these just exist to speed things up tbqh.
     patterns["/usr/share/icons"] = name
     patterns["/usr/share/man"] = name
@@ -107,6 +107,7 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/share/%s" % name] = name
     patterns["/usr/bin"] = name
     patterns["/usr/sbin"] = name
+
     # These things are because evil.
     rtable = dict()
     libr = re.compile("^/usr/(lib64|lib32)/[^/]*.\.so\..*") # main
