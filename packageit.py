@@ -91,6 +91,8 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/share/locale"] = name
     patterns["/usr/lib64/lib*.so"] = "-devel"
     patterns["/usr/lib64/lib*.so.*"] = name
+    patterns["/usr/lib64/lib*.a"] = "-devel"
+    patterns["/usr/lib32/lib*.a"] = "-32bit"
     # Consider splitting -devel .. just not that bothered tbh
     patterns["/usr/lib32/lib*.so"] = "-32bit"
     patterns["/usr/lib32/lib*.so.*"] = "-32bit"
@@ -117,13 +119,17 @@ def packageit(ymlFile, installDIR, outputXML):
     rtable = dict()
     libr = re.compile("^/usr/lib64/[^/]*.\.so\..*") # main
     libdr = re.compile("^/usr/lib64/[^/]*.\.so$")
+    libar = re.compile("^/usr/lib64/[^/]*.\.a$")
     libr32 = re.compile("^/usr/lib32/[^/]*.\.so\..*") # main
     libdr32 = re.compile("^/usr/lib32/[^/]*.\.so$")
+    libar32 = re.compile("^/usr/lib32/[^/]*.\.a$")
     rtable["/usr/lib64/lib*.so.*"] = libr # main
     rtable["/usr/lib64/lib*.so"] = libdr
+    patterns["/usr/lib64/lib*.a"] = libar
 
     rtable["/usr/lib32/lib*.so.*"] = libr32
     rtable["/usr/lib32/lib*.so"] = libdr32
+    patterns["/usr/lib32/lib*.a"] = libar32
 
     pkgFiles = dict()
     for root,dirs,files in os.walk(wdir):
@@ -208,6 +214,9 @@ def packageit(ymlFile, installDIR, outputXML):
             dep = pisi.dependency.Dependency()
             dep.package = name
             dep.release = "current"
+            if fq.endswith("-devel"):
+                if "devel" in d and bool(d['devel']) == True:
+                    package.partOf = "system.devel"
             package.packageDependencies.append(dep)
         package.description = source.description
         if fq != name:

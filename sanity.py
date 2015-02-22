@@ -28,6 +28,9 @@ buildDeps = None
 global emul32
 emul32 = False
 
+global autodep
+autodep = True
+
 def assertGetString(y, n):
     ''' Ensure string value exists '''
     if n not in y:
@@ -161,6 +164,10 @@ def sane(fpath):
 
     global name
     name = y['name']
+
+    if "autodep" in y:
+        global autodep
+        autodep = bool(y['autodep'])
 
     if not "source" in y:
         print "Required list '%s' is missing" % "source"

@@ -85,6 +85,8 @@ def install():
     pisitools.insinto("/", "%s/*")
 """ % build.InstallDir
 
+    if not sanity.autodep:
+        tmpl += "\nIgnoreAutodep=True\n"
 
     f.writelines(tmpl)
     f.close()
