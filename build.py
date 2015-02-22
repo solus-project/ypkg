@@ -142,9 +142,16 @@ export PATH="%s"
     inp = header
     if emul32:
         inp += """
-if [[ -e "%installroot%/emul32" ]]; then
+if [ -e "%installroot%/emul32" ]; then
         rm -rf "%installroot%/emul32"
 fi"""
+
+    # General cleanup crap
+    inp += """
+if [ -f "%installroot%/usr/share/man/dir" ]; then
+    rm -v "%installroot%/usr/share/man/dir"
+fi
+"""
 
     while (True):
         co = False
