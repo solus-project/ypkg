@@ -85,7 +85,10 @@ def install():
     f.writelines(tmpl)
     f.close()
 
-    ret = subprocess.call(shlex.split("sudo eopkg build %s" % pspec), shell=False)
+    cmd = "eopkg build --ignore-dependency --ignore-safety %s" % pspec
+    if not build.LeRoot:
+        cmd = "sudo %s" % cmd
+    ret = subprocess.call(shlex.split(cmd), shell=False)
     if ret != 0:
         print "Failed to build package"
         return ret

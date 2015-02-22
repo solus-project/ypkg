@@ -25,14 +25,13 @@ LeRoot = os.geteuid() == 0
 
 BuildPrefix =  "/var/ypkg-root" if LeRoot else "%s/YPKG" % os.path.expanduser("~")
 global BallDir
-BallDir = conf.values.directories.archives_dir if LeRoot else os.path.abspath("%s/sources" % BuildPrefix)
+BallDir = conf.values.dirs.archives_dir if LeRoot else os.path.abspath("%s/sources" % BuildPrefix)
 
 global BuildDir
 BuildDir = os.path.abspath("%s/build" % BuildPrefix)
 
 global InstallDir
 InstallDir = os.path.abspath("%s/install" % BuildPrefix)
-
 
 
 global ccache
