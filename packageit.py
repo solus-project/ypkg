@@ -122,7 +122,7 @@ def packageit(ymlFile, installDIR, outputXML):
             fpath = os.path.join(root, file)
             fpath = fpath.split(wdir)[1]
             hit = False
-            # Ideally we need a shitlist of regex's to ignroe.
+            # Ideally we need a shitlist of regex's to ignore.
             if "lib" in fpath and fpath.endswith(".la"):
                 continue
             for p in patterns:
@@ -137,7 +137,6 @@ def packageit(ymlFile, installDIR, outputXML):
                     if comp not in pkgFiles:
                         pkgFiles[comp] = list()
                     if p not in pkgFiles[comp]:
-                        # Determine type, etc...
                         pkgFiles[comp].append(p)
                     hit = True
                     break
@@ -149,9 +148,7 @@ def packageit(ymlFile, installDIR, outputXML):
 
     summaries = dict()
     summaries["-devel"] = "Development files for %s" % name
-    summaries["-locale"] = "Localisation files for %s" % name
     summaries["-docs"] = "Documentation for %s" % name
-    summaries["-help"] = "Help files for %s" % name
 
     for pkg in pkgFiles:
         type = "data"
