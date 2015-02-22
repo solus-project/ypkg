@@ -30,6 +30,10 @@ def packageit(ymlFile, installDIR, outputXML):
     with open(ymlFile, "r") as pkg:
         d = yaml.load(pkg)
 
+    canSplitLibs = True
+    if "libsplit" in d:
+        canSplitLibs = bool(d['libsplit'])
+
     spec = pisi.specfile.SpecFile()
     meta = pisi.metadata.MetaData()
     source = pisi.specfile.Source()
@@ -89,7 +93,7 @@ def packageit(ymlFile, installDIR, outputXML):
     def m(s):
         return re.compile(s)
     patterns["/usr/share/locale"] = name
-    patterns["/usr/lib64/lib*.so"] = "-devel"
+    patterns["/usr/lib64/lib*.so"] = "-devel" if canSplitLibs else name
     patterns["/usr/lib64/lib*.so.*"] = name
     patterns["/usr/lib64/lib*.a"] = "-devel"
     patterns["/usr/lib32/lib*.a"] = "-32bit"
@@ -125,11 +129,11 @@ def packageit(ymlFile, installDIR, outputXML):
     libar32 = re.compile("^/usr/lib32/[^/]*.\.a$")
     rtable["/usr/lib64/lib*.so.*"] = libr # main
     rtable["/usr/lib64/lib*.so"] = libdr
-    patterns["/usr/lib64/lib*.a"] = libar
+    rtable["/usr/lib64/lib*.a"] = libar
 
     rtable["/usr/lib32/lib*.so.*"] = libr32
     rtable["/usr/lib32/lib*.so"] = libdr32
-    patterns["/usr/lib32/lib*.a"] = libar32
+    rtable["/usr/lib32/lib*.a"] = libar32
 
     pkgFiles = dict()
     for root,dirs,files in os.walk(wdir):
