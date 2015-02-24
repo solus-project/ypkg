@@ -135,6 +135,19 @@ def packageit(ymlFile, installDIR, outputXML):
     rtable["/usr/lib32/lib*.so"] = libdr32
     rtable["/usr/lib32/lib*.a"] = libar32
 
+    def hasMatch(path):
+        for p in patterns:
+            if p in rtable:
+                b = rtable[p].match(fpath)
+            else:
+                b = fnmatch.fnmatch(fpath, p)
+                if not b:
+                    b = fpath.startswith(p)
+            if b:
+                return (p,patterns[p])
+        return (None,None)
+
+    # I am not proud of the following code.
     pkgFiles = dict()
     for root,dirs,files in os.walk(wdir):
         #print dirs
@@ -145,31 +158,50 @@ def packageit(ymlFile, installDIR, outputXML):
             # Ideally we need a shitlist of regex's to ignore.
             if "lib" in fpath and fpath.endswith(".la"):
                 continue
-            for p in patterns:
-                if p in rtable:
-                    b = rtable[p].match(fpath)
-                else:
-                    b = fnmatch.fnmatch(fpath, p)
-                    if not b:
-                        b = fpath.startswith(p)
-                if b:
-                    comp = patterns[p]
-                    if comp not in pkgFiles:
-                        pkgFiles[comp] = list()
-                    if p not in pkgFiles[comp]:
-                        pkgFiles[comp].append(p)
-                    hit = True
-                    break
-            if not hit:
+            p,comp = hasMatch(fpath)
+            if comp:
+                if comp not in pkgFiles:
+                    pkgFiles[comp] = list()
+                if p not in pkgFiles[comp]:
+                    pkgFiles[comp].append(p)
+            else:
                 # Fallback.. nasty
                 tmpname = name
                 if fpath.startswith("/usr/lib32"):
                     tmpname = "-32bit"
+                collapsed = False
+                if len(files) > 1:
+                    newname = os.path.dirname(fpath)
+                    p,comp = hasMatch(newname)
+                    if not p:
+                        # Check nobody conflicts.
+                        hit = False
+                        for pkg in pkgFiles:
+                            if pkg == name:
+                                continue
+                            if newname in pkgFiles[pkg]:
+                                hit = True
+                                # Already collapsed/taken
+                                break
+                            else:
+                                for fi in pkgFiles[pkg]:
+                                    if fi.startswith(newname):
+                                        # Recursive include
+                                        hit = True
+                                        break
+                        if not hit:
+                            # Actually collapse it.
+                            if name not in pkgFiles:
+                                pkgFiles[name] = list()
+                            if newname not in pkgFiles[name]:
+                                pkgFiles[name].append(newname)
+                            collapsed = True
 
-                if tmpname not in pkgFiles:
-                    pkgFiles[tmpname] = list()
-                if fpath not in pkgFiles[tmpname]:
-                    pkgFiles[tmpname].append(fpath)
+                if not collapsed:
+                    if tmpname not in pkgFiles:
+                        pkgFiles[tmpname] = list()
+                    if fpath not in pkgFiles[tmpname]:
+                        pkgFiles[tmpname].append(fpath)
 
     summaries = dict()
     summaries["-devel"] = "Development files for %s" % name
