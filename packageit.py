@@ -90,8 +90,6 @@ def packageit(ymlFile, installDIR, outputXML):
 
 
     patterns = dict()
-    def m(s):
-        return re.compile(s)
     patterns["/usr/share/locale"] = name
     patterns["/usr/lib64/lib*.so"] = "-devel" if canSplitLibs else name
     patterns["/usr/lib64/lib*.so.*"] = name
