@@ -99,7 +99,7 @@ def install():
         return ret
 
     try:
-        shutil.copy(pspec, "%s/pspec_%s.xml" % (os.getcwd(), build.host))
+        shutil.copy(pspec, "%s/pspec_%s.xml" % (os.getcwd(), build.arch))
     except:
         print "Unable to copy pspec.xml to current directory!"
         return 1

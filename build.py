@@ -36,6 +36,9 @@ InstallDir = os.path.abspath("%s/install" % BuildPrefix)
 global host
 host = conf.values.build.host
 
+global arch
+arch = conf.values.general.architecture
+
 global ccache
 ccache = conf.values.build.buildhelper is not None and "ccache" in conf.values.build.buildhelper
 
@@ -70,6 +73,7 @@ def get_path():
 
 def escape(inp, wdir, name):
     global host
+    global arch
     cxxflags = conf.values.build.cxxflags
     cflags = conf.values.build.cflags
     ldflags = conf.values.build.ldflags
@@ -84,7 +88,6 @@ def escape(inp, wdir, name):
                       -DCMAKE_CXX_FLAGS=\"%s\" \
                       -DCMAKE_LD_FLAGS=\"%s\" \
                       -DCMAKE_BUILD_TYPE=RelWithDebInfo" % (cflags, cxxflags, ldflags)
-    arch = conf.values.general.architecture
     x86 = "x86_64" in arch
 
     libdir = "lib64" if x86 else "lib"
