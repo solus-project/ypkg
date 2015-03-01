@@ -73,17 +73,20 @@ def escape(inp, wdir, name):
     macros["%installroot%"] = InstallDir
     macros["%workdir%"] = wdir
 
-    libdir = "lib64"
+    host = conf.values.build.host
+    arch = conf.values.general.architecture
+	x86 = "x86_64" in arch
+
+    libdir = "lib64" if x86 else "lib"
     if emul32:
         libdir = "lib32"
 
     # common issues...
     # -mtune=generic -march=x86-64
-    host = conf.values.build.host
-    arch = conf.values.general.architecture
     cxxflags = conf.values.build.cxxflags
     cflags = conf.values.build.cflags
-    if emul32:
+    # only x86_64 for emul32 builds right now
+    if emul32 and x86:
         if "-march=%s" % arch in cflags:
             cflags = cflags.replace("-march=%s" % arch, "-march=i686")
         if "-march=%s" % arch in cxxflags:
