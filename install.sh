@@ -1,10 +1,16 @@
 #!/bin/bash
+set -x
+
+INST_PREFIX=""
+if [[ $EUID -ne "0" ]]; then
+    INST_PREFIX="sudo"
+fi
 
 if [[ ! -d "/usr/share/ypkg" ]]; then
-    sudo mkdir -v /usr/share/ypkg
+    $INST_PREFIX mkdir -v /usr/share/ypkg
 fi
-sudo cp -v *.py /usr/share/ypkg/.
-sudo chmod -v +x /usr/share/ypkg/ypkg.py
+$INST_PREFIX cp -v *.py /usr/share/ypkg/.
+$INST_PREFIX chmod -v +x /usr/share/ypkg/ypkg.py
 if [[ ! -e "/usr/bin/ypkg" ]]; then
-    sudo ln -sv /usr/share/ypkg/ypkg.py /usr/bin/ypkg
+    $INST_PREFIX ln -sv /usr/share/ypkg/ypkg.py /usr/bin/ypkg
 fi
