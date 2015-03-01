@@ -93,6 +93,7 @@ def escape(inp, wdir, name):
     libdir = "lib64" if x86 else "lib"
     if emul32:
         libdir = "lib32"
+    macros["%libdir%"] = "/usr/%s" % libdir
 
     # common issues...
     # -mtune=generic -march=x86-64
