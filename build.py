@@ -70,14 +70,22 @@ def get_path():
 
 def escape(inp, wdir, name):
     global host
+    cxxflags = conf.values.build.cxxflags
+    cflags = conf.values.build.cflags
+    ldflags = conf.values.build.ldflags
+
     macros = dict()
     macros["%configure"] = "./configure $CONFOPTS"
     macros["%make_install"] = "%make install DESTDIR=%installroot%"
     macros["%installroot%"] = InstallDir
     macros["%workdir%"] = wdir
-
+    macros["%cmake"] = "cmake -DCMAKE_INSTALL_PREFIX=/usr \
+                      -DCMAKE_C_FLAGS=\"%s\" \
+                      -DCMAKE_CXX_FLAGS=\"%s\" \
+                      -DCMAKE_LD_FLAGS=\"%s\" \
+                      -DCMAKE_BUILD_TYPE=RelWithDebInfo" % (cflags, cxxflags, ldflags)
     arch = conf.values.general.architecture
-	x86 = "x86_64" in arch
+    x86 = "x86_64" in arch
 
     libdir = "lib64" if x86 else "lib"
     if emul32:
@@ -85,8 +93,6 @@ def escape(inp, wdir, name):
 
     # common issues...
     # -mtune=generic -march=x86-64
-    cxxflags = conf.values.build.cxxflags
-    cflags = conf.values.build.cflags
     # only x86_64 for emul32 builds right now
     if emul32 and x86:
         if "-march=%s" % arch in cflags:
