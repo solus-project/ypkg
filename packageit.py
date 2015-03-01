@@ -106,6 +106,7 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/share/gtk-doc"] = "-docs"
     patterns["/usr/share/man/man2"] = "-devel"
     patterns["/usr/share/man/man3"] = "-devel"
+    patterns["/usr/share/vala*"] = "-devel"
 
     # these just exist to speed things up tbqh.
     patterns["/usr/share/icons"] = name
