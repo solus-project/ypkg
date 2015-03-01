@@ -240,6 +240,8 @@ def packageit(ymlFile, installDIR, outputXML):
                 type = "header"
             elif file.startswith("/usr/bin"):
                 type = "executable"
+            elif file.startswith("/usr/sbin"):
+                type = "executable"
             elif file.startswith("/etc"):
                 type = "config"
             else:
