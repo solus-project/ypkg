@@ -34,7 +34,6 @@ def main():
         return 1
     if not fpath.endswith("package.yml"):
         print "Unnecessarily anal warning: File is not named package.yml"
-        return 1
 
     if not sane(fpath): # then y made for linoox
         return 1
