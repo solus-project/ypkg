@@ -33,6 +33,8 @@ BuildDir = os.path.abspath("%s/build" % BuildPrefix)
 global InstallDir
 InstallDir = os.path.abspath("%s/install" % BuildPrefix)
 
+global host
+host = conf.values.build.host
 
 global ccache
 ccache = conf.values.build.buildhelper is not None and "ccache" in conf.values.build.buildhelper
@@ -67,13 +69,13 @@ def get_path():
     return path
 
 def escape(inp, wdir, name):
+    global host
     macros = dict()
     macros["%configure"] = "./configure $CONFOPTS"
     macros["%make_install"] = "%make install DESTDIR=%installroot%"
     macros["%installroot%"] = InstallDir
     macros["%workdir%"] = wdir
 
-    host = conf.values.build.host
     arch = conf.values.general.architecture
 	x86 = "x86_64" in arch
 
