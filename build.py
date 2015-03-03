@@ -251,42 +251,46 @@ def build(fpath):
             global Clang
             Clang = cl
 
-        setup = d['setup']
         name = d['name']
-        contents = escape(setup, wdir, name)
 
-        with tempfile.NamedTemporaryFile(prefix="eopkg-setup") as script:
-            script.writelines(contents)
-            script.flush()
-            # execute it :/
-            print "Running setup..."
-            if fakeroot:
-                cmd = ["fakeroot", "/bin/sh", script.name]
-            else:
-                cmd = ["/bin/sh", script.name]
-            r = subprocess.check_call(cmd)
+        if 'setup' in d:
+            setup = d['setup']
+            contents = escape(setup, wdir, name)
 
-        contents = escape(d['build'], wdir, name)
-        with tempfile.NamedTemporaryFile(prefix="eopkg-build") as script:
-            script.writelines(contents)
-            script.flush()
-            # execute it :/
-            print "Running build..."
-            if fakeroot:
-                cmd = ["fakeroot", "/bin/sh", script.name]
-            else:
-                cmd = ["/bin/sh", script.name]
-            r = subprocess.check_call(cmd)
+            with tempfile.NamedTemporaryFile(prefix="eopkg-setup") as script:
+                script.writelines(contents)
+                script.flush()
+                # execute it :/
+                print "Running setup..."
+                if fakeroot:
+                    cmd = ["fakeroot", "/bin/sh", script.name]
+                else:
+                    cmd = ["/bin/sh", script.name]
+                r = subprocess.check_call(cmd)
+
+        if 'build' in d:
+            contents = escape(d['build'], wdir, name)
+            with tempfile.NamedTemporaryFile(prefix="eopkg-build") as script:
+                script.writelines(contents)
+                script.flush()
+                # execute it :/
+                print "Running build..."
+                if fakeroot:
+                    cmd = ["fakeroot", "/bin/sh", script.name]
+                else:
+                    cmd = ["/bin/sh", script.name]
+                r = subprocess.check_call(cmd)
 
 
-        contents = escape(d['install'], wdir, name)
-        with tempfile.NamedTemporaryFile(prefix="eopkg-install") as script:
-            script.writelines(contents)
-            script.flush()
-            # execute it :/
-            print "Running install..."
-            if fakeroot:
-                cmd = ["fakeroot", "/bin/sh", script.name]
-            else:
-                cmd = ["/bin/sh", script.name]
-            r = subprocess.check_call(cmd)
+        if 'install' in d:
+            contents = escape(d['install'], wdir, name)
+            with tempfile.NamedTemporaryFile(prefix="eopkg-install") as script:
+                script.writelines(contents)
+                script.flush()
+                # execute it :/
+                print "Running install..."
+                if fakeroot:
+                    cmd = ["fakeroot", "/bin/sh", script.name]
+                else:
+                    cmd = ["/bin/sh", script.name]
+                r = subprocess.check_call(cmd)
