@@ -155,6 +155,11 @@ export PATH="%s"
 
     header += inp
     inp = header
+    if LeRoot:
+        header += """
+export CCACHE_DIR=/root/.ccache
+"""
+
     if emul32:
         inp += """
 if [ -e "%installroot%/emul32" ]; then
