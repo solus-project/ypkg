@@ -112,9 +112,6 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/share/icons"] = name
     patterns["/usr/share/pixmaps"] = name
     patterns["/usr/share/man"] = name
-    patterns["/usr/lib64/%s" % name] = name
-    patterns["/usr/lib32/%s" % name] = "-32bit"
-    patterns["/usr/share/%s" % name] = name
     patterns["/usr/bin"] = name
     patterns["/usr/sbin"] = name
 
