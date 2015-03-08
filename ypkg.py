@@ -22,6 +22,17 @@ import sanity
 from sanity import sane
 import os
 import shutil
+import xml.etree.ElementTree as ET
+
+def load_component(fname):
+    try:
+        tree = ET.parse(fname)
+        root = tree.getroot()
+
+        name = root.findall("Name")[0].text
+        return name
+    except Exception, e:
+       return None
 
 def main():
     if len(sys.argv) < 2:
@@ -37,6 +48,15 @@ def main():
 
     if not sane(fpath): # then y made for linoox
         return 1
+
+    comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "component.xml")
+    if os.path.exists(comp):
+        packageit.component = load_component(comp)
+    else:
+        comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "..", "component.xml")
+        if os.path.exists(comp):
+            packageit.component = load_component(comp)
+
 
     pspec = build.BuildPrefix + "/%s.xml" % sanity.name
     actions = build.BuildPrefix + "/actions.py"

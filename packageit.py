@@ -11,7 +11,6 @@
 #  (at your option) any later version.
 #
 from pisi.package import Package
-import pisi.metadata
 import pisi.specfile
 import os
 import re
@@ -22,6 +21,8 @@ import datetime
 import sanity
 
 conf = pisi.config.Config()
+
+component = None
 
 def packageit(ymlFile, installDIR, outputXML):
     wdir = installDIR
@@ -35,7 +36,6 @@ def packageit(ymlFile, installDIR, outputXML):
         canSplitLibs = bool(d['libsplit'])
 
     spec = pisi.specfile.SpecFile()
-    meta = pisi.metadata.MetaData()
     source = pisi.specfile.Source()
     source.name = d['name']
     name = source.name
@@ -259,7 +259,12 @@ def packageit(ymlFile, installDIR, outputXML):
             if fq.endswith("-devel"):
                 if "devel" in d and bool(d['devel']) == True:
                     package.partOf = "system.devel"
+                else:
+                    package.partOf = "programming.devel"
             package.packageDependencies.append(dep)
+        else:
+            if component:
+                package.partOf = component
         package.description = source.description
         if fq != name:
             package.summary['en'] = summaries[pkg]
