@@ -154,7 +154,7 @@ def sane(fpath):
     try:
         vr = pisi.version.make_version(v)
     except Exception, e:
-        print vr
+        print "%s is not a valid eopkg version" % v
         sys.exit(1)
 
     assertGetString(y, "description")
