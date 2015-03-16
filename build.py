@@ -233,7 +233,9 @@ def extract(src_list):
 
     for x in src_list:
         target = os.path.join(BallDir, os.path.basename(x))
-        cmd = "tar xf \"%s\" -C \"%s\"" % (target, BuildDir)
+        ext = "unzip" if target.endswith(".zip") else "tar xf"
+        diropt = "-d" if target.endswith(".zip") else "-C"
+        cmd = "%s \"%s\" %s \"%s\"" % (ext, target, diropt, BuildDir)
         r = subprocess.check_call(cmd, shell=True)
 
 def get_work_dir():
