@@ -101,12 +101,14 @@ def packageit(ymlFile, installDIR, outputXML):
 
     patterns["/usr/share/pkgconfig"] = "-devel"
     patterns["/usr/lib64/pkgconfig"] = "-devel"
+    patterns["/usr/lib/pkgconfig"] = "-devel"
     patterns["/usr/include"] = "-devel"
     patterns["/usr/share/help"] = name
     patterns["/usr/share/gtk-doc"] = "-docs"
     patterns["/usr/share/man/man2"] = "-devel"
     patterns["/usr/share/man/man3"] = "-devel"
     patterns["/usr/share/vala*"] = "-devel"
+    patterns["/usr/share/cmake*"] = "-devel"
 
     # these just exist to speed things up tbqh.
     patterns["/usr/share/icons"] = name
