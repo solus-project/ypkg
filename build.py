@@ -78,7 +78,16 @@ def escape(inp, wdir, name):
     cflags = conf.values.build.cflags
     ldflags = conf.values.build.ldflags
 
+    x86 = "x86_64" in arch
+
+    libdir = "lib64" if x86 else "lib"
+    if emul32:
+        libdir = "lib32"
+
+    libsuffix = "64" if x86 and not emul32 else ""
+
     macros = dict()
+    macros["%libdir%"] = "/usr/%s" % libdir
     macros["%configure"] = "./configure $CONFOPTS"
     macros["%make_install"] = "%make install DESTDIR=%installroot%"
     macros["%installroot%"] = InstallDir
@@ -87,13 +96,8 @@ def escape(inp, wdir, name):
                       -DCMAKE_C_FLAGS=\"%s\" \
                       -DCMAKE_CXX_FLAGS=\"%s\" \
                       -DCMAKE_LD_FLAGS=\"%s\" \
-                      -DCMAKE_BUILD_TYPE=RelWithDebInfo" % (cflags, cxxflags, ldflags)
-    x86 = "x86_64" in arch
-
-    libdir = "lib64" if x86 else "lib"
-    if emul32:
-        libdir = "lib32"
-    macros["%libdir%"] = "/usr/%s" % libdir
+                      -DCMAKE_LIB_SUFFIX=\"%s\" \
+                      -DCMAKE_BUILD_TYPE=RelWithDebInfo" % (cflags, cxxflags, ldflags, libsuffix)
 
     # common issues...
     # -mtune=generic -march=x86-64
