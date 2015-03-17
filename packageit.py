@@ -92,8 +92,11 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns = dict()
     patterns["/usr/share/locale"] = name
     patterns["/usr/lib64/lib*.so"] = "-devel" if canSplitLibs else name
+    patterns["/usr/lib/lib*.so"] = "-devel" if canSplitLibs else name
     patterns["/usr/lib64/lib*.so.*"] = name
+    patterns["/usr/lib/lib*.so.*"] = name
     patterns["/usr/lib64/lib*.a"] = "-devel"
+    patterns["/usr/lib/lib*.a"] = "-devel"
     patterns["/usr/lib32/lib*.a"] = "-32bit"
     # Consider splitting -devel .. just not that bothered tbh
     patterns["/usr/lib32/lib*.so"] = "-32bit"
@@ -119,16 +122,24 @@ def packageit(ymlFile, installDIR, outputXML):
 
     # These things are because evil.
     rtable = dict()
-    libr = re.compile("^/usr/lib64/lib[^/]*.\.so\..*") # main
-    libdr = re.compile("^/usr/lib64/lib[^/]*.\.so$")
-    libar = re.compile("^/usr/lib64/lib[^/]*.\.a$")
+
+    libr64 = re.compile("^/usr/lib64/lib[^/]*.\.so\..*") # main
+    libdr64 = re.compile("^/usr/lib64/lib[^/]*.\.so$")
+    libar64 = re.compile("^/usr/lib64/lib[^/]*.\.a$")
+    rtable["/usr/lib64/lib*.so.*"] = libr64 # main
+    rtable["/usr/lib64/lib*.so"] = libdr64
+    rtable["/usr/lib64/lib*.a"] = libar64
+
+    libr = re.compile("^/usr/lib/lib[^/]*.\.so\..*") # main
+    libdr = re.compile("^/usr/lib/lib[^/]*.\.so$")
+    libar = re.compile("^/usr/lib/lib[^/]*.\.a$")
+    rtable["/usr/lib/lib*.so.*"] = libr # main
+    rtable["/usr/lib/lib*.so"] = libdr
+    rtable["/usr/lib/lib*.a"] = libar
+
     libr32 = re.compile("^/usr/lib32/lib[^/]*.\.so\..*") # main
     libdr32 = re.compile("^/usr/lib32/lib[^/]*.\.so$")
     libar32 = re.compile("^/usr/lib32/lib[^/]*.\.a$")
-    rtable["/usr/lib64/lib*.so.*"] = libr # main
-    rtable["/usr/lib64/lib*.so"] = libdr
-    rtable["/usr/lib64/lib*.a"] = libar
-
     rtable["/usr/lib32/lib*.so.*"] = libr32
     rtable["/usr/lib32/lib*.so"] = libdr32
     rtable["/usr/lib32/lib*.a"] = libar32
