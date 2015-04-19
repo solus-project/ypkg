@@ -90,7 +90,7 @@ def packageit(ymlFile, installDIR, outputXML):
 
 
     patterns = dict()
-    patterns["/usr/share/locale"] = name
+    patterns["/usr/share/locale/"] = name
     patterns["/usr/lib64/lib*.so"] = "-devel" if canSplitLibs else name
     patterns["/usr/lib/lib*.so"] = "-devel" if canSplitLibs else name
     patterns["/usr/lib64/lib*.so.*"] = name
@@ -102,23 +102,23 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/lib32/lib*.so"] = "-32bit"
     patterns["/usr/lib32/lib*.so.*"] = "-32bit"
 
-    patterns["/usr/share/pkgconfig"] = "-devel"
-    patterns["/usr/lib64/pkgconfig"] = "-devel"
-    patterns["/usr/lib/pkgconfig"] = "-devel"
-    patterns["/usr/include"] = "-devel"
-    patterns["/usr/share/help"] = name
-    patterns["/usr/share/gtk-doc"] = "-docs"
-    patterns["/usr/share/man/man2"] = "-devel"
-    patterns["/usr/share/man/man3"] = "-devel"
+    patterns["/usr/share/pkgconfig/"] = "-devel"
+    patterns["/usr/lib64/pkgconfig/"] = "-devel"
+    patterns["/usr/lib/pkgconfig/"] = "-devel"
+    patterns["/usr/include/"] = "-devel"
+    patterns["/usr/share/help/"] = name
+    patterns["/usr/share/gtk-doc/"] = "-docs"
+    patterns["/usr/share/man/man2/"] = "-devel"
+    patterns["/usr/share/man/man3/"] = "-devel"
     patterns["/usr/share/vala*"] = "-devel"
     patterns["/usr/share/cmake*"] = "-devel"
 
     # these just exist to speed things up tbqh.
-    patterns["/usr/share/icons"] = name
-    patterns["/usr/share/pixmaps"] = name
-    patterns["/usr/share/man"] = name
-    patterns["/usr/bin"] = name
-    patterns["/usr/sbin"] = name
+    patterns["/usr/share/icons/"] = name
+    patterns["/usr/share/pixmaps/"] = name
+    patterns["/usr/share/man/"] = name
+    patterns["/usr/bin/"] = name
+    patterns["/usr/sbin/"] = name
 
     # These things are because evil.
     rtable = dict()
@@ -179,8 +179,12 @@ def packageit(ymlFile, installDIR, outputXML):
                     if fpath.startswith("/usr/lib32"):
                         tmpname = "-32bit"
                     collapsed = False
-                    if len(files) > 1:
-                        newname = os.path.dirname(fpath)
+                    if len(files) > 0:
+                        splits = fpath[1:].split("/")
+                        if len(splits) >= 3:
+                            newname = "/%s" % "/".join(splits[:3])
+                        else:
+                            newname = os.path.dirname(fpath)
                         p,comp = hasMatch(newname)
                         if not p:
                             # Check nobody conflicts.
@@ -237,6 +241,8 @@ def packageit(ymlFile, installDIR, outputXML):
         package = pisi.specfile.Package()
         package.name = fq
         for file in pkgFiles[pkg]:
+            if file.endswith("/"):
+                file = file[:-1]
             if file.startswith("/usr/lib/pkgconfig"):
                 type = "data"
             elif file.startswith("/usr/lib64/pkgconfig"):
