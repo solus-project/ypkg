@@ -3,7 +3,7 @@
 #
 #  packageit.py
 #  
-#  Copyright 2015 Ikey Doherty <ikey@evolve-os.com>
+#  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -57,8 +57,8 @@ def packageit(ymlFile, installDIR, outputXML):
     # LIES. #
     arch = pisi.specfile.Archive()
     source.archive.append(arch)
-    arch.sha1sum = "083029a13c0c475bf42a4232c68a9caa6dbc763e"
-    arch.uri = "https://evolve-os.com/sources/README"
+    arch.sha1sum = "79eb0752a961b8e0d15c77d298c97498fbc89c5a"
+    arch.uri = "https://solus-project.com/sources/README.Solus"
     arch.type = "binary"
 
     # Seems legit.
