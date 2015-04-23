@@ -1,0 +1,47 @@
+From 4a280db84b17fdb64d890808015942027fe93776 Mon Sep 17 00:00:00 2001
+From: Ikey Doherty <ikey@solus-project.com>
+Date: Thu, 23 Apr 2015 22:52:49 +0100
+Subject: [PATCH 1/2] Sample patch merely for ypkg testing
+
+---
+ doc/nanorc.sample.in | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/doc/nanorc.sample.in b/doc/nanorc.sample.in
+index 192f9b4..83f9c4e 100644
+--- a/doc/nanorc.sample.in
++++ b/doc/nanorc.sample.in
+@@ -242,10 +242,10 @@
+ # include "@PKGDATADIR@/nanorc.nanorc"
+ 
+ ## C/C++
+-# include "@PKGDATADIR@/c.nanorc"
++include "@PKGDATADIR@/c.nanorc"
+ 
+ ## Makefiles
+-# include "@PKGDATADIR@/makefile.nanorc"
++include "@PKGDATADIR@/makefile.nanorc"
+ 
+ ## Cascading Style Sheets
+ # include "@PKGDATADIR@/css.nanorc"
+@@ -284,7 +284,7 @@
+ # include "@PKGDATADIR@/perl.nanorc"
+ 
+ ## Python
+-# include "@PKGDATADIR@/python.nanorc"
++include "@PKGDATADIR@/python.nanorc"
+ 
+ ## Ruby
+ # include "@PKGDATADIR@/ruby.nanorc"
+@@ -308,7 +308,7 @@
+ # include "@PKGDATADIR@/asm.nanorc"
+ 
+ ## Bourne shell scripts
+-# include "@PKGDATADIR@/sh.nanorc"
++include "@PKGDATADIR@/sh.nanorc"
+ 
+ ## POV-Ray
+ # include "@PKGDATADIR@/pov.nanorc"
+-- 
+2.3.2
+

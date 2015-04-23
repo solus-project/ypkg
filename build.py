@@ -58,6 +58,8 @@ Clang = which("clang")
 global emul32
 emul32 = False
 
+global pkgfile
+
 def get_path():
     path = "/usr/bin:/bin"
     if ccache:
@@ -128,6 +130,7 @@ def escape(inp, wdir, name):
     macros["%CXX%"] = "%s-g++" % host
     macros["%JOBS%"] = conf.values.build.jobs
     macros["%make"] = "make %JOBS%"
+    macros["%patch"] = "patch -t --remove-empty-files --no-backup-if-mismatch"
 
     # We like clang
     if Clang:
@@ -146,6 +149,7 @@ def escape(inp, wdir, name):
 #!/bin/bash
 set -e
 set -x
+export TERM=dumb
 cd %%workdir%%;
 export CFLAGS="%%CFLAGS%%"
 export CXXFLAGS="%%CXXFLAGS%%"
@@ -153,17 +157,27 @@ export LDFLAGS="%%LDFLAGS%%"
 export CC="%%CC%%"
 export CXX="%%CXX%%"
 export PATH="%s"
+export srcdir="%%workdir%%"
+export installdir="%%installroot%%"
 """ % get_path()
     if emul32:
         header += "\nexport EMUL32BUILD=1\n"
 
-    header += inp
-    inp = header
     if LeRoot:
         header += """
 export CCACHE_DIR=/root/.ccache
 """
 
+    pkgfiles = get_pkgfiles_dir()
+    if pkgfiles is not None:
+        header += """
+export pkgfiles="%s"
+""" % pkgfiles
+
+    header += inp
+    inp = header
+
+    print "Pkgfiles: %s" % pkgfiles
     if emul32:
         inp += """
 if [ -e "%installroot%/emul32" ]; then
@@ -207,7 +221,6 @@ def fetch_source(sources):
     for source_item in sources:
         source = source_item.uri
         endName = os.path.basename(source)
-        # TODO: Add sha256 checks!!
         fname = os.path.join(BallDir, endName)
         if not os.path.exists(fname):
             try:
@@ -249,7 +262,19 @@ def get_work_dir():
     else:
         return os.path.join(BuildDir, kids[0])
 
+def get_pkgfiles_dir():
+    dirn = os.path.dirname(pkgfile)
+    fpath = os.path.abspath(dirn)
+    fdir = os.path.join(fpath, "files")
+    if os.path.exists(fdir):
+        return fdir
+    return None
+
 def build(fpath):
+    global pkgfile
+
+    pkgfile = fpath
+
     with open(fpath, "r") as pkg:
         d = yaml.load(pkg)
         print "building %s" % d['name']
