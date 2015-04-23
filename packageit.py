@@ -277,7 +277,8 @@ def packageit(ymlFile, installDIR, outputXML):
             package.files.append(path)
         if fq != name:
             # needs runtime deps..
-            package.packageDependencies = list()
+            if not package.packageDependencies:
+                package.packageDependencies = list()
             dep = pisi.dependency.Dependency()
             dep.package = name
             dep.release = "current"
@@ -295,6 +296,15 @@ def packageit(ymlFile, installDIR, outputXML):
             package.summary['en'] = summaries[pkg]
         else:
             package.summary['en'] = d['summary']
+
+        if sanity.rundeps is not None and package.name in sanity.rundeps:
+            for dep in sanity.rundeps[package.name]:
+                pkgdep = pisi.dependency.Dependency()
+                if not package.packageDependencies:
+                    package.packageDependencies = list()
+                pkgdep.package = dep
+                package.packageDependencies.append(pkgdep)
+
         spec.packages.append(package)
 
     spec.write(outputXML)

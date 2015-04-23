@@ -31,6 +31,45 @@ emul32 = False
 global autodep
 autodep = True
 
+global rundeps
+rundeps = None
+
+global mutations
+mutations = None
+
+def init_mutations():
+    global mutations
+
+    if not mutations:
+        mutations = dict()
+        mutations["main"] = name
+        mutations["devel"] = "%s-devel" % name
+        mutations["docs"] = "%s-docs" % name
+        mutations["32bit"] = "%s-32bit" % name
+
+def add_runtime_dep(pkg, dep):
+    ''' Explicitly add a package to the runtime dependencies '''
+    global mutations
+    global rundeps
+    if not pkg or not dep:
+        print "Required values missing for add_runtime_dep"
+        sys.exit(1)
+
+    init_mutations()
+
+    pkgname = pkg
+    if pkgname in mutations:
+        pkgname = mutations[pkgname]
+
+    if not rundeps:
+        rundeps = dict()
+
+    if pkgname not in rundeps:
+        rundeps[pkgname] = list()
+
+    if dep not in rundeps[pkgname]:
+        rundeps[pkgname].append(dep)
+
 def assertGetString(y, n):
     ''' Ensure string value exists '''
     if n not in y:
@@ -127,6 +166,58 @@ _sources = None
 def get_sources():
     return _sources
 
+def do_multimap(data, fname, func):
+    ''' Crazy looking assumption based logic..
+        Used currently for rundeps, and works in the following way...
+        Provided data needs to be in a list format:
+            - name
+            - name
+        
+        Default mapping will place the value "name" as the key
+            - name
+        
+        Default mapping places each value in this list with default key:
+            - [name, name, name, name]
+        
+        Explicit key and value:
+            - name: rundep
+        '''
+    if not isinstance(data, list):
+        print "'%s' is not a valid list" % fname
+        sys.exit(1)
+    for item in data:
+        if isinstance(item, str):
+            # main package
+            func(name, item)
+        elif isinstance(item, list):
+            for subitem in item:
+                if not isinstance(subitem, str):
+                    print "'%s' is not a valid string" % v
+                    sys.exit(1)
+                func(name, subitem)
+        elif isinstance(item, dict):
+            key = item.keys()
+            val = item.values()
+            if len(key) != 1 or len(val) != 1:
+                print "%s is not a 1:1 mapping: %s" % item
+                sys.exit(1)
+            k = key[0]
+            v = val[0]
+            if isinstance(v, list):
+                for subitem in v:
+                    if not isinstance(subitem, str):
+                        print "'%s' is not a valid string" % v
+                        sys.exit(1)
+                    func(k, subitem)
+            elif isinstance(v, str):
+                func(k, v)
+            else:
+                print "'%s' is not a valid string or list of strings" % v
+                sys.exit(1)
+        else:
+            print "Invalid item in '%s': %s" % (fname, item)
+            sys.exit(1)
+
 class TarSource:
     uri = None
     hash = None
@@ -217,6 +308,10 @@ def sane(fpath):
         sources.append(src)
     global _sources
     _sources = sources
+
+    if "rundeps" in y:
+        rdeps = y["rundeps"]
+        do_multimap(rdeps, "rundeps", add_runtime_dep)
 
     # Fuzzy.
     assertIsString(y, "setup")
