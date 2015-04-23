@@ -177,7 +177,6 @@ export pkgfiles="%s"
     header += inp
     inp = header
 
-    print "Pkgfiles: %s" % pkgfiles
     if emul32:
         inp += """
 if [ -e "%installroot%/emul32" ]; then
