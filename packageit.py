@@ -144,17 +144,24 @@ def packageit(ymlFile, installDIR, outputXML):
     rtable["/usr/lib32/lib*.so"] = libdr32
     rtable["/usr/lib32/lib*.a"] = libar32
 
+    tables = list()
+    if sanity.pkg_patterns:
+        tables.append(sanity.pkg_patterns)
+    tables.append(patterns)
+
     def hasMatch(path):
-        for p in patterns:
-            if p in rtable:
-                b = rtable[p].match(path)
-            else:
-                b = fnmatch.fnmatch(path, p)
-                if not b:
-                    b = path.startswith(p)
-            if b:
-                return (p,patterns[p])
-        return (None,None)
+        for table in tables:
+            for p in table:
+                if p in rtable:
+                    b = rtable[p].match(path)
+                else:
+                    b = fnmatch.fnmatch(path, p)
+                    if not b:
+                        b = path.startswith(p)
+                if b:
+                    return (p,table[p])
+            if table == patterns:
+                return (None,None)
 
     # I am not proud of the following code.
     pkgFiles = dict()
@@ -230,6 +237,10 @@ def packageit(ymlFile, installDIR, outputXML):
     summaries["-docs"] = "Documentation for %s" % name
     summaries["-32bit"] = "32-bit libraries for %s" % name
 
+    # Reserved but unmapped..
+    
+    summaries["-utils"] = "Utilities for %s" % name
+
     for pkg in pkgFiles:
         type = "data"
         fq = pkg
@@ -263,9 +274,9 @@ def packageit(ymlFile, installDIR, outputXML):
                 type = "localedata"
             elif file.startswith("/usr/include"):
                 type = "header"
-            elif file.startswith("/usr/bin"):
+            elif file.startswith("/usr/bin") or file.startswith("/bin"):
                 type = "executable"
-            elif file.startswith("/usr/sbin"):
+            elif file.startswith("/usr/sbin") or file.startswith("/sbin"):
                 type = "executable"
             elif file.startswith("/etc"):
                 type = "config"
@@ -287,6 +298,8 @@ def packageit(ymlFile, installDIR, outputXML):
                     package.partOf = "system.devel"
                 else:
                     package.partOf = "programming.devel"
+            elif fq.endswith("-docs"):
+                package.partOf = "programming.docs"
             package.packageDependencies.append(dep)
         else:
             if component:

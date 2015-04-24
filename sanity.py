@@ -40,6 +40,9 @@ pkg_replaces = None
 global mutations
 mutations = None
 
+global pkg_patterns
+pkg_patterns = None
+
 def init_mutations():
     global mutations
 
@@ -49,6 +52,7 @@ def init_mutations():
         mutations["devel"] = "%s-devel" % name
         mutations["docs"] = "%s-docs" % name
         mutations["32bit"] = "%s-32bit" % name
+        mutations["utils"] = "%s-utils" % name
 
 def add_runtime_dep(pkg, dep):
     ''' Explicitly add a package to the runtime dependencies '''
@@ -96,6 +100,34 @@ def add_replaces(pkg, pkg2):
 
     if pkg2 not in pkg_replaces[pkgname]:
         pkg_replaces[pkgname].append(pkg2)
+
+def add_pattern(pkg, pattern):
+    ''' Explicitly add/override a default pattern '''
+    global mutations
+    global pkg_patterns
+
+    if not pkg or not pattern:
+        print "Required values missing for add_pattern"
+        sys.exit(1)
+
+    init_mutations()
+
+    pkgname = pkg
+    if pkgname not in mutations and pkgname != name:
+        print "Unsupported pattern name: %s" % pkg
+        sys.exit(1)
+
+    if pkgname != name:
+        pkgname = "-%s" % pkgname
+
+    if not pkg_patterns:
+        pkg_patterns = dict()
+
+    if pattern in pkg_patterns:
+        print "Duplicate pattern for %s: %s" % (pkg, pattern)
+        sys.exit(1)
+    pkg_patterns[pattern] = pkgname
+
 
 def assertGetString(y, n):
     ''' Ensure string value exists '''
@@ -342,6 +374,9 @@ def sane(fpath):
     if "replaces" in y:
         rpl = y["replaces"]
         do_multimap(rpl, "replaces", add_replaces)
+    if "patterns" in y:
+        pat = y["patterns"]
+        do_multimap(pat, "patterns", add_pattern)
 
     # Fuzzy.
     assertIsString(y, "setup")
