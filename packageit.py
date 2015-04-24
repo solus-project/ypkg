@@ -297,6 +297,7 @@ def packageit(ymlFile, installDIR, outputXML):
         else:
             package.summary['en'] = d['summary']
 
+        # Runtime deps
         if sanity.rundeps is not None and package.name in sanity.rundeps:
             for dep in sanity.rundeps[package.name]:
                 pkgdep = pisi.dependency.Dependency()
@@ -304,6 +305,15 @@ def packageit(ymlFile, installDIR, outputXML):
                     package.packageDependencies = list()
                 pkgdep.package = dep
                 package.packageDependencies.append(pkgdep)
+
+        # Package replacement
+        if sanity.pkg_replaces is not None and package.name in sanity.pkg_replaces:
+            for rpl in sanity.pkg_replaces[package.name]:
+                replace = pisi.replace.Replace()
+                if not package.replaces:
+                    package.replaces = list()
+                replace.package = rpl
+                package.replaces.append(replace)
 
         spec.packages.append(package)
 

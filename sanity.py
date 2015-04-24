@@ -34,6 +34,9 @@ autodep = True
 global rundeps
 rundeps = None
 
+global pkg_replaces
+pkg_replaces = None
+
 global mutations
 mutations = None
 
@@ -69,6 +72,30 @@ def add_runtime_dep(pkg, dep):
 
     if dep not in rundeps[pkgname]:
         rundeps[pkgname].append(dep)
+
+def add_replaces(pkg, pkg2):
+    ''' Explicitly replace one package with another '''
+    global mutations
+    global pkg_replaces
+
+    if not pkg or not pkg2:
+        print "Required values missing for add_replaces"
+        sys.exit(1)
+
+    init_mutations()
+
+    pkgname = pkg
+    if pkgname in mutations:
+        pkgname = mutations[pkgname]
+
+    if not pkg_replaces:
+        pkg_replaces = dict()
+
+    if pkgname not in pkg_replaces:
+        pkg_replaces[pkgname] = list()
+
+    if pkg2 not in pkg_replaces[pkgname]:
+        pkg_replaces[pkgname].append(pkg2)
 
 def assertGetString(y, n):
     ''' Ensure string value exists '''
@@ -312,6 +339,9 @@ def sane(fpath):
     if "rundeps" in y:
         rdeps = y["rundeps"]
         do_multimap(rdeps, "rundeps", add_runtime_dep)
+    if "replaces" in y:
+        rpl = y["replaces"]
+        do_multimap(rpl, "replaces", add_replaces)
 
     # Fuzzy.
     assertIsString(y, "setup")
