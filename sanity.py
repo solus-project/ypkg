@@ -324,13 +324,17 @@ def sane(fpath):
         sys.exit(1)
 
     # Determine packager...
-    confPath = "%s/.evolveos/packager" % os.path.expanduser("~")
+    confPathOld = "%s/.evolveos/packager" % os.path.expanduser("~")
+    confPath = "%s/.solus/packager" % os.path.expanduser("~")
     if not os.path.exists(confPath):
-        print "Ensure %s exists!" % confPath
-        print "[Packager]"
-        print "Name=Your Name Here"
-        print "Email=yourAwesome@email.address"
-        sys.exit(1)
+        if os.path.exists(confPathOld):
+            confPath = confPathOld
+        else:
+            print "Ensure %s exists!" % confPath
+            print "[Packager]"
+            print "Name=Your Name Here"
+            print "Email=yourAwesome@email.address"
+            sys.exit(1)
 
     confObj = ConfigObj(confPath)
     global pkger_name
