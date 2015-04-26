@@ -498,7 +498,9 @@ class BinMan:
             pkgs = sorted(newdb[source], key=RepoPackage.get_release, reverse=True)
             if source not in olddb.db:
                 print "Pulling new package source: %s" % source
-                self._add_package(clone, pkgs[0])
+                cpkgs = [p for p in pkgs if p.release == pkgs[0].release]
+                for pkg in cpkgs:
+                    self._add_package(clone, pkg)
                 updates += 1
             else:
                 oldpkgs = sorted(olddb[source], key=RepoPackage.get_release, reverse=True)
@@ -506,7 +508,9 @@ class BinMan:
                 orel = oldpkgs[0].release
                 if (nrel > orel):
                     print "Updating %s from %s-%s to %s-%s" % (source, oldpkgs[0].pkg.package.history[0].version, orel, pkgs[0].pkg.package.history[0].version, nrel)
-                    self._add_package(clone, pkgs[0])
+                    cpkgs = [p for p in pkgs if p.release == nrel]
+                    for p in cpkgs:
+                        self._add_package(clone, p)
                     updates += 1
         if updates > 0:
             self._stuff_repo_db(clone)
