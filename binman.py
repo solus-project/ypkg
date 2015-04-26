@@ -23,6 +23,9 @@ import cPickle as pickle
 # Yes - that really is hardcoded right now.
 basedir = "./repo"
 
+# Ya, also hard coded. shush :p
+max_versions = 3
+
 class RepoPackage:
     ''' Exists solely to enable pickling magics '''
     filename = None
@@ -118,6 +121,7 @@ class BinMan:
         helps["pull"] = "Pull from one repo into another"
         helps["remove-repo"] =  "Remove existing repository"
         helps["remove-source"] = "Remove package by source name"
+        helps["trim"] = "Trim repo by removing excessive old releases"
         helps["help"] =  "Print this help message"
         biggest = sorted([len(x) for x in helps.keys()], reverse=True)[0]
         hlptxt = ""
@@ -424,6 +428,44 @@ class BinMan:
 
         for source in db.db:
             self._create_delta(name, source)
+
+    def trim(self, showhelp = False):
+        ''' Trim a repository by allowing only a maximum number of versions '''
+        parser = argparse.ArgumentParser(description="Remove packages from a repo if it has too many old versions (5)")
+        parser.add_argument("repo", help="Name of the repository")
+        if showhelp:
+             parser.print_help()
+             sys.exit(0)
+
+        args = parser.parse_args(sys.argv[2:])
+        repo = args.repo
+        if not self._is_repo(repo):
+            print "%s is not a repo, aborting" % repo
+            sys.exit(1)
+        db = self._get_repo_db(repo)
+        if len(db.db.keys()) == 0:
+            print "Cannot trim empty repository"
+            sys.exit(1)
+        total = 0
+        for src in db.db:
+            pkgs = db.db[src]
+            pkg_names = dict()
+
+            for pkg in pkgs:
+                if pkg.pkg.package.name not in pkg_names:
+                    pkg_names[pkg.pkg.package.name] = list()
+                pkg_names[pkg.pkg.package.name].append(pkg)
+            for pkgn in pkg_names:
+                bins = pkg_names[pkgn]
+                bins = sorted(bins, key=RepoPackage.get_release, reverse=True)
+                if len(bins) > max_versions:
+                    clip = bins[max_versions:]
+                    total += len(clip)
+                    for bin in clip:
+                        print "trimming: %s-%s-%s" % (bin.pkg.package.name, bin.pkg.package.history[0].version, bin.release)
+                        self._remove_package(repo, bin)
+        self._stuff_repo_db(repo)
+        print "trimmed: %s packages" % total
 
     def remove_source(self, showhelp = False):
         parser = argparse.ArgumentParser(description="Remove all packages from <repo> matching source name. Note that by using \"pkg==release\" syntax you can opt to remove only packages of a specific release number")
@@ -752,9 +794,6 @@ class BinMan:
             print "Unable to remove package: %s" % repofile
             print e
             return False
-        finally:
-            if not bypass:
-                self._stuff_repo_db(repo)
         # Clean up pool
         self._clean_pool(pkg)
         return True
