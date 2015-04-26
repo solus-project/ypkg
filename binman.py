@@ -90,6 +90,9 @@ class BinMan:
     needdelta = list()
     lastrepo = None
 
+    # ignore reindex/delta
+    bypass = False
+
     def get_args(self):
         return sys.argv[2:3]
 
@@ -658,7 +661,7 @@ class BinMan:
             pobj = RepoPackage(meta, os.path.basename(pkg))
         else:
             pobj = pkg
-        db.append(pobj)
+
 
         if not os.path.exists(repodir):
             try:
@@ -691,36 +694,53 @@ class BinMan:
             return False
         self.mark_altered(repo)
 
+        if pobj.source in db.db:
+            pkgs = sorted(db[pobj.source], key=RepoPackage.get_release, reverse=True)
+        else:
+            pkgs = None
+        db.append(pobj)
+        if pkgs and pobj.release != pkgs[0].release:
+            # We got bumped, replace deltas.
+            self._kill_deltas(repo, pkgs[0])
+            self.mark_altered(repo)
         return True
+
+    def _kill_deltas(self, repo, pkg):
+        ''' Kill all potential delta files for a given package '''
+        repofile = self._get_repo_target(repo, pkg)
+        pkgdir = os.path.dirname(repofile)
+
+        globTo = os.path.join(pkgdir, self.get_delta_to_glob(pkg.pkg.package))
+        globFrom = os.path.join(pkgdir, self.get_delta_from_glob(pkg.pkg.package))
+
+        kills = list()
+        kills.extend(glob.glob(globTo))
+        kills.extend(glob.glob(globFrom))
+        for kill in kills:
+            print "Removing invalid delta:%s" % kill
+            try:
+                os.unlink(kill)
+            except Exception, e:
+                print "Unable to remove: %s" % kill
+                print e
+            if pkg.source not in self.needdelta:
+                self.needdelta.append(pkg.source)
+                self.lastrepo = repo
+            self._clean_pool(self._get_pool_name(kill))
 
     def _remove_package(self, repo, pkg, bypass=False):
         ''' Remove the given package from a repo '''
         repofile = self._get_repo_target(repo, pkg)
         db = self._get_repo_db(repo)
 
+        self.bypass = bypass
         try:
             os.unlink(repofile)
             pkgdir = os.path.dirname(repofile)
             pkgdir_p = os.path.dirname(pkgdir)
             db.remove(pkg)
 
-            globTo = os.path.join(pkgdir, self.get_delta_to_glob(pkg.pkg.package))
-            globFrom = os.path.join(pkgdir, self.get_delta_from_glob(pkg.pkg.package))
-
-            kills = list()
-            kills.extend(glob.glob(globTo))
-            kills.extend(glob.glob(globFrom))
-            for kill in kills:
-                print "Removing invalid delta:%s" % kill
-                try:
-                    os.unlink(kill)
-                except Exception, e:
-                    print "Unable to remove: %s" % kill
-                    print e
-                if pkg.source not in self.needdelta and not bypass:
-                    self.needdelta.append(pkg.source)
-                    self.lastrepo = repo
-                self._clean_pool(self._get_pool_name(kill))
+            self._kill_deltas(repo, pkg)
 
             if len(os.listdir(pkgdir)) == 0:
                 print "Removing package directory: %s" % pkgdir
