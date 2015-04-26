@@ -152,6 +152,9 @@ class BinMan:
             for repo in self.altered:
                 self._update_repo(repo)
 
+    def _get_assets_dir(self, repo):
+        return os.path.join(basedir, "%s.assets" % repo)
+
     def _update_repo(self, repo):
         dirn = self._get_repo_dir(repo)
         if not self._is_repo(dirn):
@@ -171,6 +174,19 @@ class BinMan:
                        skip_signing=True, # TODO: Add signing support
                        compression=pisi.file.File.COMPRESSION_TYPE_XZ)
         os.chdir(olddir)
+
+        assets = self._get_assets_dir(repo)
+        if os.path.exists(assets):
+            knownAssets = ["components.xml", "distribution.xml", "groups.xml"]
+            for item in knownAssets:
+                srcPath = os.path.join(assets, item)
+                if os.path.exists(srcPath):
+                    print "asset: %s" % item
+                    dstPath = os.path.join(dirn, item)
+                    try:
+                        shutil.copy2(srcPath, dstPath)
+                    except Exception, e:
+                        print "Failed to install asset file: %s" % item
 
     def help(self):
         ''' Display help message, optionally for a given topic '''
@@ -285,7 +301,6 @@ class BinMan:
         if showhelp:
             parser.print_help()
             sys.exit(0)
-
         args = parser.parse_args(self.get_args())
         name = args.repo
         if self._is_repo(name):
@@ -293,6 +308,18 @@ class BinMan:
             sys.exit(1)
         elif os.path.exists(name):
             print "%s exists and is not a repo" % name
+            sys.exit(1)
+        adir = self._get_assets_dir(name)
+
+        if os.path.exists(adir):
+            print "Assests dir exists: %s" % adir
+            sys.exit(1)
+
+        try:
+            os.makedirs(adir)
+        except Exception, e:
+            print "Unable to construct assets dir %s" % adir
+            print e
             sys.exit(1)
         self._create_repo(name)
 
@@ -327,7 +354,14 @@ class BinMan:
                 os.unlink(f)
             os.rmdir(dirn)
             self.repodbs.pop(name, None)
-            os.unlink(self._get_repo_db_name(name))
+            if os.path.exists(self._get_repo_db_name(name)):
+                os.unlink(self._get_repo_db_name(name))
+            adir = self._get_assets_dir(name)
+            if os.path.exists(adir) and len(os.listdir(adir)) > 0:
+                print "Warning: Not removing assets dir, not empty: %s" % adir
+            else:
+                if os.path.exists(adir):
+                    os.rmdir(adir)
         except Exception, e:
             print "Unable to delete repo directory: %s" % dirn
             print e
@@ -588,6 +622,27 @@ class BinMan:
         if len(db.db.keys()) == 0:
             print "%s is empty, cannot clone" % src
             sys.exit(1)
+
+        adir = self._get_assets_dir(dest)
+        if os.path.exists(adir):
+            print "Assets dir exist, cannot continue cloning: %s" % adir
+            sys.exit(1)
+        adirsrc = self._get_assets_dir(src)
+        if os.path.exists(adirsrc):
+            try:
+                shutil.copytree(adirsrc, adir)
+            except Exception, e:
+                print "Failed to copy asset dir: %s" % adirsrc
+                print e
+                sys.exit(1)
+        else:
+            adir = self._get_assets_dir(name)
+            try:
+                os.makedirs(adir)
+            except Exception, e:
+                print "Unable to construct assets dir %s" % adir
+                print e
+                sys.exit(1)
 
         self._create_repo(dest)
 
