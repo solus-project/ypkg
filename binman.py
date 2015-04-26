@@ -107,6 +107,7 @@ class BinMan:
         ''' Construct a new BinMan '''
         helps = collections.OrderedDict()
         helps["add"] = "Add package(s) to repository"
+        helps["clone"] = "Clone a repository"
         helps["copy-source"] = "Copy package by source name"
         helps["create-repo"] =  "Create new repository"
         helps["delta"] = "Create package deltas"
@@ -259,6 +260,16 @@ class BinMan:
             dirn = dirn[0]
         return os.path.join(self._get_repo_dir(repo), dirn, pkg.source.name, bpath)
 
+    def _create_repo(self, name):
+        ''' Helper to create a new repo '''
+        try:
+            os.makedirs(os.path.dirname(self._get_repo_file(name)))
+            self._touch(self._get_repo_file(name))
+        except Exception, e:
+            print "Unable to create repo: %s" % name
+            print e
+            sys.exit(1)
+
     def create_repo(self, showhelp = False):
         ''' Create a new repository '''
         parser = argparse.ArgumentParser(description="Create a new repository")
@@ -275,13 +286,7 @@ class BinMan:
         elif os.path.exists(name):
             print "%s exists and is not a repo" % name
             sys.exit(1)
-        try:
-            os.makedirs(os.path.dirname(self._get_repo_file(name)))
-            self._touch(self._get_repo_file(name))
-        except Exception, e:
-            print "Unable to create repo: %s" % name
-            print e
-            sys.exit(1)
+        self._create_repo(name)
 
     def remove_repo(self, showhelp = False):
         ''' Remove a repository '''
@@ -462,6 +467,55 @@ class BinMan:
         for removal in removals:
             self._remove_package(repo, removal)
 
+    def clone(self, showhelp = False):
+        ''' Clone repo from src to dst, basically a mass copy-src '''
+        parser = argparse.ArgumentParser(description="Clone one repository, creating a new identical snapshot")
+        parser.add_argument("src", help="Name of the source repository")
+        parser.add_argument("dest", help="Name of the new repository")
+        parser.add_argument("-a", "--all-versions", help="Copy all versions", action="store_true")
+        parser.add_argument("--packages", help=argparse.SUPPRESS)
+        if showhelp:
+             parser.print_help()
+             sys.exit(0)
+
+        args = parser.parse_args(sys.argv[2:])
+        src = args.src
+        dest = args.dest
+
+        if not self._is_repo(src):
+            print "%s is not a valid repository" % dest
+            sys.exit(1)
+        if os.path.exists(self._get_repo_dir(dest)):
+            print "%s exists - aborting" % dest
+            sys.exit(1)
+
+        db = self._get_repo_db(src)
+        if len(db.db.keys()) == 0:
+            print "%s is empty, cannot clone" % src
+            sys.exit(1)
+
+        self._create_repo(dest)
+
+        for source in db.db:
+            pkgs = db[source]
+
+            copies = pkgs
+            if not args.all_versions:
+                releases = sorted([int(x.release) for x in pkgs], reverse=True)
+                copies = [x for x in pkgs if int(x.release) == releases[0]]
+            for copy in copies:
+                tgt = self._get_repo_target(dest, copy)
+                if os.path.exists(tgt):
+                    print "Skipping inclusion of already included %s" % copy.pkg.package.name
+                else:
+                    if not self._add_package(dest, copy):
+                        print "Failed to clone: %s" % tgt
+                        sys.exit(1)
+                    else:
+                        print "add: %s" % copy.pkg.package.name
+        self.mark_altered(dest)
+        self._stuff_repo_db(dest)
+
     def copy_source(self, showhelp = False):
         ''' Copy package from src to dst '''
         parser = argparse.ArgumentParser(description="Copy package using source name")
@@ -503,7 +557,7 @@ class BinMan:
                 if os.path.exists(tgt):
                     print "Skipping inclusion of already included %s" % copy.pkg.package.name
                 else:
-                    if not self._add_package(dest, self._get_pool_name(copy.filename)):
+                    if not self._add_package(dest, copy):
                         print "Failed to copy-source: %s" % tgt
                         sys.exit(1)
                     else:
@@ -548,8 +602,12 @@ class BinMan:
             sys.exit(1)
 
         db = self._get_repo_db(repo)
-        meta,files = pisi.api.info(pkg)
-        pobj = RepoPackage(meta, os.path.basename(pkg))
+        pobj = None
+        if isinstance(pkg, str):
+            meta,files = pisi.api.info(pkg)
+            pobj = RepoPackage(meta, os.path.basename(pkg))
+        else:
+            pobj = pkg
         db.append(pobj)
 
         if not os.path.exists(repodir):
@@ -559,24 +617,27 @@ class BinMan:
                 print "Unable to create %s" % repodir
                 print e
                 return False
-        if not self._is_pooled(pkg):
-            print "Pooling: %s" % pkg
+        if not self._is_pooled(pobj.filename):
+            if isinstance(pkg, RepoPackage):
+                print "Local package not pooled - fatal"
+                sys.exit(1)
+            print "Pooling: %s" % pobj.filename
             try:
                 if not os.path.exists(self._get_pool_dir()):
                     os.makedirs(self._get_pool_dir())
 
-                shutil.copy2(pkg, self._get_pool_name(pkg))
+                shutil.copy2(pkg, self._get_pool_name(pobj.filename))
             except Exception, e:
-                print "Unable to pool: %s\n" % pkg
+                print "Unable to pool: %s\n" % pobj.filename
                 return False
         else:
-            print "Using %s from pool" % pkg
+            print "Using %s from pool" % pobj.filename
 
         try:
-            os.link(self._get_pool_name(pkg), repofile)
-            print "Imported %s" % pkg
+            os.link(self._get_pool_name(pobj.filename), repofile)
+            print "Imported %s" % pobj.filename
         except Exception, e:
-            print "Unable to link from pool: %s" % pkg
+            print "Unable to link from pool: %s" % pobj.filename
             return False
         self.mark_altered(repo)
 
