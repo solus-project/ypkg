@@ -308,7 +308,7 @@ class BinMan:
             pkgs = db[source]
             i = 0
             for pkg in list(db[source]):
-                self._remove_package(name, pkg)
+                self._remove_package(name, pkg, bypass=True)
                 i += 1
 
         dirn = self._get_repo_dir(name)
@@ -417,7 +417,6 @@ class BinMan:
         if len(db.db.keys()) == 0:
             print "No packages found in %s" % name
             sys.exit(0)
-
 
         for source in db.db:
             self._create_delta(name, source)
@@ -643,7 +642,7 @@ class BinMan:
 
         return True
 
-    def _remove_package(self, repo, pkg):
+    def _remove_package(self, repo, pkg, bypass=False):
         ''' Remove the given package from a repo '''
         repofile = self._get_repo_target(repo, pkg)
         db = self._get_repo_db(repo)
@@ -667,7 +666,7 @@ class BinMan:
                 except Exception, e:
                     print "Unable to remove: %s" % kill
                     print e
-                if pkg.source not in self.needdelta:
+                if pkg.source not in self.needdelta and not bypass:
                     self.needdelta.append(pkg.source)
                     self.lastrepo = repo
                 self._clean_pool(self._get_pool_name(kill))
@@ -683,7 +682,8 @@ class BinMan:
             print e
             return False
         finally:
-            self._stuff_repo_db(repo)
+            if not bypass:
+                self._stuff_repo_db(repo)
         # Clean up pool
         self._clean_pool(pkg)
         return True
