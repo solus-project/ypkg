@@ -112,6 +112,7 @@ class BinMan:
         helps["create-repo"] =  "Create new repository"
         helps["delta"] = "Create package deltas"
         helps["list-repos"] = "List repositories"
+        helps["pull"] = "Pull from one repo into another"
         helps["remove-repo"] =  "Remove existing repository"
         helps["remove-source"] = "Remove package by source name"
         helps["help"] =  "Print this help message"
@@ -464,7 +465,53 @@ class BinMan:
             removals.extend(match)
         self.mark_altered(repo)
         for removal in removals:
-            self._remove_package(repo, removal)
+            self._remove_package(repo, removal, bypass=True)
+        if len(self._get_repo_db(repo).db[name]) == 0:
+            self._get_repo_db(repo).db.pop(name, None)
+        self._stuff_repo_db(repo)
+
+    def pull(self, showhelp = False):
+        ''' Update src repo from dst, basically a partial mass copy-src '''
+        parser = argparse.ArgumentParser(description="Pull changes from <origin> repo into <clone>")
+        parser.add_argument("clone", help="Name of the cloned repository")
+        parser.add_argument("origin", help="Name of the source repository")
+        if showhelp:
+             parser.print_help()
+             sys.exit(0)
+
+        args = parser.parse_args(sys.argv[2:])
+        origin = args.origin
+        clone = args.clone
+
+        if not self._is_repo(origin):
+            print "Origin %s does not exist" % origin
+            sys.exit(1)
+        if not self._is_repo(clone):
+            print "Clone %s does not exist" % clone
+            sys.exit(1)
+
+        olddb = self._get_repo_db(clone)
+        newdb = self._get_repo_db(origin)
+
+        updates = 0
+        for source in newdb.db:
+            pkgs = sorted(newdb[source], key=RepoPackage.get_release, reverse=True)
+            if source not in olddb.db:
+                print "Pulling new package source: %s" % source
+                self._add_package(clone, pkgs[0])
+                updates += 1
+            else:
+                oldpkgs = sorted(olddb[source], key=RepoPackage.get_release, reverse=True)
+                nrel = pkgs[0].release
+                orel = oldpkgs[0].release
+                if (nrel > orel):
+                    print "Updating %s from %s-%s to %s-%s" % (source, oldpkgs[0].pkg.package.history[0].version, orel, pkgs[0].pkg.package.history[0].version, nrel)
+                    self._add_package(clone, pkgs[0])
+                    updates += 1
+        if updates > 0:
+            self._stuff_repo_db(clone)
+        else:
+            print "Everything up to date"
 
     def clone(self, showhelp = False):
         ''' Clone repo from src to dst, basically a mass copy-src '''
