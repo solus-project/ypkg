@@ -591,6 +591,19 @@ class BinMan:
                     for p in cpkgs:
                         self._add_package(clone, p)
                     updates += 1
+
+        assets = self._get_assets_dir(origin)
+        if os.path.exists(assets):
+            knownAssets = ["components.xml", "distribution.xml", "groups.xml"]
+            for item in knownAssets:
+                srcPath = os.path.join(assets, item)
+                if os.path.exists(srcPath):
+                    print "asset: %s" % item
+                    dstPath = os.path.join(self._get_assets_dir(clone), item)
+                    try:
+                        shutil.copy2(srcPath, dstPath)
+                    except Exception, e:
+                        print "Failed to install asset file: %s" % item
         if updates > 0:
             self._stuff_repo_db(clone)
         else:
