@@ -462,6 +462,7 @@ class BinMan:
 
         for source in db.db:
             self._create_delta(name, source)
+        self.mark_altered(name)
 
     def trim(self, showhelp = False):
         ''' Trim a repository by allowing only a maximum number of versions '''
