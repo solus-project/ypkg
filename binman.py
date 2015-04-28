@@ -22,6 +22,7 @@ import cPickle as pickle
 
 # Yes - that really is hardcoded right now.
 basedir = "./repo"
+incomingbase = "./incoming"
 
 # Ya, also hard coded. shush :p
 max_versions = 3
@@ -92,6 +93,7 @@ class BinMan:
     altered = list()
     needdelta = list()
     lastrepo = None
+    process_mode = False
 
     # ignore reindex/delta
     bypass = False
@@ -118,6 +120,7 @@ class BinMan:
         helps["create-repo"] =  "Create new repository"
         helps["delta"] = "Create package deltas"
         helps["list-repos"] = "List repositories"
+        helps["process-incoming"] = "Process incoming packages"
         helps["pull"] = "Pull from one repo into another"
         helps["remove-repo"] =  "Remove existing repository"
         helps["remove-source"] = "Remove package by source name"
@@ -153,7 +156,10 @@ class BinMan:
                 self._update_repo(repo)
 
     def _get_assets_dir(self, repo):
-        return os.path.join(basedir, "%s.assets" % repo)
+        return os.path.abspath(os.path.join(basedir, "%s.assets" % repo))
+
+    def _get_incoming_dir(self, repo):
+        return os.path.abspath(os.path.join(incomingbase, "%s" % repo))
 
     def _update_repo(self, repo):
         dirn = self._get_repo_dir(repo)
@@ -434,8 +440,6 @@ class BinMan:
                         for d in pkgs:
                             try:
                                 dpath = os.path.join(deltadir, d)
-                                print dpath
-                                print ptgt
                                 os.link(dpath, ptgt)
                             except Exception, e:
                                 print "Unable to pool delta: %s" % d
@@ -813,6 +817,10 @@ class BinMan:
         if pkgs and pobj.release != pkgs[0].release:
             # We got bumped, replace deltas.
             self._kill_deltas(repo, pkgs[0])
+            if self.process_mode and pobj.source not in self.needdelta:
+                # Try delta anyway for process mode
+                self.needdelta.append(pobj.source)
+                self.lastrepo = repo
             self.mark_altered(repo)
         return True
 
@@ -882,6 +890,64 @@ class BinMan:
                 print "Unable to remove pool file: %s" % pfile
                 print e
                 sys.exit(1)
+
+    def process_incoming(self, showhelp=False):
+        ''' Process files from incoming directory '''
+        parser = argparse.ArgumentParser(description="Process all incoming packages",
+            usage="%s process <repo> [packages]" % sys.argv[0])
+        parser.add_argument("repo", help="Name of the repository")
+        if showhelp:
+            parser.print_help()
+            sys.exit(0)
+        args = parser.parse_args(self.get_args())
+        name = args.repo
+
+        if not self._is_repo(name):
+            print "Repository '%s' does not exist" % name
+            sys.exit(1)
+        incdir = self._get_incoming_dir(name)
+        if not os.path.exists(incdir):
+            print "%s does not exist" % incdir
+            sys.exit(1)
+
+        files = None
+        try:
+            files = os.listdir(incdir)
+        except Exception, e:
+            print "Unable to analyze %s" % incdir
+            print e
+            sys.exit(1)
+        if len(files) < 1:
+            print "No files to process"
+            sys.exit(0)
+
+        invalids = [x for x in files if not os.path.exists(os.path.join(incdir, x)) or not x.endswith(".eopkg")]
+        if len(invalids) > 0:
+            print "Invalid or missing: %s" % (", ".join([os.path.basename(x) for x in invalids]))
+            sys.exit(1)
+
+        self.process_mode = True
+
+        for pkg in files:
+            fpath = os.path.join(incdir, pkg)
+            tgt = self._get_repo_target(name, fpath)
+            if os.path.exists(tgt):
+                print "Skipping inclusion of already included %s" % os.path.basename(tgt)
+                continue
+            if fpath.endswith(".delta.eopkg"):
+                print "Skipping delta: %s" % os.path.basename(tgt)
+                continue
+            if not self._add_package(name, fpath):
+                print "Failed to include %s" % fpath
+                self._stuff_repo_db(name)
+                sys.exit(1)
+            try:
+                os.unlink(fpath)
+            except Exception, e:
+                print "Unable to unlink source file: %s" % fpath
+                print e
+            # plod on.
+        self._stuff_repo_db(name)
 
     def add(self, showhelp=False):
         ''' Add packages to repository '''
