@@ -98,10 +98,11 @@ def main():
     packageit.packageit(fpath, build.InstallDir, pspec)
     f = open(actions, "w")
     tmpl = """
-from pisi.actionsapi import pisitools
+import shutil
+from pisi.actionsapi import get
 
 def install():
-    pisitools.insinto("/", "%s/*")
+    shutil.move("%s/", get.installDIR())
 """ % build.InstallDir
 
     if not sanity.autodep:
