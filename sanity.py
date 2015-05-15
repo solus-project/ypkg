@@ -43,6 +43,9 @@ mutations = None
 global pkg_patterns
 pkg_patterns = None
 
+global pkg_strip
+pkg_strip = True
+
 def init_mutations():
     global mutations
 
@@ -318,6 +321,9 @@ def sane(fpath):
     if "autodep" in y:
         global autodep
         autodep = bool(y['autodep'])
+    if "strip" in y:
+        global pkg_strip
+        pkg_strip = bool(y['strip'])
 
     if not "source" in y:
         print "Required list '%s' is missing" % "source"

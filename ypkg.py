@@ -106,7 +106,8 @@ def install():
 
     if not sanity.autodep:
         tmpl += "\nIgnoreAutodep=True\n"
-
+    if not sanity.pkg_strip:
+        tmpl += "\nNoStrip = [\"/\"]\n"
     f.writelines(tmpl)
     f.close()
 
