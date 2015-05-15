@@ -18,6 +18,8 @@ import sys
 import subprocess
 import hashlib
 
+import sanity
+
 import pisi.config
 conf = pisi.config.Config()
 
@@ -76,6 +78,7 @@ def get_path():
 def escape(inp, wdir, name):
     global host
     global arch
+    global BallDir
     cxxflags = conf.values.build.cxxflags
     cflags = conf.values.build.cflags
     ldflags = conf.values.build.ldflags
@@ -131,6 +134,10 @@ def escape(inp, wdir, name):
     macros["%JOBS%"] = conf.values.build.jobs
     macros["%make"] = "make %JOBS%"
     macros["%patch"] = "patch -t --remove-empty-files --no-backup-if-mismatch"
+    macros["%package%"] = sanity.name
+    macros["%version%"] = sanity.version
+    macros["%release%"] = sanity.release
+    macros["%sources%"] = BallDir
 
     # We like clang
     if Clang:
@@ -159,6 +166,10 @@ export CXX="%%CXX%%"
 export PATH="%s"
 export srcdir="%%workdir%%"
 export installdir="%%installroot%%"
+export package="%%package%%"
+export release="%%release%%"
+export version="%%version%%"
+export sources="%%sources%%"
 """ % get_path()
     if emul32:
         header += "\nexport EMUL32BUILD=1\n"
@@ -245,7 +256,6 @@ def fetch_source(sources):
 def extract(src_list):
     if not os.path.exists(BuildDir):
         os.makedirs(BuildDir)
-    print src_list
 
     for x in src_list:
         target = os.path.join(BallDir, os.path.basename(x))
@@ -259,7 +269,7 @@ def get_work_dir():
     if len(kids) > 1:
         return BuildDir
     else:
-        return os.path.join(BuildDir, kids[0])
+        return os.path.join(BuildDir, kids[0] if len(kids) > 0 else BuildDir)
 
 def get_pkgfiles_dir():
     dirn = os.path.dirname(pkgfile)

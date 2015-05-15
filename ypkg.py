@@ -83,8 +83,15 @@ def main():
     build.cleanup()
     sources = sanity.get_sources()
     tars = build.fetch_source(sources)
-    build.extract(tars)
-
+    if sanity.pkg_extract:
+        build.extract(tars)
+    else:
+        try:
+            if not os.path.exists(build.BuildDir):
+                os.makedirs(build.BuildDir)
+        except Exception, e:
+            print "Unable to create build directory: %s" % e
+            return 1
     try:
         build.build(fpath)
         if sanity.emul32:

@@ -46,6 +46,13 @@ pkg_patterns = None
 global pkg_strip
 pkg_strip = True
 
+global pkg_extract
+pkg_extract = True
+
+global release
+global version
+global name
+
 def init_mutations():
     global mutations
 
@@ -314,6 +321,10 @@ def sane(fpath):
     assertGetString(y, "summary")
     assertGetInteger(y, "release")
 
+    global version 
+    global release
+    release = str(assertGetInteger(y, "release"))
+    version = str(v) 
 
     global name
     name = y['name']
@@ -324,6 +335,9 @@ def sane(fpath):
     if "strip" in y:
         global pkg_strip
         pkg_strip = bool(y['strip'])
+    if "extract" in y:
+        global pkg_extract
+        pkg_extract = bool(y['extract'])
 
     if not "source" in y:
         print "Required list '%s' is missing" % "source"
