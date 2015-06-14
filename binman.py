@@ -19,6 +19,7 @@ import collections
 import pisi
 import glob
 import cPickle as pickle
+import pyinotify
 
 # Yes - that really is hardcoded right now.
 basedir = "./repo"
@@ -87,7 +88,7 @@ class RepoCollection:
             raise KeyError("No such key: %s" % sname)
         return self.db[sname]
 
-class BinMan:
+class BinMan(pyinotify.ProcessEvent):
 
     repodbs = dict()
     altered = list()
@@ -120,6 +121,7 @@ class BinMan:
         helps["create-repo"] =  "Create new repository"
         helps["delta"] = "Create package deltas"
         helps["list-repos"] = "List repositories"
+        helps["monitor-incoming"] = "Monitor incoming packages"
         helps["process-incoming"] = "Process incoming packages"
         helps["pull"] = "Pull from one repo into another"
         helps["remove-repo"] =  "Remove existing repository"
@@ -893,6 +895,92 @@ class BinMan:
                 print "Unable to remove pool file: %s" % pfile
                 print e
                 sys.exit(1)
+
+    incoming_pkgs = list()
+    monitor_busy = False
+
+    def _internal_monitor(self):
+        self.process_mode = True
+
+        self.monitor_busy = True
+        files = self.incoming_pkgs
+
+        while len(files) > 0:
+            removed = list()
+            for pkg in files:
+                fpath = os.path.join(self.incdir, pkg)
+                if not self._add_package(self.increpo, fpath):
+                    print "Failed to include %s" % fpath
+                    self._stuff_repo_db(self.increpo)
+                    sys.exit(1)
+                try:
+                    os.unlink(fpath)
+                except Exception, e:
+                    print "Unable to unlink source file: %s" % fpath
+                    print e
+                if pkg in self.incoming_pkgs:
+                    self.incoming_pkgs.remove(pkg)
+                # plod on.
+            self._stuff_repo_db(self.increpo)
+            files = self.incoming_pkgs
+
+        if len(self.altered) > 0:
+            print "Updating altered repositories"
+            pops = self.altered
+            for repo in pops:
+                self._update_repo(repo)
+                self.altered.remove(repo)
+
+        self.monitor_busy = False
+
+    def process_IN_CLOSE_WRITE(self, event):
+        if not event.pathname.endswith(".eopkg"):
+            return
+        pkg = os.path.basename(event.pathname)
+        fpath = os.path.join(self.incdir, pkg)
+        tgt = self._get_repo_target(self.increpo, fpath)
+        if os.path.exists(tgt):
+            print "Skipping inclusion of already included %s" % os.path.basename(tgt)
+            return
+        if fpath.endswith(".delta.eopkg"):
+            print "Skipping delta: %s" % os.path.basename(tgt)
+            return
+        if pkg not in self.incoming_pkgs:
+            self.incoming_pkgs.append(pkg)
+
+        if not self.monitor_busy:
+            self._internal_monitor()
+
+
+    def monitor_incoming(self, showhelp=False):
+        ''' Process files from incoming directory - and keep watching them '''
+        parser = argparse.ArgumentParser(description="Monitor incoming packages",
+            usage="%s process <repo>" % sys.argv[0])
+        parser.add_argument("repo", help="Name of the repository")
+        if showhelp:
+            parser.print_help()
+            sys.exit(0)
+        args = parser.parse_args(self.get_args())
+        name = args.repo
+
+        if not self._is_repo(name):
+            print "Repository '%s' does not exist" % name
+            sys.exit(1)
+        incdir = self._get_incoming_dir(name)
+        self.incdir = incdir
+        self.increpo = name
+
+        if not os.path.exists(incdir):
+            print "%s does not exist" % incdir
+            sys.exit(1)
+
+        self.process_mode = True
+
+        wm = pyinotify.WatchManager()
+        mask = pyinotify.IN_CLOSE_WRITE
+        notifier = pyinotify.Notifier(wm, self)
+        wdd = wm.add_watch(incdir, mask, rec=False)
+        notifier.loop()
 
     def process_incoming(self, showhelp=False):
         ''' Process files from incoming directory '''
