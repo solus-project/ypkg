@@ -190,10 +190,12 @@ class BinMan:
                     print "asset: %s" % item
                     dstPath = os.path.join(dirn, item)
                     try:
-                        shutil.copy2(srcPath, dstPath)
+                        if os.path.exists(dstPath):
+                            os.unlink(dstPath)
+                        shutil.copy(srcPath, dstPath)
                     except Exception, e:
                         print "Failed to install asset file: %s" % item
-
+                        print e
     def help(self):
         ''' Display help message, optionally for a given topic '''
         if not self.has_args():
@@ -606,9 +608,10 @@ class BinMan:
                     print "asset: %s" % item
                     dstPath = os.path.join(self._get_assets_dir(clone), item)
                     try:
-                        shutil.copy2(srcPath, dstPath)
+                        shutil.copy(srcPath, dstPath)
                     except Exception, e:
                         print "Failed to install asset file: %s" % item
+                        print e
         if updates > 0:
             self._stuff_repo_db(clone)
         else:
@@ -794,7 +797,7 @@ class BinMan:
                 if not os.path.exists(self._get_pool_dir()):
                     os.makedirs(self._get_pool_dir())
 
-                shutil.copy2(pkg, self._get_pool_name(pobj.filename))
+                shutil.copy(pkg, self._get_pool_name(pobj.filename))
             except Exception, e:
                 print "Unable to pool: %s\n" % pobj.filename
                 return False
@@ -989,4 +992,5 @@ class BinMan:
         self._stuff_repo_db(name)
 
 if __name__ == "__main__":
+    os.umask(0022)
     BinMan()
