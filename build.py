@@ -170,6 +170,7 @@ export package="%%package%%"
 export release="%%release%%"
 export version="%%version%%"
 export sources="%%sources%%"
+export LD_AS_NEEDED=1
 """ % get_path()
     if emul32:
         header += "\nexport EMUL32BUILD=1\n"
