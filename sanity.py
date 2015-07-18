@@ -31,6 +31,9 @@ emul32 = False
 global autodep
 autodep = True
 
+global can_ccache
+can_ccache = True
+
 global rundeps
 rundeps = None
 
@@ -338,6 +341,9 @@ def sane(fpath):
     if "extract" in y:
         global pkg_extract
         pkg_extract = bool(y['extract'])
+    if "ccache" in y:
+        global can_ccache
+        can_ccache = bool(y['ccache'])
 
     if not "source" in y:
         print "Required list '%s' is missing" % "source"

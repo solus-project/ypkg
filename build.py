@@ -64,7 +64,7 @@ global pkgfile
 
 def get_path():
     path = "/usr/bin:/bin"
-    if ccache:
+    if ccache and sanity.can_ccache:
         cpath = ""
         if os.path.exists("/usr/lib/ccache/bin"):
             cpath = "/usr/lib/ccache/bin"
