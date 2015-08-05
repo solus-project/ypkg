@@ -171,8 +171,10 @@ class BinMan(pyinotify.ProcessEvent):
 
         if self.lastrepo and len(self.needdelta) > 0:
             print "Reproducing deltas due to invalidation"
-            for name in self.needdelta:
+            d = self.needdelta
+            for name in d:
                 self._create_delta(self.lastrepo, name)
+                self.needdelta.remove(name)
 
         olddir = os.getcwd()
         os.chdir(dirn)
