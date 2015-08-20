@@ -122,7 +122,6 @@ def escape(inp, wdir, name):
                            --mandir=/usr/share/man \
                            --infodir=/usr/share/man \
                            --datadir=/usr/share/ \
-                           --docdir=/usr/share/doc \
                            --sysconfdir=/etc \
                            --localstatedir=/var \
                            --libexecdir=/usr/%s/%s" % (prefix, host, libdir, libdir, name)
