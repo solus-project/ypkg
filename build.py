@@ -55,7 +55,7 @@ def which(p):
     return False
 
 global Clang
-Clang = which("clang")
+Clang = False
 
 global emul32
 emul32 = False
@@ -291,8 +291,8 @@ def build(fpath):
         wdir = get_work_dir()
         if "clang" in d:
             cl = bool(d['clang'])
-            if not cl:
-                print "Disabling clang"
+            if cl:
+                print "Enabling clang"
             global Clang
             Clang = cl
 
