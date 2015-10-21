@@ -199,6 +199,7 @@ fi"""
 if [ -f "%installroot%/usr/share/man/dir" ]; then
     rm -v "%installroot%/usr/share/man/dir"
 fi
+find "%installroot%/%libdir%" -type f -name *.la|xargs rm -rf
 """
 
     while (True):
