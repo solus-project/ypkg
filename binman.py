@@ -861,7 +861,8 @@ class BinMan(pyinotify.ProcessEvent):
 
         self.bypass = bypass
         try:
-            os.unlink(repofile)
+            if os.path.exists(repofile):
+                os.unlink(repofile)
             pkgdir = os.path.dirname(repofile)
             pkgdir_p = os.path.dirname(pkgdir)
             db.remove(pkg)
@@ -892,7 +893,8 @@ class BinMan(pyinotify.ProcessEvent):
             pfile = self._get_pool_name(pkg) if isinstance(pkg, str) else self._get_pool_name(pkg.filename)
             print "Removing no-longer used pool file: %s" % pfile
             try:
-                os.unlink(pfile)
+                if os.path.exists(pfile):
+                    os.unlink(pfile)
             except Exception, e:
                 print "Unable to remove pool file: %s" % pfile
                 print e
