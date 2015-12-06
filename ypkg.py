@@ -46,7 +46,7 @@ def main():
     if not fpath.endswith("package.yml"):
         print "Unnecessarily anal warning: File is not named package.yml"
 
-    if not sane(fpath): # then y made for linoox
+    if not sane(fpath, True): # then y made for linoox
         return 1
 
     comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "component.xml")

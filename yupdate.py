@@ -38,7 +38,7 @@ if __name__ == "__main__":
     if not ymlfile.endswith(".yml"):
         usage("%s does not look like a valid package.yml file")
 
-    if not sanity.sane(ymlfile):
+    if not sanity.sane(ymlfile, checkall=False):
         print "File does not appear to be valid, aborting"
         sys.exit(1)
 

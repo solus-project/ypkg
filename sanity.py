@@ -297,7 +297,7 @@ class TarSource:
     def __str__(self):
         return "%s (%s)" % (self.uri, self.hash)
 
-def sane(fpath):
+def sane(fpath, checkall=False):
     ''' Determine if the conf is actually, yknow, sane. '''
     if not os.path.exists(fpath):
         print "%s does not exist, bailing"
@@ -423,7 +423,7 @@ def sane(fpath):
         sys.exit(1)
 
     # Obv.
-    if "builddeps" in y:
+    if checkall and "builddeps" in y:
         assertStringList(y, "builddeps")
         b = get_build_deps(y)
         global buildDeps
