@@ -39,8 +39,8 @@ def packageit(ymlFile, installDIR, outputXML):
     source = pisi.specfile.Source()
     source.name = d['name']
     name = source.name
-    source.summary['en'] = str(d['summary'])
-    source.description['en'] = str(d['description'])
+    source.summary['en'] = str(sanity.summaries[sanity.name])
+    source.description['en'] = str(sanity.descriptions[sanity.name])
     if "homepage" in d:
         source.homepage = d['homepage']
 
@@ -232,15 +232,6 @@ def packageit(ymlFile, installDIR, outputXML):
                 print "Warning: Empty directory: %s" % fname
                 scanFi([fname])
 
-    summaries = dict()
-    summaries["-devel"] = "Development files for %s" % name
-    summaries["-docs"] = "Documentation for %s" % name
-    summaries["-32bit"] = "32-bit libraries for %s" % name
-
-    # Reserved but unmapped..
-    
-    summaries["-utils"] = "Utilities for %s" % name
-
     for pkg in pkgFiles:
         type = "data"
         fq = pkg
@@ -248,7 +239,6 @@ def packageit(ymlFile, installDIR, outputXML):
             fq = name + fq
         elif fq.endswith("-"):
             fq = fq + name
-        print fq
         package = pisi.specfile.Package()
         package.name = fq
         for file in pkgFiles[pkg]:
@@ -290,25 +280,37 @@ def packageit(ymlFile, installDIR, outputXML):
             # needs runtime deps..
             if not package.packageDependencies:
                 package.packageDependencies = list()
-            dep = pisi.dependency.Dependency()
-            dep.package = name
-            dep.release = "current"
-            if fq.endswith("-devel"):
+
+            if "-" in fq:
+                end = fq.split("-")[-1]
+            else:
+                end = fq
+            # Ensure we retain autodep on main package for the original autosplits
+            if end in sanity.autodep_always:
+                dep = pisi.dependency.Dependency()
+                dep.package = name
+                dep.release = "current"
+                package.packageDependencies.append(dep)
+
+            # Set automatic component
+            if end == "devel":
                 if "devel" in d and bool(d['devel']) == True:
                     package.partOf = "system.devel"
                 else:
                     package.partOf = "programming.devel"
-            elif fq.endswith("-docs"):
+            elif end == "docs":
                 package.partOf = "programming.docs"
-            package.packageDependencies.append(dep)
         else:
             if component:
                 package.partOf = component
-        package.description = source.description
-        if fq != name:
-            package.summary['en'] = summaries[pkg]
+        if pkg in sanity.descriptions:
+            package.description['en'] = sanity.descriptions[pkg]
         else:
-            package.summary['en'] = d['summary']
+            package.description['en'] = sanity.descriptions[sanity.name]
+        if pkg in sanity.summaries:
+            package.summary['en'] = sanity.summaries[pkg]
+        else:
+            package.summary['en'] = sanity.summaries[sanity.name]
 
         # Runtime deps
         if sanity.rundeps is not None and package.name in sanity.rundeps:

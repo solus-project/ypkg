@@ -56,6 +56,15 @@ global release
 global version
 global name
 
+global summaries
+summaries = None
+
+global descriptions
+descriptions = None
+
+global autodep_always
+autodep_always = [ "devel", "docs", "32bit", "utils"]
+
 def init_mutations():
     global mutations
 
@@ -67,6 +76,53 @@ def init_mutations():
         mutations["32bit"] = "%s-32bit" % name
         mutations["utils"] = "%s-utils" % name
 
+def maybe_mutate(pkg):
+    global mutations
+    global named
+
+    #if pkg == name:
+    #    return
+    if not pkg in mutations:
+        mutations[pkg] = "%s-%s" % (name, pkg)
+
+def add_summary(pkg, summary):
+    ''' Add summary for the main package or one of the subpackages '''
+    global mutations
+    global summaries
+
+    if not pkg or not summary:
+        print("Required values missing for add_summary")
+        sys.exit(1)
+    init_mutations()
+
+    maybe_mutate(pkg)
+
+    if summaries is None:
+        summaries = dict()
+    if pkg == name:
+        summaries[pkg] = summary
+    else:
+        summaries["-%s" % pkg] = summary
+
+def add_description(pkg, description):
+    ''' Add description for the main package or one of the subpackages '''
+    global mutations
+    global descriptions
+
+    if not pkg or not description:
+        print("Required values missing for add_description")
+        sys.exit(1)
+    init_mutations()
+
+    maybe_mutate(pkg)
+
+    if descriptions is None:
+        descriptions = dict()
+    if pkg == name:
+        descriptions[pkg] = description
+    else:
+        descriptions["-%s" % pkg] = description
+
 def add_runtime_dep(pkg, dep):
     ''' Explicitly add a package to the runtime dependencies '''
     global mutations
@@ -77,6 +133,7 @@ def add_runtime_dep(pkg, dep):
 
     init_mutations()
 
+    maybe_mutate(pkg)
     pkgname = pkg
     if pkgname in mutations:
         pkgname = mutations[pkgname]
@@ -101,6 +158,7 @@ def add_replaces(pkg, pkg2):
 
     init_mutations()
 
+    maybe_mutate(pkg)
     pkgname = pkg
     if pkgname in mutations:
         pkgname = mutations[pkgname]
@@ -126,8 +184,10 @@ def add_pattern(pkg, pattern):
     init_mutations()
 
     pkgname = pkg
+    maybe_mutate(pkg)
     if pkgname not in mutations and pkgname != name:
         print "Unsupported pattern name: %s" % pkg
+        print(mutations)
         sys.exit(1)
 
     if pkgname != name:
@@ -320,8 +380,6 @@ def sane(fpath, checkall=False):
         print "%s is not a valid eopkg version" % v
         sys.exit(1)
 
-    assertGetString(y, "description")
-    assertGetString(y, "summary")
     assertGetInteger(y, "release")
 
     global version 
@@ -398,6 +456,41 @@ def sane(fpath, checkall=False):
     global _sources
     _sources = sources
 
+    global descriptions
+    if "description" not in y:
+        print("description missing from spec")
+        sys.exit(1)
+
+    s = y["description"]
+    if isinstance(s, str):
+        add_description(name, s)
+    else:
+        do_multimap(s, "description", add_description)
+
+    if not name in descriptions:
+        print("Description missing for main source package")
+        sys.exit(1)
+
+    global summaries
+    # Default summaries and subpackages
+    if "summary" not in y:
+        print("summary missing from spec")
+        sys.exit(1)
+    add_summary("devel", "Development files for %s" % name)
+    add_summary("docs", "Documentation for %s" % name)
+    add_summary("32bit", "32-bit libraries for %s" % name)
+    add_summary("utils", "Utilities for %s" % name)
+
+    s = y["summary"]
+    if isinstance(s, str):
+        add_summary(name, s)
+    else:
+        do_multimap(s, "summary", add_summary)
+
+    if not name in summaries:
+        print("Summary missing for main source package")
+        sys.exit(1)
+        
     if "rundeps" in y:
         rdeps = y["rundeps"]
         do_multimap(rdeps, "rundeps", add_runtime_dep)
