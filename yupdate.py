@@ -14,6 +14,7 @@ import sys
 import yaml
 import os
 import commands
+import pisi.version
 
 import sys
 sys.path.append("/usr/share/ypkg")
@@ -43,6 +44,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     newversion = sys.argv[1]
+    try:
+        d = pisi.version.Version(newversion)
+    except Exception, e:
+        print("Problematic version string: %s" % e)
+        sys.exit(1)
+
     url = sys.argv[2]
     file = url.split("/")[-1]
 
