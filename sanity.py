@@ -134,9 +134,7 @@ def add_runtime_dep(pkg, dep):
     init_mutations()
 
     maybe_mutate(pkg)
-    pkgname = pkg
-    if pkgname in mutations:
-        pkgname = mutations[pkgname]
+    pkgname = pkg if pkg == name else mutations[pkg]
 
     if not rundeps:
         rundeps = dict()
@@ -159,9 +157,8 @@ def add_replaces(pkg, pkg2):
     init_mutations()
 
     maybe_mutate(pkg)
-    pkgname = pkg
-    if pkgname in mutations:
-        pkgname = mutations[pkgname]
+    maybe_mutate(pkg)
+    pkgname = pkg if pkg == name else mutations[pkg]
 
     if not pkg_replaces:
         pkg_replaces = dict()
