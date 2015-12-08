@@ -242,11 +242,11 @@ def assertStringList(y, n):
         sys.exit(1)
     r = y[n]
     ret = list()
-    if isinstance(r, str):
+    if isinstance(r, str) or isinstance(r, unicode):
         ret.append(r)
     elif isinstance(r, list):
         for i in r:
-            if not isinstance(i, str):
+            if not isinstance(i, str) and not isinstance(i, unicode):
                 print "[%s] Item '%s' is not a string" % (n,i)
                 sys.exit(1)
             ret.append(i)
@@ -315,12 +315,12 @@ def do_multimap(data, fname, func):
         print "'%s' is not a valid list" % fname
         sys.exit(1)
     for item in data:
-        if isinstance(item, str):
+        if isinstance(item, str) or isinstance(item, unicode):
             # main package
             func(name, item)
         elif isinstance(item, list):
             for subitem in item:
-                if not isinstance(subitem, str):
+                if not isinstance(subitem, str) and not isinstance(subitem, unicode):
                     print "'%s' is not a valid string" % v
                     sys.exit(1)
                 func(name, subitem)
@@ -334,11 +334,11 @@ def do_multimap(data, fname, func):
             v = val[0]
             if isinstance(v, list):
                 for subitem in v:
-                    if not isinstance(subitem, str):
+                    if not isinstance(subitem, str) and not isinstance(subitem, unicode):
                         print "'%s' is not a valid string" % v
                         sys.exit(1)
                     func(k, subitem)
-            elif isinstance(v, str):
+            elif isinstance(v, str) or isinstance(v, unicode):
                 func(k, v)
             else:
                 print "'%s' is not a valid string or list of strings" % v
@@ -440,10 +440,10 @@ def sane(fpath, checkall=False):
             sys.exit(1)
         k = key[0]
         v = val[0]
-        if not isinstance(k, str):
+        if not isinstance(k, str) and not isinstance(k, unicode):
             print "'%s' is not a valid string" % k
             sys.exit(1)
-        if not isinstance(v, str):
+        if not isinstance(v, str) and not isinstance(k, unicode):
             print "'%s' is not a valid string" % v
             sys.exit(1)
         src = TarSource()
@@ -459,7 +459,7 @@ def sane(fpath, checkall=False):
         sys.exit(1)
 
     s = y["description"]
-    if isinstance(s, str):
+    if isinstance(s, str) or isinstance(s, unicode):
         add_description(name, s)
     else:
         do_multimap(s, "description", add_description)
@@ -479,7 +479,7 @@ def sane(fpath, checkall=False):
     add_summary("utils", "Utilities for %s" % name)
 
     s = y["summary"]
-    if isinstance(s, str):
+    if isinstance(s, str) or isinstance(s, unicode):
         add_summary(name, s)
     else:
         do_multimap(s, "summary", add_summary)
