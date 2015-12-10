@@ -440,10 +440,10 @@ class BinMan(pyinotify.ProcessEvent):
                         continue
                     os.chdir(deltadir)
                     pkgs = None
-                    try:
-                        pkgs = pisi.operations.delta.create_delta_package(i.filename, top.filename)
-                    except Exception, e:
-                        print "Generic delta issue: %s" % e
+                    #try:
+                    #    pkgs = pisi.operations.delta.create_delta_package(i.filename, top.filename)
+                    #except Exception, e:
+                    #    print "Generic delta issue: %s" % e
                     if not pkgs or len(pkgs) == 0:
                         print "No delta possible for %s-%s" % (i.pkg.package.name, i.pkg.package.version)
                     else:
