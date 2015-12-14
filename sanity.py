@@ -486,6 +486,7 @@ def sane(fpath, checkall=False):
     add_summary("devel", "Development files for %s" % name)
     add_summary("docs", "Documentation for %s" % name)
     add_summary("32bit", "32-bit libraries for %s" % name)
+    add_summary("32bit-devel", "Development files for 32-bit %s" % name)
     add_summary("utils", "Utilities for %s" % name)
 
     s = y["summary"]
