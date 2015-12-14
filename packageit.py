@@ -301,6 +301,13 @@ def packageit(ymlFile, installDIR, outputXML):
                     dep.package = dname + "-32bit"
                     dep.release = "current"
                     package.packageDependencies.append(dep)
+                # if there is a -devel, we need this, as it has the include files.
+                if "-devel" in pkgFiles and len(pkgFiles["-devel"]) > 0:
+                    dep = pisi.dependency.Dependency()
+                    dname = name
+                    dep.package = dname + "-devel"
+                    dep.release = "current"
+                    package.packageDependencies.append(dep)
 
             # Set automatic component
             if pkg == "-devel":
