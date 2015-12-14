@@ -63,7 +63,7 @@ global descriptions
 descriptions = None
 
 global autodep_always
-autodep_always = [ "devel", "docs", "32bit", "utils"]
+autodep_always = [ "-devel", "-docs", "-32bit", "-utils"]
 
 def init_mutations():
     global mutations

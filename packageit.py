@@ -97,13 +97,14 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/lib/lib*.so.*"] = name
     patterns["/usr/lib64/lib*.a"] = "-devel"
     patterns["/usr/lib/lib*.a"] = "-devel"
-    patterns["/usr/lib32/lib*.a"] = "-32bit"
+    patterns["/usr/lib32/lib*.a"] = "-32bit-devel"
     # Consider splitting -devel .. just not that bothered tbh
-    patterns["/usr/lib32/lib*.so"] = "-32bit"
+    patterns["/usr/lib32/lib*.so"] = "-32bit-devel"
     patterns["/usr/lib32/lib*.so.*"] = "-32bit"
 
     patterns["/usr/share/pkgconfig/"] = "-devel"
     patterns["/usr/lib64/pkgconfig/"] = "-devel"
+    patterns["/usr/lib32/pkgconfig/"] = "-32bit-devel"
     patterns["/usr/lib/pkgconfig/"] = "-devel"
     patterns["/usr/include/"] = "-devel"
     patterns["/usr/share/help/"] = name
@@ -210,11 +211,12 @@ def packageit(ymlFile, installDIR, outputXML):
                                             hit = True
                                             break
                             if not hit:
-                                # Actually collapse it.
-                                if name not in pkgFiles:
-                                    pkgFiles[name] = list()
-                                if newname not in pkgFiles[name]:
-                                    pkgFiles[name].append(newname)
+                                # Actually collapse it. Fallback behaviour for lib32
+                                pkgName = "-32bit" if newname.startswith("/usr/lib32/") else name 
+                                if pkgName not in pkgFiles:
+                                    pkgFiles[pkgName] = list()
+                                if newname not in pkgFiles[pkgName]:
+                                    pkgFiles[pkgName].append(newname)
                                 collapsed = True
 
                     if not collapsed:
@@ -247,6 +249,8 @@ def packageit(ymlFile, installDIR, outputXML):
             if file.startswith("/usr/lib/pkgconfig"):
                 type = "data"
             elif file.startswith("/usr/lib64/pkgconfig"):
+                type = "data"
+            elif file.startswith("/usr/lib32/pkgconfig"):
                 type = "data"
             elif file.startswith("/usr/share/pkgconfig"):
                 type = "data"
@@ -281,24 +285,34 @@ def packageit(ymlFile, installDIR, outputXML):
             if not package.packageDependencies:
                 package.packageDependencies = list()
 
-            if "-" in fq:
-                end = fq.split("-")[-1]
-            else:
-                end = fq
             # Ensure we retain autodep on main package for the original autosplits
-            if end in sanity.autodep_always:
-                dep = pisi.dependency.Dependency()
-                dep.package = name
-                dep.release = "current"
-                package.packageDependencies.append(dep)
+            if pkg in sanity.autodep_always:
+                if name in pkgFiles:
+                    dep = pisi.dependency.Dependency()
+                    dname = name
+                    dep.package = dname
+                    dep.release = "current"
+                    package.packageDependencies.append(dep)
+            if pkg == "-32bit-devel":
+                # Autodep on the real package..
+                if "-32bit" in pkgFiles:
+                    dep = pisi.dependency.Dependency()
+                    dname = name
+                    dep.package = dname + "-32bit"
+                    dep.release = "current"
+                    package.packageDependencies.append(dep)
 
             # Set automatic component
-            if end == "devel":
+            if pkg == "-devel":
                 if "devel" in d and bool(d['devel']) == True:
                     package.partOf = "system.devel"
                 else:
                     package.partOf = "programming.devel"
-            elif end == "docs":
+            elif pkg == "-32bit":
+                package.partOf = "emul32"
+            elif pkg == "-32bit-devel":
+                package.partOf = "programming.devel"
+            elif pkg == "-docs":
                 package.partOf = "programming.docs"
         else:
             if component:
