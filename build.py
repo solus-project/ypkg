@@ -145,8 +145,8 @@ def escape(inp, wdir, name):
 
     if emul32:
         if Clang:
-            macros["%CC%"] += " -m32"
-            macros["%CXX%"] += " -m32"
+            macros["%CC%"] += "clang -m32"
+            macros["%CXX%"] += "clang++ -m32"
         else:
             macros["%CC%"] = "gcc -m32"
             macros["%CXX%"] = "g++ -m32"
@@ -173,6 +173,7 @@ export LD_AS_NEEDED=1
 """ % get_path()
     if emul32:
         header += "\nexport EMUL32BUILD=1\n"
+        header += "\nexport PKG_CONFIG_PATH=\"/usr/lib32/pkgconfig:/usr/share/pkgconfig\"\n"
 
     if LeRoot:
         header += """
