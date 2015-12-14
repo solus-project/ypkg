@@ -113,6 +113,8 @@ def escape(inp, wdir, name):
         if "-march=%s" % arch in cxxflags:
             cxxflags = cxxflags.replace("-march=%s" % arch, "-march=i686")
         host = "i686-pc-linux-gnu"
+    else:
+        host = conf.values.build.host
 
     prefix = "/usr" if not emul32 else "/emul32"
 
