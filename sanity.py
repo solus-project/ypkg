@@ -264,29 +264,39 @@ def get_build_deps(y):
         return None
 
     rgx = "^pkgconfig\((.*)\)$"
+    rgx32 = "^pkgconfig32\((.*)\)$"
     r = re.compile(rgx)
+    r32 = re.compile(rgx32)
     depList = list()
     pcs = list()
+    pcs32 = list()
     l = assertStringList(y, "builddeps")
     for dep in l:
         m = r.search(dep)
         if m:
             pcs.append(m.group(1))
         else:
-            depList.append(dep)
-    for pc in pcs:
-        ret = _pdb.get_package_by_pkgconfig(pc)
-        if not ret:
-            print "Warning: build dep does not exist in repo: %s" % pc
-        
-            ret = _idb.get_package_by_pkgconfig(pc)
-            if ret is None:
-                print "Requested build dep does not exist! %s" % pc
-                sys.exit(1)
-        if ret.name in depList:
-            print "Info: %s is already in dependency list.." % pc
-        else:
-            depList.append(ret.name)
+            m = r32.search(dep)
+            if m:
+                pcs32.append(m.group(1))
+            else:
+                depList.append(dep)
+
+    for pclist in (pcs, pcs32):
+        for pc in pclist:
+            emul32pc = pclist == pcs32
+            ret = _pdb.get_package_by_pkgconfig(pc) if not emul32pc else _pdb.get_package_by_pkgconfig32(pc)
+            if not ret:
+                print "Warning: build dep does not exist in repo: %s" % pc
+            
+                ret = _idb.get_package_by_pkgconfig(pc) if not emul32pc else _idb.get_package_by_pkgconfig32(pc)
+                if ret is None:
+                    print "Requested build dep does not exist! %s" % pc
+                    sys.exit(1)
+            if ret.name in depList:
+                print "Info: %s is already in dependency list.." % pc
+            else:
+                depList.append(ret.name)
     return depList
 
 global _sources
