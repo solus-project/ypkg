@@ -287,7 +287,7 @@ def packageit(ymlFile, installDIR, outputXML):
 
             # Ensure we retain autodep on main package for the original autosplits
             if pkg in sanity.autodep_always:
-                if name in pkgFiles:
+                if name in pkgFiles and len(pkgFiles[name]) > 0:
                     dep = pisi.dependency.Dependency()
                     dname = name
                     dep.package = dname
@@ -295,7 +295,7 @@ def packageit(ymlFile, installDIR, outputXML):
                     package.packageDependencies.append(dep)
             if pkg == "-32bit-devel":
                 # Autodep on the real package..
-                if "-32bit" in pkgFiles:
+                if "-32bit" in pkgFiles and len(pkgFiles["-32bit"]) > 0:
                     dep = pisi.dependency.Dependency()
                     dname = name
                     dep.package = dname + "-32bit"
