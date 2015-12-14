@@ -93,11 +93,13 @@ def main():
             print "Unable to create build directory: %s" % e
             return 1
     try:
-        build.build(fpath)
         if sanity.emul32:
-            print "Rebuilding for 32-bit"
+            print("Building for 32-bit")
             build.emul32 = True
             build.build(fpath)
+            print("Building native package")
+        build.emul32 = False
+        build.build(fpath)
     except Exception, e:
         print "Build failure: %s" % e
         return 1
