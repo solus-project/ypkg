@@ -100,8 +100,8 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/lib64/lib*.a"] = "-devel"
     patterns["/usr/lib/lib*.a"] = "-devel"
     patterns["/usr/lib32/lib*.a"] = "-32bit-devel"
-    # Consider splitting -devel .. just not that bothered tbh
-    patterns["/usr/lib32/lib*.so"] = "-32bit-devel"
+    # 32-bit buggery
+    patterns["/usr/lib32/lib*.so"] = "-32bit-devel" if canSplitLibs else "-32bit"
     patterns["/usr/lib32/lib*.so.*"] = "-32bit"
 
     patterns["/usr/share/pkgconfig/"] = "-devel"
