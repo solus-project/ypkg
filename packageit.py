@@ -19,6 +19,8 @@ import yaml
 import time
 import datetime
 import sanity
+import build
+import sys
 
 conf = pisi.config.Config()
 
@@ -353,4 +355,10 @@ def packageit(ymlFile, installDIR, outputXML):
 
         spec.packages.append(package)
 
+    count = 0
+    for pkg in pkgFiles:
+        count += len(pkgFiles[pkg])
+    if count == 0:
+        print("\n\nypkg: This package has not installed any files to the $installdir root.\nPlease review your install section. Aborting now.\nInstall dir: %s\n" % build.InstallDir)
+        sys.exit(1)
     spec.write(outputXML)
