@@ -62,6 +62,9 @@ summaries = None
 global descriptions
 descriptions = None
 
+global optimize_type
+optimize_type = None
+
 global autodep_always
 autodep_always = [ "-devel", "-docs", "-32bit", "-utils"]
 
@@ -508,6 +511,15 @@ def sane(fpath, checkall=False):
     if "patterns" in y:
         pat = y["patterns"]
         do_multimap(pat, "patterns", add_pattern)
+
+
+    global optimize_type
+    if "optimize" in y:
+        optimize_type = y["optimize"]
+
+        if optimize_type not in ["speed", "size", "none"]:
+            print("Unknown optimize type, expected one of 'speed', 'size', 'none'")
+            sys.exit(1)
 
     # Fuzzy.
     assertIsString(y, "setup")

@@ -83,6 +83,26 @@ def escape(inp, wdir, name):
     cflags = conf.values.build.cflags
     ldflags = conf.values.build.ldflags
 
+    exflags = None
+    # credit here to Clear Linux autospec
+    if sanity.optimize_type is not None:
+        if sanity.optimize_type == "speed":
+            exflags = "-flto -ffunction-sections -fno-semantic-interposition -O3".split(" ")
+        elif sanity.optimize_type == "size":
+            exflags = "-Os -ffunction-sections".split(" ")
+
+    if exflags:
+        optimisations = ["-O%s" % x for x in range(0, 4)]
+        optimisations.extend("-Os")
+        lcxxflags =  filter(lambda s: s not in optimisations, cxxflags.split(" "))
+        lcflags = filter(lambda s: s not in optimisations, cflags.split(" "))
+
+        lcflags.extend(exflags)
+        lcxxflags.extend(exflags)
+
+        cxxflags = " ".join(lcxxflags)
+        cflags = " ".join(lcflags)
+
     x86 = "x86_64" in arch
 
     libdir = "lib64" if x86 else "lib"
@@ -176,6 +196,13 @@ export LD_AS_NEEDED=1
     if emul32:
         header += "\nexport EMUL32BUILD=1\n"
         header += "\nexport PKG_CONFIG_PATH=\"/usr/lib32/pkgconfig:/usr/share/pkgconfig\"\n"
+
+    if sanity.optimize_type is not None and sanity.optimize_type == "speed":
+        header += """
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+"""
 
     if LeRoot:
         header += """
