@@ -34,6 +34,25 @@ def load_component(fname):
     except Exception, e:
        return None
 
+def build_package(tars, fpath, emul32=False):
+    build.emul32 = emul32
+
+    if sanity.pkg_extract:
+        build.extract(tars)
+    else:
+        try:
+            if not os.path.exists(build.get_build_dir()):
+                os.makedirs(build.get_build_dir())
+        except Exception, e:
+            print "Unable to create build directory: %s" % e
+            return False
+    try:
+        build.build(fpath)
+    except Exception, e:
+        print "Build failure: %s" % e
+        return False
+    return True
+
 def main():
     if len(sys.argv) < 2:
         print "Not enough arguments"
@@ -61,8 +80,7 @@ def main():
     pspec = build.BuildPrefix + "/%s.xml" % sanity.name
     actions = build.BuildPrefix + "/actions.py"
 
-    build.BuildDir += "/%s" % sanity.name
-    build.InstallDir += "/%s" % sanity.name
+    # Ensure installed
 
     insList = list()
     if sanity.buildDeps:
@@ -83,25 +101,24 @@ def main():
     build.cleanup()
     sources = sanity.get_sources()
     tars = build.fetch_source(sources)
-    if sanity.pkg_extract:
-        build.extract(tars)
-    else:
+
+    # Emul32 first, so 64-bit can overwrite files
+    if sanity.emul32:
+        print("Building for 32-bit")
         try:
-            if not os.path.exists(build.BuildDir):
-                os.makedirs(build.BuildDir)
+            if not build_package(tars, fpath, True):
+                print("32-bit build failure")
+                return 1
         except Exception, e:
-            print "Unable to create build directory: %s" % e
+            print("32-bit build failure: %s" % e)
             return 1
+
     try:
-        if sanity.emul32:
-            print("Building for 32-bit")
-            build.emul32 = True
-            build.build(fpath)
-            print("Building native package")
-        build.emul32 = False
-        build.build(fpath)
+        print("Building native package")
+        if not build_package(tars, fpath):
+            return 1
     except Exception, e:
-        print "Build failure: %s" % e
+        print("Native build failure: %s" % e)
         return 1
 
     packageit.packageit(fpath, build.InstallDir, pspec)

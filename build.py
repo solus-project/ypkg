@@ -29,9 +29,6 @@ BuildPrefix =  "/var/ypkg-root" if LeRoot else "%s/YPKG" % os.path.expanduser("~
 global BallDir
 BallDir = conf.values.dirs.archives_dir if LeRoot else os.path.abspath("%s/sources" % BuildPrefix)
 
-global BuildDir
-BuildDir = os.path.abspath("%s/build" % BuildPrefix)
-
 global InstallDir
 InstallDir = os.path.abspath("%s/install" % BuildPrefix)
 
@@ -46,6 +43,21 @@ ccache = conf.values.build.buildhelper is not None and "ccache" in conf.values.b
 
 global fakeroot
 fakeroot = False
+
+def get_build_dir_emul32():
+    global BuildPrefix
+
+    return os.path.abspath("%s/build-32/%s" % (BuildPrefix, sanity.name))
+
+
+def get_build_dir():
+    global BuildPrefix
+    global emul32
+
+    if emul32:
+        return get_build_dir_emul32()
+    return os.path.abspath("%s/build/%s" % (BuildPrefix, sanity.name))
+
 
 def which(p):
     for i in os.environ['PATH'].split(":"):
@@ -248,9 +260,17 @@ find "%installroot%/%libdir%" -type f -name *.la|xargs rm -rf
 
 
 def cleanup():
-    if os.path.exists(BuildDir) and os.path.isdir(BuildDir):
-        print "Removing %s" % BuildDir
-        os.system("rm -rf \"%s\"" % BuildDir)
+    bd = get_build_dir()
+    if os.path.exists(bd) and os.path.isdir(bd):
+        print "Removing %s" % bd
+        os.system("rm -rf \"%s\"" % bd)
+
+    # Ensure emul32 is dead too
+    bd2 = get_build_dir_emul32()
+    if os.path.exists(bd2) and os.path.isdir(bd2):
+        print("Removing %s" % bd2)
+        os.system("rm -rf \"%s\"" % bd2)
+
     if os.path.exists(InstallDir) and os.path.isdir(InstallDir):
         print "Removing %s" % InstallDir
         os.system("rm -rf \"%s\"" % InstallDir)
@@ -285,22 +305,24 @@ def fetch_source(sources):
     return tars
 
 def extract(src_list):
-    if not os.path.exists(BuildDir):
-        os.makedirs(BuildDir)
+    bd = get_build_dir()
+    if not os.path.exists(bd):
+        os.makedirs(bd)
 
     for x in src_list:
         target = os.path.join(BallDir, os.path.basename(x))
         ext = "unzip" if target.endswith(".zip") else "tar xf"
         diropt = "-d" if target.endswith(".zip") else "-C"
-        cmd = "%s \"%s\" %s \"%s\"" % (ext, target, diropt, BuildDir)
+        cmd = "%s \"%s\" %s \"%s\"" % (ext, target, diropt, bd)
         r = subprocess.check_call(cmd, shell=True)
 
 def get_work_dir():
-    kids = os.listdir(BuildDir)
+    bd = get_build_dir()
+    kids = os.listdir(bd)
     if len(kids) > 1:
-        return BuildDir
+        return bd
     else:
-        return os.path.join(BuildDir, kids[0] if len(kids) > 0 else BuildDir)
+        return os.path.join(bd, kids[0] if len(kids) > 0 else bd)
 
 def get_pkgfiles_dir():
     dirn = os.path.dirname(pkgfile)
