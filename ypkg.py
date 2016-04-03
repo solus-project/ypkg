@@ -68,13 +68,14 @@ def main():
     if not sane(fpath, True): # then y made for linoox
         return 1
 
-    comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "component.xml")
-    if os.path.exists(comp):
-        packageit.component = load_component(comp)
-    else:
-        comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "..", "component.xml")
+    if packageit.component is None:
+        comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "component.xml")
         if os.path.exists(comp):
             packageit.component = load_component(comp)
+        else:
+            comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "..", "component.xml")
+            if os.path.exists(comp):
+                packageit.component = load_component(comp)
 
 
     pspec = build.BuildPrefix + "/%s.xml" % sanity.name
