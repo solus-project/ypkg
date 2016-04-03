@@ -166,7 +166,7 @@ def escape(inp, wdir, name):
     macros["%CXX%"] = "%s-g++" % host
     macros["%JOBS%"] = conf.values.build.jobs
     macros["%make"] = "make %JOBS%"
-    macros["%patch"] = "patch -t --remove-empty-files --no-backup-if-mismatch"
+    macros["%patch"] = "patch -t --remove-empty-files --no-backup-if-mismatch --force"
     macros["%package%"] = sanity.name
     macros["%version%"] = sanity.version
     macros["%release%"] = sanity.release
@@ -347,7 +347,7 @@ def run_step(wdir, d, name):
             cmd = ["fakeroot", "/bin/sh", script.name]
         else:
             cmd = ["/bin/sh", script.name]
-        r = subprocess.check_call(cmd)
+        r = subprocess.check_call(cmd, stdin=subprocess.PIPE)
 
 
 def build(fpath):
