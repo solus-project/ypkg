@@ -312,17 +312,8 @@ def packageit(ymlFile, installDIR, outputXML):
                     package.packageDependencies.append(dep)
 
             # Set automatic component
-            if pkg == "-devel":
-                if "devel" in d and bool(d['devel']) == True:
-                    package.partOf = "system.devel"
-                else:
-                    package.partOf = "programming.devel"
-            elif pkg == "-32bit":
-                package.partOf = "emul32"
-            elif pkg == "-32bit-devel":
-                package.partOf = "programming.devel"
-            elif pkg == "-docs":
-                package.partOf = "programming.docs"
+            if pkg in sanity.components:
+                package.partOf = sanity.components[pkg]
         else:
             if component:
                 package.partOf = component

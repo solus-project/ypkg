@@ -16,6 +16,7 @@ import sys
 import re
 import pisi.db
 from configobj import ConfigObj
+import packageit
 
 global name
 
@@ -64,6 +65,9 @@ descriptions = None
 
 global optimize_type
 optimize_type = None
+
+global components
+components = None
 
 global autodep_always
 autodep_always = [ "-devel", "-docs", "-32bit", "-utils"]
@@ -126,6 +130,26 @@ def add_description(pkg, description):
     else:
         descriptions["-%s" % pkg] = description
 
+def add_component(pkg, component):
+    ''' Add component for the main package or one of the subpackages '''
+    global mutations
+    global components
+
+    if not pkg or not component:
+        print("Required values missing for add_component")
+        sys.exit(1)
+    init_mutations()
+
+    maybe_mutate(pkg)
+
+    if components is None:
+        components = dict()
+    if pkg == name:
+        packageit.component = component
+        components[pkg] = component
+    else:
+        components["-%s" % pkg] = component
+
 def add_runtime_dep(pkg, dep):
     ''' Explicitly add a package to the runtime dependencies '''
     global mutations
@@ -147,6 +171,7 @@ def add_runtime_dep(pkg, dep):
 
     if dep not in rundeps[pkgname]:
         rundeps[pkgname].append(dep)
+
 
 def add_replaces(pkg, pkg2):
     ''' Explicitly replace one package with another '''
@@ -501,7 +526,25 @@ def sane(fpath, checkall=False):
     if not name in summaries:
         print("Summary missing for main source package")
         sys.exit(1)
-        
+
+    # Default components
+    global components
+    if "devel" in y and bool(y["devel"]) == True:
+        add_component("devel", "system.devel")
+    else:
+        add_component("devel", "programming.devel")
+    add_component("32bit", "emul32")
+    add_component("32bit-devel", "programming.devel")
+    add_component("docs", "programming.docs")
+
+    # User-made overrides
+    if "component" in y:
+        s = y["component"]
+        if isinstance(s, str) or isinstance(s, unicode):
+            add_component(name, s)
+        else:
+            do_multimap(s, "component", add_component)
+
     if "rundeps" in y:
         rdeps = y["rundeps"]
         do_multimap(rdeps, "rundeps", add_runtime_dep)
