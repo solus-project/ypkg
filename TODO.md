@@ -68,10 +68,10 @@ have to build the packages itself**.
 The TODO:
 ---------
 
- * [ ] Write a new CLI frontend that's option based this time
- * [ ] Split dependency install out from main ypkg routine
+ * [x] Write a new CLI frontend that's option based this time
  * [ ] Add class-based `YpkgSpec` to represent the `package.yml` input file
  * [ ] Add dedicated parser
+ * [ ] Split dependency install out from main ypkg routine
  * [ ] Add **extensible** macros
  * [ ] Add the string-based path globbing algo
  * [ ] Add necessary logic to dynamically emit the `YpkgPackage` objects
