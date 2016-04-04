@@ -27,9 +27,17 @@ except Exception as e:
 
 class YpkgSpec:
 
+    # Root meta information
     pkg_name = None
     pkg_version = None
     pkg_homepage = None
+
+    # Build control
+    pkg_devel = False
+    pkg_clang = False
+    pkg_strip = True
+    pkg_ccache = True
+    pkg_emul32 = False
 
     mandatory_tokens = None
     optional_tokens = None
@@ -43,6 +51,11 @@ class YpkgSpec:
         # These guys are optional
         self.optional_tokens = OrderedDict([
             ("homepage", unicode),
+            ("devel", bool),
+            ("clang", bool),
+            ("strip", bool),
+            ("ccache", bool),
+            ("emul32", bool),
         ])
 
     def load_from_path(self, path):
