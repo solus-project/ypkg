@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  ybump.py
-#  
+#
 #  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -17,6 +17,7 @@ import os
 import sys
 sys.path.append("/usr/share/ypkg")
 import sanity
+
 
 def usage(msg=None, ex=1):
     if msg:
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     buf = list()
     with open(ymlfile, "r") as infile:
         for line in infile.readlines():
-            line = line.replace("\n","").replace("\r","")
+            line = line.replace("\n", "").replace("\r", "")
             if ":" in line:
                 spl = line.split(":")
                 if len(spl) != 2:
@@ -60,8 +61,7 @@ if __name__ == "__main__":
         f = open(ymlfile, "w")
         f.writelines(["%s\n" % x for x in buf])
         f.close()
-    except Exception, e:
+    except Exception as e:
         print "Error writing file, may need to reset it."
         print e
         sys.exit(1)
-

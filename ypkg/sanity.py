@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  sanity.py
-#  
+#
 #  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -70,7 +70,8 @@ global components
 components = None
 
 global autodep_always
-autodep_always = [ "-devel", "-docs", "-32bit", "-utils"]
+autodep_always = ["-devel", "-docs", "-32bit", "-utils"]
+
 
 def init_mutations():
     global mutations
@@ -83,14 +84,16 @@ def init_mutations():
         mutations["32bit"] = "%s-32bit" % name
         mutations["utils"] = "%s-utils" % name
 
+
 def maybe_mutate(pkg):
     global mutations
     global named
 
-    #if pkg == name:
+    # if pkg == name:
     #    return
-    if not pkg in mutations:
+    if pkg not in mutations:
         mutations[pkg] = "%s-%s" % (name, pkg)
+
 
 def add_summary(pkg, summary):
     ''' Add summary for the main package or one of the subpackages '''
@@ -111,6 +114,7 @@ def add_summary(pkg, summary):
     else:
         summaries["-%s" % pkg] = summary
 
+
 def add_description(pkg, description):
     ''' Add description for the main package or one of the subpackages '''
     global mutations
@@ -129,6 +133,7 @@ def add_description(pkg, description):
         descriptions[pkg] = description
     else:
         descriptions["-%s" % pkg] = description
+
 
 def add_component(pkg, component):
     ''' Add component for the main package or one of the subpackages '''
@@ -149,6 +154,7 @@ def add_component(pkg, component):
         components[pkg] = component
     else:
         components["-%s" % pkg] = component
+
 
 def add_runtime_dep(pkg, dep):
     ''' Explicitly add a package to the runtime dependencies '''
@@ -197,6 +203,7 @@ def add_replaces(pkg, pkg2):
     if pkg2 not in pkg_replaces[pkgname]:
         pkg_replaces[pkgname].append(pkg2)
 
+
 def add_pattern(pkg, pattern):
     ''' Explicitly add/override a default pattern '''
     global mutations
@@ -238,7 +245,8 @@ def assertGetString(y, n):
         print "Key '%s' must be a string" % n
         sys.exit(1)
     return r
-    
+
+
 def assertGetInteger(y, n):
     ''' Ensure integer value exists '''
     if n not in y:
@@ -249,6 +257,7 @@ def assertGetInteger(y, n):
         print "Key '%s' must be a integer" % n
         sys.exit(1)
     return r
+
 
 def assertIsString(y, n):
     ''' Ensure value is string if it exists '''
@@ -261,6 +270,7 @@ def assertIsString(y, n):
         print "Key '%s' must be a string" % n
         sys.exit(1)
     return r
+
 
 def assertStringList(y, n):
     ''' Ensure value is either a list of strings, or a list
@@ -275,7 +285,7 @@ def assertStringList(y, n):
     elif isinstance(r, list):
         for i in r:
             if not isinstance(i, str) and not isinstance(i, unicode):
-                print "[%s] Item '%s' is not a string" % (n,i)
+                print "[%s] Item '%s' is not a string" % (n, i)
                 sys.exit(1)
             ret.append(i)
     else:
@@ -283,9 +293,10 @@ def assertStringList(y, n):
     return ret
 
 
-
 _idb = pisi.db.installdb.InstallDB()
 _pdb = pisi.db.packagedb.PackageDB()
+
+
 def get_build_deps(y):
     ''' Get the eopkg version of the .pc files, and dependencies '''
     if "builddeps" not in y:
@@ -313,11 +324,13 @@ def get_build_deps(y):
     for pclist in (pcs, pcs32):
         for pc in pclist:
             emul32pc = pclist == pcs32
-            ret = _pdb.get_package_by_pkgconfig(pc) if not emul32pc else _pdb.get_package_by_pkgconfig32(pc)
+            ret = _pdb.get_package_by_pkgconfig(
+                pc) if not emul32pc else _pdb.get_package_by_pkgconfig32(pc)
             if not ret:
                 print "Warning: build dep does not exist in repo: %s" % pc
-            
-                ret = _idb.get_package_by_pkgconfig(pc) if not emul32pc else _idb.get_package_by_pkgconfig32(pc)
+
+                ret = _idb.get_package_by_pkgconfig(
+                    pc) if not emul32pc else _idb.get_package_by_pkgconfig32(pc)
                 if ret is None:
                     print "Requested build dep does not exist! %s" % pc
                     sys.exit(1)
@@ -330,8 +343,10 @@ def get_build_deps(y):
 global _sources
 _sources = None
 
+
 def get_sources():
     return _sources
+
 
 def do_multimap(data, fname, func):
     ''' Crazy looking assumption based logic..
@@ -339,13 +354,13 @@ def do_multimap(data, fname, func):
         Provided data needs to be in a list format:
             - name
             - name
-        
+
         Default mapping will place the value "name" as the key
             - name
-        
+
         Default mapping places each value in this list with default key:
             - [name, name, name, name]
-        
+
         Explicit key and value:
             - name: rundep
         '''
@@ -358,7 +373,11 @@ def do_multimap(data, fname, func):
             func(name, item)
         elif isinstance(item, list):
             for subitem in item:
-                if not isinstance(subitem, str) and not isinstance(subitem, unicode):
+                if not isinstance(
+                        subitem,
+                        str) and not isinstance(
+                        subitem,
+                        unicode):
                     print "'%s' is not a valid string" % v
                     sys.exit(1)
                 func(name, subitem)
@@ -372,7 +391,11 @@ def do_multimap(data, fname, func):
             v = val[0]
             if isinstance(v, list):
                 for subitem in v:
-                    if not isinstance(subitem, str) and not isinstance(subitem, unicode):
+                    if not isinstance(
+                            subitem,
+                            str) and not isinstance(
+                            subitem,
+                            unicode):
                         print "'%s' is not a valid string" % v
                         sys.exit(1)
                     func(k, subitem)
@@ -385,12 +408,14 @@ def do_multimap(data, fname, func):
             print "Invalid item in '%s': %s" % (fname, item)
             sys.exit(1)
 
+
 class TarSource:
     uri = None
     hash = None
 
     def __str__(self):
         return "%s (%s)" % (self.uri, self.hash)
+
 
 def sane(fpath, checkall=False):
     ''' Determine if the conf is actually, yknow, sane. '''
@@ -402,7 +427,7 @@ def sane(fpath, checkall=False):
     try:
         f = open(fpath, "r")
         y = yaml.load(f)
-    except Exception, e:
+    except Exception as e:
         print "Unable to load %s: %s" % (fpath, e)
         return False
 
@@ -411,16 +436,16 @@ def sane(fpath, checkall=False):
     v = assertGetString(y, "version")
     try:
         vr = pisi.version.make_version(v)
-    except Exception, e:
+    except Exception as e:
         print "%s is not a valid eopkg version" % v
         sys.exit(1)
 
     assertGetInteger(y, "release")
 
-    global version 
+    global version
     global release
     release = str(assertGetInteger(y, "release"))
-    version = str(v) 
+    version = str(v)
 
     global name
     name = y['name']
@@ -502,7 +527,7 @@ def sane(fpath, checkall=False):
     else:
         do_multimap(s, "description", add_description)
 
-    if not name in descriptions:
+    if name not in descriptions:
         print("Description missing for main source package")
         sys.exit(1)
 
@@ -523,13 +548,13 @@ def sane(fpath, checkall=False):
     else:
         do_multimap(s, "summary", add_summary)
 
-    if not name in summaries:
+    if name not in summaries:
         print("Summary missing for main source package")
         sys.exit(1)
 
     # Default components
     global components
-    if "devel" in y and bool(y["devel"]) == True:
+    if "devel" in y and bool(y["devel"]):
         add_component("devel", "system.devel")
     else:
         add_component("devel", "programming.devel")
@@ -554,7 +579,6 @@ def sane(fpath, checkall=False):
     if "patterns" in y:
         pat = y["patterns"]
         do_multimap(pat, "patterns", add_pattern)
-
 
     global optimize_type
     if "optimize" in y:

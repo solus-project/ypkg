@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  packageit.py
-#  
+#
 #  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -25,6 +25,7 @@ import sys
 conf = pisi.config.Config()
 
 component = None
+
 
 def packageit(ymlFile, installDIR, outputXML):
     wdir = installDIR
@@ -80,7 +81,7 @@ def packageit(ymlFile, installDIR, outputXML):
     upd.version = str(d['version'])
 
     dt = datetime.datetime.now()
-    #s = dt.strftime("%M-%D-%Y") # Why? Why couldn't it be this?
+    # s = dt.strftime("%M-%D-%Y") # Why? Why couldn't it be this?
     s = dt.strftime("%Y-%m-%d")
     upd.date = s
     upd.comment = "Packaging update"
@@ -89,7 +90,6 @@ def packageit(ymlFile, installDIR, outputXML):
     history.append(upd)
     spec.history = history
     source.history = history
-
 
     patterns = dict()
     patterns["/usr/share/locale/"] = name
@@ -126,21 +126,21 @@ def packageit(ymlFile, installDIR, outputXML):
     # These things are because evil.
     rtable = dict()
 
-    libr64 = re.compile("^/usr/lib64/lib[^/]*.\.so\..*") # main
+    libr64 = re.compile("^/usr/lib64/lib[^/]*.\.so\..*")  # main
     libdr64 = re.compile("^/usr/lib64/lib[^/]*.\.so$")
     libar64 = re.compile("^/usr/lib64/lib[^/]*.\.a$")
-    rtable["/usr/lib64/lib*.so.*"] = libr64 # main
+    rtable["/usr/lib64/lib*.so.*"] = libr64  # main
     rtable["/usr/lib64/lib*.so"] = libdr64
     rtable["/usr/lib64/lib*.a"] = libar64
 
-    libr = re.compile("^/usr/lib/lib[^/]*.\.so\..*") # main
+    libr = re.compile("^/usr/lib/lib[^/]*.\.so\..*")  # main
     libdr = re.compile("^/usr/lib/lib[^/]*.\.so$")
     libar = re.compile("^/usr/lib/lib[^/]*.\.a$")
-    rtable["/usr/lib/lib*.so.*"] = libr # main
+    rtable["/usr/lib/lib*.so.*"] = libr  # main
     rtable["/usr/lib/lib*.so"] = libdr
     rtable["/usr/lib/lib*.a"] = libar
 
-    libr32 = re.compile("^/usr/lib32/lib[^/]*.\.so\..*") # main
+    libr32 = re.compile("^/usr/lib32/lib[^/]*.\.so\..*")  # main
     libdr32 = re.compile("^/usr/lib32/lib[^/]*.\.so$")
     libar32 = re.compile("^/usr/lib32/lib[^/]*.\.a$")
     rtable["/usr/lib32/lib*.so.*"] = libr32
@@ -162,13 +162,13 @@ def packageit(ymlFile, installDIR, outputXML):
                     if not b:
                         b = path.startswith(p)
                 if b:
-                    return (p,table[p])
+                    return (p, table[p])
             if table == patterns:
-                return (None,None)
+                return (None, None)
 
     # I am not proud of the following code.
     pkgFiles = dict()
-    for root,dirs,files in os.walk(wdir):
+    for root, dirs, files in os.walk(wdir):
         def scanFi(files):
             for file in files:
                 fpath = os.path.join(root, file)
@@ -177,7 +177,7 @@ def packageit(ymlFile, installDIR, outputXML):
                 # Ideally we need a shitlist of regex's to ignore.
                 if "lib" in fpath and fpath.endswith(".la"):
                     continue
-                p,comp = hasMatch(fpath)
+                p, comp = hasMatch(fpath)
                 if comp:
                     if comp not in pkgFiles:
                         pkgFiles[comp] = list()
@@ -195,7 +195,7 @@ def packageit(ymlFile, installDIR, outputXML):
                             newname = "/%s" % "/".join(splits[:3])
                         else:
                             newname = os.path.dirname(fpath)
-                        p,comp = hasMatch(newname)
+                        p, comp = hasMatch(newname)
                         if not p:
                             # Check nobody conflicts.
                             hit = False
@@ -213,8 +213,10 @@ def packageit(ymlFile, installDIR, outputXML):
                                             hit = True
                                             break
                             if not hit:
-                                # Actually collapse it. Fallback behaviour for lib32
-                                pkgName = "-32bit" if newname.startswith("/usr/lib32/") else name 
+                                # Actually collapse it. Fallback behaviour for
+                                # lib32
+                                pkgName = "-32bit" if newname.startswith(
+                                    "/usr/lib32/") else name
                                 if pkgName not in pkgFiles:
                                     pkgFiles[pkgName] = list()
                                 if newname not in pkgFiles[pkgName]:
@@ -287,7 +289,8 @@ def packageit(ymlFile, installDIR, outputXML):
             if not package.packageDependencies:
                 package.packageDependencies = list()
 
-            # Ensure we retain autodep on main package for the original autosplits
+            # Ensure we retain autodep on main package for the original
+            # autosplits
             if pkg in sanity.autodep_always:
                 if name in pkgFiles and len(pkgFiles[name]) > 0:
                     dep = pisi.dependency.Dependency()
@@ -303,7 +306,8 @@ def packageit(ymlFile, installDIR, outputXML):
                     dep.package = dname + "-32bit"
                     dep.release = "current"
                     package.packageDependencies.append(dep)
-                # if there is a -devel, we need this, as it has the include files.
+                # if there is a -devel, we need this, as it has the include
+                # files.
                 if "-devel" in pkgFiles and len(pkgFiles["-devel"]) > 0:
                     dep = pisi.dependency.Dependency()
                     dname = name
@@ -350,6 +354,8 @@ def packageit(ymlFile, installDIR, outputXML):
     for pkg in pkgFiles:
         count += len(pkgFiles[pkg])
     if count == 0:
-        print("\n\nypkg: This package has not installed any files to the $installdir root.\nPlease review your install section. Aborting now.\nInstall dir: %s\n" % build.InstallDir)
+        print(
+            "\n\nypkg: This package has not installed any files to the $installdir root.\nPlease review your install section. Aborting now.\nInstall dir: %s\n" %
+            build.InstallDir)
         sys.exit(1)
     spec.write(outputXML)

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  ypkg.py
-#  
+#
 #  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -24,6 +24,7 @@ import os
 import shutil
 import xml.etree.ElementTree as ET
 
+
 def load_component(fname):
     try:
         tree = ET.parse(fname)
@@ -31,8 +32,9 @@ def load_component(fname):
 
         name = root.findall("Name")[0].text
         return name
-    except Exception, e:
-       return None
+    except Exception as e:
+        return None
+
 
 def build_package(tars, fpath, emul32=False):
     build.emul32 = emul32
@@ -43,15 +45,16 @@ def build_package(tars, fpath, emul32=False):
         try:
             if not os.path.exists(build.get_build_dir()):
                 os.makedirs(build.get_build_dir())
-        except Exception, e:
+        except Exception as e:
             print "Unable to create build directory: %s" % e
             return False
     try:
         build.build(fpath)
-    except Exception, e:
+    except Exception as e:
         print "Build failure: %s" % e
         return False
     return True
+
 
 def main():
     if len(sys.argv) < 2:
@@ -65,18 +68,26 @@ def main():
     if not fpath.endswith("package.yml"):
         print "Unnecessarily anal warning: File is not named package.yml"
 
-    if not sane(fpath, True): # then y made for linoox
+    if not sane(fpath, True):  # then y made for linoox
         return 1
 
     if packageit.component is None:
-        comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "component.xml")
+        comp = os.path.join(
+            os.path.dirname(
+                os.path.abspath(fpath)),
+            "..",
+            "component.xml")
         if os.path.exists(comp):
             packageit.component = load_component(comp)
         else:
-            comp = os.path.join(os.path.dirname(os.path.abspath(fpath)), "..", "..", "component.xml")
+            comp = os.path.join(
+                os.path.dirname(
+                    os.path.abspath(fpath)),
+                "..",
+                "..",
+                "component.xml")
             if os.path.exists(comp):
                 packageit.component = load_component(comp)
-
 
     pspec = build.BuildPrefix + "/%s.xml" % sanity.name
     actions = build.BuildPrefix + "/actions.py"
@@ -110,7 +121,7 @@ def main():
             if not build_package(tars, fpath, True):
                 print("32-bit build failure")
                 return 1
-        except Exception, e:
+        except Exception as e:
             print("32-bit build failure: %s" % e)
             return 1
 
@@ -118,7 +129,7 @@ def main():
         print("Building native package")
         if not build_package(tars, fpath):
             return 1
-    except Exception, e:
+    except Exception as e:
         print("Native build failure: %s" % e)
         return 1
 
@@ -152,8 +163,8 @@ def install():
     except:
         print "Unable to copy pspec.xml to current directory!"
         return 1
-    
-    return 0    
+
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -25,9 +25,12 @@ conf = pisi.config.Config()
 
 LeRoot = os.geteuid() == 0
 
-BuildPrefix =  "/var/ypkg-root" if LeRoot else "%s/YPKG" % os.path.expanduser("~")
+BuildPrefix = "/var/ypkg-root" if LeRoot else "%s/YPKG" % os.path.expanduser(
+    "~")
 global BallDir
-BallDir = conf.values.dirs.archives_dir if LeRoot else os.path.abspath("%s/sources" % BuildPrefix)
+BallDir = conf.values.dirs.archives_dir if LeRoot else os.path.abspath(
+    "%s/sources" %
+    BuildPrefix)
 
 global InstallDir
 InstallDir = os.path.abspath("%s/install" % BuildPrefix)
@@ -43,6 +46,7 @@ ccache = conf.values.build.buildhelper is not None and "ccache" in conf.values.b
 
 global fakeroot
 fakeroot = False
+
 
 def get_build_dir_emul32():
     global BuildPrefix
@@ -61,7 +65,7 @@ def get_build_dir():
 
 def which(p):
     for i in os.environ['PATH'].split(":"):
-        p2 = os.path.join(i,p)
+        p2 = os.path.join(i, p)
         if os.path.exists(p2):
             return True
     return False
@@ -73,6 +77,7 @@ global emul32
 emul32 = False
 
 global pkgfile
+
 
 def get_path():
     path = "/usr/bin:/bin"
@@ -87,6 +92,7 @@ def get_path():
             path = "%s:%s" % (cpath, path)
     return path
 
+
 def escape(inp, wdir, name):
     global host
     global arch
@@ -99,14 +105,17 @@ def escape(inp, wdir, name):
     # credit here to Clear Linux autospec
     if sanity.optimize_type is not None:
         if sanity.optimize_type == "speed":
-            exflags = "-flto -ffunction-sections -fno-semantic-interposition -O3".split(" ")
+            exflags = "-flto -ffunction-sections -fno-semantic-interposition -O3".split(
+                " ")
         elif sanity.optimize_type == "size":
             exflags = "-Os -ffunction-sections".split(" ")
 
     if exflags:
         optimisations = ["-O%s" % x for x in range(0, 4)]
         optimisations.extend("-Os")
-        lcxxflags =  filter(lambda s: s not in optimisations, cxxflags.split(" "))
+        lcxxflags = filter(
+            lambda s: s not in optimisations,
+            cxxflags.split(" "))
         lcflags = filter(lambda s: s not in optimisations, cflags.split(" "))
 
         lcflags.extend(exflags)
@@ -275,6 +284,7 @@ def cleanup():
         print "Removing %s" % InstallDir
         os.system("rm -rf \"%s\"" % InstallDir)
 
+
 def fetch_source(sources):
     tars = None
     if not os.path.exists(BallDir):
@@ -285,7 +295,9 @@ def fetch_source(sources):
         fname = os.path.join(BallDir, endName)
         if not os.path.exists(fname):
             try:
-                p = subprocess.check_call("wget -O \"%s\" \"%s\"" % (fname, source), shell=True)
+                p = subprocess.check_call(
+                    "wget -O \"%s\" \"%s\"" %
+                    (fname, source), shell=True)
             except:
                 print "Abnormal exit from download"
                 sys.exit(1)
@@ -304,6 +316,7 @@ def fetch_source(sources):
             tars.append(source)
     return tars
 
+
 def extract(src_list):
     bd = get_build_dir()
     if not os.path.exists(bd):
@@ -316,6 +329,7 @@ def extract(src_list):
         cmd = "%s \"%s\" %s \"%s\"" % (ext, target, diropt, bd)
         r = subprocess.check_call(cmd, shell=True)
 
+
 def get_work_dir():
     bd = get_build_dir()
     kids = os.listdir(bd)
@@ -323,6 +337,7 @@ def get_work_dir():
         return bd
     else:
         return os.path.join(bd, kids[0] if len(kids) > 0 else bd)
+
 
 def get_pkgfiles_dir():
     dirn = os.path.dirname(pkgfile)
@@ -371,4 +386,3 @@ def build(fpath):
         run_step(wdir, d, 'build')
         run_step(wdir, d, 'install')
         run_step(wdir, d, 'check')
-

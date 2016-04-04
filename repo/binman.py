@@ -3,9 +3,9 @@
 #
 #  binman.py - eopkg repository maintainence
 #  Warning: Still work in progress, missing publish/snapshot functionality!
-#  
+#
 #  Copyright 2015 Ikey Doherty <ikey@solus-project.com>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 2 of the License, or
@@ -28,6 +28,7 @@ incomingbase = "./incoming"
 # Ya, also hard coded. shush :p
 max_versions = 3
 
+
 class RepoPackage:
     ''' Exists solely to enable pickling magics '''
     filename = None
@@ -49,6 +50,7 @@ class RepoPackage:
     def get_release(self):
         return self.release
 
+
 class RepoCollection:
 
     db = None
@@ -58,7 +60,7 @@ class RepoCollection:
 
     def append(self, pkg):
         ''' Append this package to the repo collection '''
-        if not pkg.source in self.db:
+        if pkg.source not in self.db:
             self.db[pkg.source] = list()
         if not pkg in self.db[pkg.source]:
             self.db[pkg.source].append(pkg)
@@ -67,13 +69,13 @@ class RepoCollection:
 
     def remove(self, pkg):
         ''' Remove this package from the repo collection '''
-        if not pkg.source in self.db:
+        if pkg.source not in self.db:
             return
         self.db[pkg.source].remove(pkg)
 
     def __hasitem__(self, pkg):
         ''' Passing a .eopkg to determine if we have it. '''
-        if not pkg.source in self.db:
+        if pkg.source not in self.db:
             return False
         return pkg in self.db[pkg.source]
 
@@ -84,9 +86,10 @@ class RepoCollection:
 
     def __getitem__(self, sname):
         ''' Return packages for this source name '''
-        if not sname in self.db:
+        if sname not in self.db:
             raise KeyError("No such key: %s" % sname)
         return self.db[sname]
+
 
 class BinMan(pyinotify.ProcessEvent):
 
@@ -109,7 +112,7 @@ class BinMan(pyinotify.ProcessEvent):
         return len(self.get_args()) > 0
 
     def mark_altered(self, name):
-        if not name in self.altered:
+        if name not in self.altered:
             self.altered.append(name)
 
     def __init__(self):
@@ -118,24 +121,27 @@ class BinMan(pyinotify.ProcessEvent):
         helps["add"] = "Add package(s) to repository"
         helps["clone"] = "Clone a repository"
         helps["copy-source"] = "Copy package by source name"
-        helps["create-repo"] =  "Create new repository"
+        helps["create-repo"] = "Create new repository"
         helps["delta"] = "Create package deltas"
         helps["list-repos"] = "List repositories"
         helps["monitor-incoming"] = "Monitor incoming packages"
         helps["process-incoming"] = "Process incoming packages"
         helps["pull"] = "Pull from one repo into another"
-        helps["remove-repo"] =  "Remove existing repository"
+        helps["remove-repo"] = "Remove existing repository"
         helps["remove-source"] = "Remove package by source name"
         helps["trim"] = "Trim repo by removing excessive old releases"
-        helps["help"] =  "Print this help message"
+        helps["help"] = "Print this help message"
         biggest = sorted([len(x) for x in helps.keys()], reverse=True)[0]
         hlptxt = ""
         biggest += 4
         for k in helps:
             hlptxt += k.rjust(biggest) + " - " + helps[k] + "\n"
 
-        parser = argparse.ArgumentParser(description="eopkg repository management",
-            usage="%s <command> [arguments]\n\n%s" % (sys.argv[0],hlptxt))
+        parser = argparse.ArgumentParser(
+            description="eopkg repository management",
+            usage="%s <command> [arguments]\n\n%s" %
+            (sys.argv[0],
+             hlptxt))
         self.p = parser
         parser.add_argument("command", help=argparse.SUPPRESS)
 
@@ -146,7 +152,7 @@ class BinMan(pyinotify.ProcessEvent):
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(args, 'command'):
             sys.exit(1)
-        command = args.command.replace("-","_")
+        command = args.command.replace("-", "_")
         if not hasattr(self, command) or args.command not in helps:
             print "Unknown command: %s" % command
             sys.exit(1)
@@ -181,7 +187,7 @@ class BinMan(pyinotify.ProcessEvent):
         pisi.api.index(["."],
                        output=os.path.join(dirn, "eopkg-index.xml"),
                        skip_sources=True,
-                       skip_signing=True, # TODO: Add signing support
+                       skip_signing=True,  # TODO: Add signing support
                        compression=pisi.file.File.COMPRESSION_TYPE_XZ)
         os.chdir(olddir)
 
@@ -197,18 +203,20 @@ class BinMan(pyinotify.ProcessEvent):
                         if os.path.exists(dstPath):
                             os.unlink(dstPath)
                         shutil.copy(srcPath, dstPath)
-                    except Exception, e:
+                    except Exception as e:
                         print "Failed to install asset file: %s" % item
                         print e
+
     def help(self):
         ''' Display help message, optionally for a given topic '''
         if not self.has_args():
             self.p.print_help()
             sys.exit(0)
-        parser = argparse.ArgumentParser(description="Show help on a given topic")
+        parser = argparse.ArgumentParser(
+            description="Show help on a given topic")
         parser.add_argument("topic", help="Topic to display help on")
         args = parser.parse_args(self.get_args())
-        topic = args.topic.replace("-","_")
+        topic = args.topic.replace("-", "_")
         if not hasattr(self, topic):
             print "Unknown topic"
             sys.exit(1)
@@ -240,7 +248,7 @@ class BinMan(pyinotify.ProcessEvent):
                 f = open(self._get_repo_db_name(name), "rb")
                 db = pickle.load(f)
                 f.close()
-            except Exception, e:
+            except Exception as e:
                 print "Unable to load DB file: %s" % os.path.basename(self._get_repo_db_name(name))
                 print e
                 sys.exit(1)
@@ -259,7 +267,7 @@ class BinMan(pyinotify.ProcessEvent):
             pickle.dump(db, f)
             f.flush()
             f.close()
-        except Exception, e:
+        except Exception as e:
             print "Unable to save DB file: %s" % os.path.basename(self._get_repo_db_name(name))
             print e
             sys.exit(1)
@@ -287,26 +295,28 @@ class BinMan(pyinotify.ProcessEvent):
             pkg = fpath.pkg
             bpath = fpath.filename
         else:
-            pkg,files = pisi.api.info(fpath)
+            pkg, files = pisi.api.info(fpath)
             bpath = os.path.basename(fpath)
         dirn = pkg.source.name
         if dirn.startswith("lib"):
             dirn = dirn[:4]
         else:
             dirn = dirn[0]
-        return os.path.join(self._get_repo_dir(repo), dirn, pkg.source.name, bpath)
+        return os.path.join(
+            self._get_repo_dir(repo),
+            dirn, pkg.source.name, bpath)
 
     def _create_repo(self, name):
         ''' Helper to create a new repo '''
         try:
             os.makedirs(os.path.dirname(self._get_repo_file(name)))
             self._touch(self._get_repo_file(name))
-        except Exception, e:
+        except Exception as e:
             print "Unable to create repo: %s" % name
             print e
             sys.exit(1)
 
-    def create_repo(self, showhelp = False):
+    def create_repo(self, showhelp=False):
         ''' Create a new repository '''
         parser = argparse.ArgumentParser(description="Create a new repository")
         parser.add_argument("repo", help="Name of the new repository")
@@ -329,13 +339,13 @@ class BinMan(pyinotify.ProcessEvent):
 
         try:
             os.makedirs(adir)
-        except Exception, e:
+        except Exception as e:
             print "Unable to construct assets dir %s" % adir
             print e
             sys.exit(1)
         self._create_repo(name)
 
-    def remove_repo(self, showhelp = False):
+    def remove_repo(self, showhelp=False):
         ''' Remove a repository '''
         parser = argparse.ArgumentParser(description="Remove repository")
         parser.add_argument("repo", help="Name of the repository")
@@ -374,7 +384,7 @@ class BinMan(pyinotify.ProcessEvent):
             else:
                 if os.path.exists(adir):
                     os.rmdir(adir)
-        except Exception, e:
+        except Exception as e:
             print "Unable to delete repo directory: %s" % dirn
             print e
             sys.exit(1)
@@ -383,20 +393,29 @@ class BinMan(pyinotify.ProcessEvent):
 
     def get_delta_filename(self, pkg1, pkg2):
         ''' Determine end name of delta file '''
-        delta_name = "-".join((pkg2.name, pkg1.release, pkg2.release,
-           pkg2.distributionRelease, pkg2.architecture)) + pisi.context.const.delta_package_suffix
+        delta_name = "-".join((pkg2.name,
+                               pkg1.release,
+                               pkg2.release,
+                               pkg2.distributionRelease,
+                               pkg2.architecture)) + pisi.context.const.delta_package_suffix
         return delta_name
 
     def get_delta_to_glob(self, pkg):
         ''' Determine end name of delta file '''
-        delta_name = "-".join((pkg.name, pkg.release, "*",
-           pkg.distributionRelease, pkg.architecture)) + pisi.context.const.delta_package_suffix
+        delta_name = "-".join((pkg.name,
+                               pkg.release,
+                               "*",
+                               pkg.distributionRelease,
+                               pkg.architecture)) + pisi.context.const.delta_package_suffix
         return delta_name
 
     def get_delta_from_glob(self, pkg):
         ''' Determine end name of delta file '''
-        delta_name = "-".join((pkg.name, "*", pkg.release,
-           pkg.distributionRelease, pkg.architecture)) + pisi.context.const.delta_package_suffix
+        delta_name = "-".join((pkg.name,
+                               "*",
+                               pkg.release,
+                               pkg.distributionRelease,
+                               pkg.architecture)) + pisi.context.const.delta_package_suffix
         return delta_name
 
     def _create_delta(self, repo, source):
@@ -406,7 +425,7 @@ class BinMan(pyinotify.ProcessEvent):
             raise RuntimeError("Should not be reached, aborting")
 
         db = self._get_repo_db(repo)
-        if not source in db.db:
+        if source not in db.db:
             return
 
         pkgs = db.db[source]
@@ -434,15 +453,15 @@ class BinMan(pyinotify.ProcessEvent):
                         print "Using cached delta: %s" % dname
                         try:
                             os.link(ptgt, deltapath)
-                        except Exception, e:
+                        except Exception as e:
                             print "Unable to link pool delta: %s" % dname
                             print e
                         continue
                     os.chdir(deltadir)
                     pkgs = None
-                    #try:
+                    # try:
                     #    pkgs = pisi.operations.delta.create_delta_package(i.filename, top.filename)
-                    #except Exception, e:
+                    # except Exception, e:
                     #    print "Generic delta issue: %s" % e
                     if not pkgs or len(pkgs) == 0:
                         print "No delta possible for %s-%s" % (i.pkg.package.name, i.pkg.package.version)
@@ -451,14 +470,15 @@ class BinMan(pyinotify.ProcessEvent):
                             try:
                                 dpath = os.path.join(deltadir, d)
                                 os.link(dpath, ptgt)
-                            except Exception, e:
+                            except Exception as e:
                                 print "Unable to pool delta: %s" % d
                                 print e
                     os.chdir(olddir)
 
-    def delta(self, showhelp = False):
+    def delta(self, showhelp=False):
         ''' Create deltas in the given repo '''
-        parser = argparse.ArgumentParser(description="Create deltas for <repo>")
+        parser = argparse.ArgumentParser(
+            description="Create deltas for <repo>")
         parser.add_argument("repo", help="Name of repository")
         if showhelp:
             parser.print_help()
@@ -478,13 +498,14 @@ class BinMan(pyinotify.ProcessEvent):
             self._create_delta(name, source)
         self.mark_altered(name)
 
-    def trim(self, showhelp = False):
+    def trim(self, showhelp=False):
         ''' Trim a repository by allowing only a maximum number of versions '''
-        parser = argparse.ArgumentParser(description="Remove packages from a repo if it has too many old versions (5)")
+        parser = argparse.ArgumentParser(
+            description="Remove packages from a repo if it has too many old versions (5)")
         parser.add_argument("repo", help="Name of the repository")
         if showhelp:
-             parser.print_help()
-             sys.exit(0)
+            parser.print_help()
+            sys.exit(0)
 
         args = parser.parse_args(sys.argv[2:])
         repo = args.repo
@@ -516,15 +537,16 @@ class BinMan(pyinotify.ProcessEvent):
         self._stuff_repo_db(repo)
         print "trimmed: %s packages" % total
 
-    def remove_source(self, showhelp = False):
-        parser = argparse.ArgumentParser(description="Remove all packages from <repo> matching source name. Note that by using \"pkg==release\" syntax you can opt to remove only packages of a specific release number")
+    def remove_source(self, showhelp=False):
+        parser = argparse.ArgumentParser(
+            description="Remove all packages from <repo> matching source name. Note that by using \"pkg==release\" syntax you can opt to remove only packages of a specific release number")
         parser.add_argument("repo", help="Name of the repository")
         parser.add_argument("--packages", help=argparse.SUPPRESS)
         if showhelp:
-             parser.print_help()
-             sys.exit(0)
+            parser.print_help()
+            sys.exit(0)
 
-        args,sargs = parser.parse_known_args(sys.argv[2:])
+        args, sargs = parser.parse_known_args(sys.argv[2:])
         repo = args.repo
 
         if len(sargs) < 1:
@@ -534,7 +556,6 @@ class BinMan(pyinotify.ProcessEvent):
             print "%s is not a valid repository" % dest
             sys.exit(1)
 
-
         removals = list()
         for name in sargs:
             rel = None
@@ -543,7 +564,7 @@ class BinMan(pyinotify.ProcessEvent):
                 name = splits[0]
                 try:
                     rel = int(splits[1])
-                except Exception, e:
+                except Exception as e:
                     print "%s is not a valid number" % splits[1]
                     sys.exit(1)
             if not name in self._get_repo_db(repo):
@@ -554,7 +575,7 @@ class BinMan(pyinotify.ProcessEvent):
             if rel:
                 match = [x for x in pkgs if int(x.release) == rel]
                 if not match or len(match) == 0:
-                    print "No matches found for %s==%s" % (name,rel)
+                    print "No matches found for %s==%s" % (name, rel)
                     sys.exit(1)
             removals.extend(match)
         self.mark_altered(repo)
@@ -564,14 +585,15 @@ class BinMan(pyinotify.ProcessEvent):
             self._get_repo_db(repo).db.pop(name, None)
         self._stuff_repo_db(repo)
 
-    def pull(self, showhelp = False):
+    def pull(self, showhelp=False):
         ''' Update src repo from dst, basically a partial mass copy-src '''
-        parser = argparse.ArgumentParser(description="Pull changes from <origin> repo into <clone>")
+        parser = argparse.ArgumentParser(
+            description="Pull changes from <origin> repo into <clone>")
         parser.add_argument("clone", help="Name of the cloned repository")
         parser.add_argument("origin", help="Name of the source repository")
         if showhelp:
-             parser.print_help()
-             sys.exit(0)
+            parser.print_help()
+            sys.exit(0)
 
         args = parser.parse_args(sys.argv[2:])
         origin = args.origin
@@ -589,7 +611,10 @@ class BinMan(pyinotify.ProcessEvent):
 
         updates = 0
         for source in newdb.db:
-            pkgs = sorted(newdb[source], key=RepoPackage.get_release, reverse=True)
+            pkgs = sorted(
+                newdb[source],
+                key=RepoPackage.get_release,
+                reverse=True)
             if source not in olddb.db:
                 print "Pulling new package source: %s" % source
                 cpkgs = [p for p in pkgs if p.release == pkgs[0].release]
@@ -597,7 +622,10 @@ class BinMan(pyinotify.ProcessEvent):
                     self._add_package(clone, pkg)
                 updates += 1
             else:
-                oldpkgs = sorted(olddb[source], key=RepoPackage.get_release, reverse=True)
+                oldpkgs = sorted(
+                    olddb[source],
+                    key=RepoPackage.get_release,
+                    reverse=True)
                 nrel = pkgs[0].release
                 orel = oldpkgs[0].release
                 if (nrel > orel):
@@ -617,7 +645,7 @@ class BinMan(pyinotify.ProcessEvent):
                     dstPath = os.path.join(self._get_assets_dir(clone), item)
                     try:
                         shutil.copy(srcPath, dstPath)
-                    except Exception, e:
+                    except Exception as e:
                         print "Failed to install asset file: %s" % item
                         print e
         if updates > 0:
@@ -625,16 +653,21 @@ class BinMan(pyinotify.ProcessEvent):
         else:
             print "Everything up to date"
 
-    def clone(self, showhelp = False):
+    def clone(self, showhelp=False):
         ''' Clone repo from src to dst, basically a mass copy-src '''
-        parser = argparse.ArgumentParser(description="Clone one repository, creating a new identical snapshot")
+        parser = argparse.ArgumentParser(
+            description="Clone one repository, creating a new identical snapshot")
         parser.add_argument("src", help="Name of the source repository")
         parser.add_argument("dest", help="Name of the new repository")
-        parser.add_argument("-a", "--all-versions", help="Copy all versions", action="store_true")
+        parser.add_argument(
+            "-a",
+            "--all-versions",
+            help="Copy all versions",
+            action="store_true")
         parser.add_argument("--packages", help=argparse.SUPPRESS)
         if showhelp:
-             parser.print_help()
-             sys.exit(0)
+            parser.print_help()
+            sys.exit(0)
 
         args = parser.parse_args(sys.argv[2:])
         src = args.src
@@ -660,7 +693,7 @@ class BinMan(pyinotify.ProcessEvent):
         if os.path.exists(adirsrc):
             try:
                 shutil.copytree(adirsrc, adir)
-            except Exception, e:
+            except Exception as e:
                 print "Failed to copy asset dir: %s" % adirsrc
                 print e
                 sys.exit(1)
@@ -668,7 +701,7 @@ class BinMan(pyinotify.ProcessEvent):
             adir = self._get_assets_dir(name)
             try:
                 os.makedirs(adir)
-            except Exception, e:
+            except Exception as e:
                 print "Unable to construct assets dir %s" % adir
                 print e
                 sys.exit(1)
@@ -695,18 +728,23 @@ class BinMan(pyinotify.ProcessEvent):
         self.mark_altered(dest)
         self._stuff_repo_db(dest)
 
-    def copy_source(self, showhelp = False):
+    def copy_source(self, showhelp=False):
         ''' Copy package from src to dst '''
-        parser = argparse.ArgumentParser(description="Copy package using source name")
+        parser = argparse.ArgumentParser(
+            description="Copy package using source name")
         parser.add_argument("src", help="Name of the source repository")
         parser.add_argument("dest", help="Name of the dest repository")
-        parser.add_argument("-a", "--all-versions", help="Copy all versions", action="store_true")
+        parser.add_argument(
+            "-a",
+            "--all-versions",
+            help="Copy all versions",
+            action="store_true")
         parser.add_argument("--packages", help=argparse.SUPPRESS)
         if showhelp:
-             parser.print_help()
-             sys.exit(0)
+            parser.print_help()
+            sys.exit(0)
 
-        args,sargs = parser.parse_known_args(sys.argv[2:])
+        args, sargs = parser.parse_known_args(sys.argv[2:])
         src = args.src
         dest = args.dest
 
@@ -752,11 +790,11 @@ class BinMan(pyinotify.ProcessEvent):
             for k in os.listdir(basedir):
                 if os.path.exists(os.path.join(basedir, k, ".eopkg-repo")):
                     ret.append(k)
-        except Exception, e:
+        except Exception as e:
             return None
         return ret
 
-    def list_repos(self, showhelp = False):
+    def list_repos(self, showhelp=False):
         parser = argparse.ArgumentParser(description="List repositories")
         parser.add_argument("--dummy", help=argparse.SUPPRESS)
         ''' List the known repositories '''
@@ -783,16 +821,15 @@ class BinMan(pyinotify.ProcessEvent):
         db = self._get_repo_db(repo)
         pobj = None
         if isinstance(pkg, str):
-            meta,files = pisi.api.info(pkg)
+            meta, files = pisi.api.info(pkg)
             pobj = RepoPackage(meta, os.path.basename(pkg))
         else:
             pobj = pkg
 
-
         if not os.path.exists(repodir):
             try:
                 os.makedirs(repodir)
-            except Exception, e:
+            except Exception as e:
                 print "Unable to create %s" % repodir
                 print e
                 return False
@@ -806,7 +843,7 @@ class BinMan(pyinotify.ProcessEvent):
                     os.makedirs(self._get_pool_dir())
 
                 shutil.copy(pkg, self._get_pool_name(pobj.filename))
-            except Exception, e:
+            except Exception as e:
                 print "Unable to pool: %s\n" % pobj.filename
                 return False
         else:
@@ -815,13 +852,15 @@ class BinMan(pyinotify.ProcessEvent):
         try:
             os.link(self._get_pool_name(pobj.filename), repofile)
             print "Imported %s" % pobj.filename
-        except Exception, e:
+        except Exception as e:
             print "Unable to link from pool: %s" % pobj.filename
             return False
         self.mark_altered(repo)
 
         if pobj.source in db.db:
-            pkgs = sorted(db[pobj.source], key=RepoPackage.get_release, reverse=True)
+            pkgs = sorted(
+                db[pobj.source],
+                key=RepoPackage.get_release, reverse=True)
         else:
             pkgs = None
         db.append(pobj)
@@ -841,7 +880,9 @@ class BinMan(pyinotify.ProcessEvent):
         pkgdir = os.path.dirname(repofile)
 
         globTo = os.path.join(pkgdir, self.get_delta_to_glob(pkg.pkg.package))
-        globFrom = os.path.join(pkgdir, self.get_delta_from_glob(pkg.pkg.package))
+        globFrom = os.path.join(
+            pkgdir, self.get_delta_from_glob(
+                pkg.pkg.package))
 
         kills = list()
         kills.extend(glob.glob(globTo))
@@ -850,7 +891,7 @@ class BinMan(pyinotify.ProcessEvent):
             print "Removing invalid delta:%s" % kill
             try:
                 os.unlink(kill)
-            except Exception, e:
+            except Exception as e:
                 print "Unable to remove: %s" % kill
                 print e
             if pkg.source not in self.needdelta:
@@ -879,7 +920,7 @@ class BinMan(pyinotify.ProcessEvent):
             if len(os.listdir(pkgdir_p)) == 0:
                 print "Removing package parent directory: %s" % pkgdir_p
                 os.rmdir(pkgdir_p)
-        except Exception, e:
+        except Exception as e:
             print "Unable to remove package: %s" % repofile
             print e
             return False
@@ -894,12 +935,13 @@ class BinMan(pyinotify.ProcessEvent):
             return
         existing = [x for x in names if os.path.exists(x)]
         if len(existing) == 0:
-            pfile = self._get_pool_name(pkg) if isinstance(pkg, str) else self._get_pool_name(pkg.filename)
+            pfile = self._get_pool_name(pkg) if isinstance(
+                pkg, str) else self._get_pool_name(pkg.filename)
             print "Removing no-longer used pool file: %s" % pfile
             try:
                 if os.path.exists(pfile):
                     os.unlink(pfile)
-            except Exception, e:
+            except Exception as e:
                 print "Unable to remove pool file: %s" % pfile
                 print e
                 sys.exit(1)
@@ -923,7 +965,7 @@ class BinMan(pyinotify.ProcessEvent):
                     sys.exit(1)
                 try:
                     os.unlink(fpath)
-                except Exception, e:
+                except Exception as e:
                     print "Unable to unlink source file: %s" % fpath
                     print e
                 if pkg in self.incoming_pkgs:
@@ -959,11 +1001,12 @@ class BinMan(pyinotify.ProcessEvent):
         if not self.monitor_busy:
             self._internal_monitor()
 
-
     def monitor_incoming(self, showhelp=False):
         ''' Process files from incoming directory - and keep watching them '''
-        parser = argparse.ArgumentParser(description="Monitor incoming packages",
-            usage="%s process <repo>" % sys.argv[0])
+        parser = argparse.ArgumentParser(
+            description="Monitor incoming packages",
+            usage="%s process <repo>" %
+            sys.argv[0])
         parser.add_argument("repo", help="Name of the repository")
         if showhelp:
             parser.print_help()
@@ -992,8 +1035,10 @@ class BinMan(pyinotify.ProcessEvent):
 
     def process_incoming(self, showhelp=False):
         ''' Process files from incoming directory '''
-        parser = argparse.ArgumentParser(description="Process all incoming packages",
-            usage="%s process <repo> [packages]" % sys.argv[0])
+        parser = argparse.ArgumentParser(
+            description="Process all incoming packages",
+            usage="%s process <repo> [packages]" %
+            sys.argv[0])
         parser.add_argument("repo", help="Name of the repository")
         if showhelp:
             parser.print_help()
@@ -1012,7 +1057,7 @@ class BinMan(pyinotify.ProcessEvent):
         files = None
         try:
             files = os.listdir(incdir)
-        except Exception, e:
+        except Exception as e:
             print "Unable to analyze %s" % incdir
             print e
             sys.exit(1)
@@ -1020,7 +1065,8 @@ class BinMan(pyinotify.ProcessEvent):
             print "No files to process"
             sys.exit(0)
 
-        invalids = [x for x in files if not os.path.exists(os.path.join(incdir, x)) or not x.endswith(".eopkg")]
+        invalids = [x for x in files if not os.path.exists(
+            os.path.join(incdir, x)) or not x.endswith(".eopkg")]
         if len(invalids) > 0:
             print "Invalid or missing: %s" % (", ".join([os.path.basename(x) for x in invalids]))
             sys.exit(1)
@@ -1042,7 +1088,7 @@ class BinMan(pyinotify.ProcessEvent):
                 sys.exit(1)
             try:
                 os.unlink(fpath)
-            except Exception, e:
+            except Exception as e:
                 print "Unable to unlink source file: %s" % fpath
                 print e
             # plod on.
@@ -1050,8 +1096,10 @@ class BinMan(pyinotify.ProcessEvent):
 
     def add(self, showhelp=False):
         ''' Add packages to repository '''
-        parser = argparse.ArgumentParser(description="Add package(s) to repository",
-            usage="%s add <repo> [packages]" % sys.argv[0])
+        parser = argparse.ArgumentParser(
+            description="Add package(s) to repository",
+            usage="%s add <repo> [packages]" %
+            sys.argv[0])
         parser.add_argument("repo", help="Name of the repository")
         parser.add_argument("--packages", help=argparse.SUPPRESS)
         if showhelp:
@@ -1068,7 +1116,9 @@ class BinMan(pyinotify.ProcessEvent):
             parser.print_help()
             sys.exit(1)
 
-        invalids = [x for x in self.get_subargs() if not os.path.exists(x) or not x.endswith(".eopkg")]
+        invalids = [
+            x for x in self.get_subargs()
+            if not os.path.exists(x) or not x.endswith(".eopkg")]
         if len(invalids) > 0:
             print "Invalid or missing: %s" % (", ".join([os.path.basename(x) for x in invalids]))
             sys.exit(1)
@@ -1081,12 +1131,12 @@ class BinMan(pyinotify.ProcessEvent):
                     continue
                 if not self._add_package(name, pkg):
                     print "Aborting due to failed add"
-                    self._stuff_repo_db(name);
+                    self._stuff_repo_db(name)
                     sys.exit(1)
             else:
                 print "%s already in repo" % os.path.basename(pkg)
         self._stuff_repo_db(name)
 
 if __name__ == "__main__":
-    os.umask(0022)
+    os.umask(00022)
     BinMan()
