@@ -14,7 +14,7 @@
 from . import console_ui
 from . import yamlhelper
 
-from yamlhelper import OneOrMoreString
+from yamlhelper import OneOrMoreString, MultimapFormat
 
 import os
 from collections import OrderedDict
@@ -59,6 +59,9 @@ class YpkgSpec:
     step_install = None
     step_check = None
 
+    def add_summary(self, key, value):
+        pass
+
     def __init__(self):
         # These tokens *must* exist
         self.mandatory_tokens = OrderedDict([
@@ -66,6 +69,7 @@ class YpkgSpec:
             ("version", unicode),
             ("release", int),
             ("license", OneOrMoreString),
+            ("summary", MultimapFormat(self, self.add_summary, "main")),
             ("source", list),  # We verify sources later
         ])
         # These guys are optional
@@ -78,6 +82,7 @@ class YpkgSpec:
             ("emul32", bool),
             ("autodep", bool),
             ("extract", bool),
+            ("rundeps", MultimapFormat),
             ("builddeps", OneOrMoreString),
         ])
         # Build steps are handled separately
@@ -121,7 +126,12 @@ class YpkgSpec:
                 if token not in yaml_data and tk_set != self.mandatory_tokens:
                     # ok to skip optionals
                     continue
-                val = yamlhelper.assertGetType(yaml_data, token, t)
+
+                if isinstance(t, MultimapFormat):
+                    if not yamlhelper.assertMultimap(yaml_data, token, t):
+                        return False
+                else:
+                    val = yamlhelper.assertGetType(yaml_data, token, t)
                 if val is None:
                     return False
                 # Handle build steps differently to avoid collisions

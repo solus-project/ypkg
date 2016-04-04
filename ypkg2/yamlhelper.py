@@ -27,6 +27,25 @@ class OneOrMoreString:
         pass
 
 
+class MultimapFormat:
+    """ Request items in a multimap format """
+
+    ref_object = None
+    ref_function = None
+    ref_default = None
+
+    def __init__(self, ref_object, ref_function, ref_default):
+        self.ref_object = ref_object
+        self.ref_function = ref_function
+        self.ref_default = ref_default
+
+
+def assertMultimap(ymlFile, key, t):
+    """ Perform multi-map operations in the given key """
+    console_ui.emit_error("YAML:{}".format(key), "Multimap not yet supported")
+    return False
+
+
 def assertGetType(ymlFile, key, t):
     ''' Ensure a value of the given type exists '''
     if key not in ymlFile:
