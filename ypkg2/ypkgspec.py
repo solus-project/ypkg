@@ -15,6 +15,13 @@ from . import console_ui
 
 import os
 
+from yaml import load as yaml_load
+try:
+    from yaml import CLoader as Loader
+except Exception as e:
+    console_ui.emit_warning("YAML", "Native YAML loader unavailable")
+    from yaml import Loader
+
 
 class YpkgSpec:
 
@@ -37,4 +44,13 @@ class YpkgSpec:
                                     "File is not named package.yml")
 
         console_ui.emit_info("TODO", "Parsing not yet implemented")
+
+        with open(path, "r") as inpfile:
+            try:
+                yaml_data = yaml_load(inpfile, Loader=Loader)
+            except Exception as e:
+                console_ui.emit_error("Parse", "Failed to parse YAML file")
+                print(e)
+                return False
+
         return False
