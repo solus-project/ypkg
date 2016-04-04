@@ -39,9 +39,18 @@ class YpkgSpec:
     pkg_strip = True
     pkg_ccache = True
     pkg_emul32 = False
+    pkg_autodep = True
+    pkg_extract = True
 
     mandatory_tokens = None
     optional_tokens = None
+    build_steps = None
+
+    # Build steps
+    step_setup = None
+    step_build = None
+    step_install = None
+    step_check = None
 
     def __init__(self):
         # These tokens *must* exist
@@ -58,6 +67,15 @@ class YpkgSpec:
             ("strip", bool),
             ("ccache", bool),
             ("emul32", bool),
+            ("autodep", bool),
+            ("extract", bool),
+        ])
+        # Build steps are handled separately
+        self.build_steps = OrderedDict([
+            ("setup", unicode),
+            ("build", unicode),
+            ("install", unicode),
+            ("check", unicode),
         ])
 
     def load_from_path(self, path):
@@ -85,16 +103,22 @@ class YpkgSpec:
                 return False
 
         # Grab the main root elements (k->v mapping)
-        for tk_set in [self.mandatory_tokens, self.optional_tokens]:
+        sets = [self.mandatory_tokens, self.optional_tokens, self.build_steps]
+        for tk_set in sets:
             for token in tk_set.keys():
                 t = tk_set[token]
-                if token not in yaml_data and tk_set == self.optional_tokens:
+
+                if token not in yaml_data and tk_set != self.mandatory_tokens:
                     # ok to skip optionals
                     continue
                 val = yamlhelper.assertGetType(yaml_data, token, t)
                 if not val:
                     return False
-                instance_name = "pkg_{}".format(token)
+                # Handle build steps differently to avoid collisions
+                if tk_set == self.build_steps:
+                    instance_name = "step_{}".format(token)
+                else:
+                    instance_name = "pkg_{}".format(token)
                 if not hasattr(self, instance_name):
                     console_ui.emit_error("YAML",
                                           "Internal error for unknown token")
