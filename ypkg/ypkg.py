@@ -10,16 +10,13 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
-import sys
-
-sys.path.append("/usr/share/ypkg")
-
-import build
-import packageit
-import subprocess
-import shlex
-import sanity
 from sanity import sane
+from . import build
+from . import packageit
+from . import subprocess
+from . import shlex
+from . import sanity
+
 import os
 import shutil
 import xml.etree.ElementTree as ET

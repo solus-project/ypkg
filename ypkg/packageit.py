@@ -101,7 +101,12 @@ def packageit(ymlFile, installDIR, outputXML):
     patterns["/usr/lib/lib*.a"] = "-devel"
     patterns["/usr/lib32/lib*.a"] = "-32bit-devel"
     # 32-bit buggery
-    patterns["/usr/lib32/lib*.so"] = "-32bit-devel" if canSplitLibs else "-32bit"
+
+    if canSplitLibs:
+        patterns["/usr/lib32/lib*.so"] = "-32bit-devel"
+    else:
+        patterns["/usr/lib32/lib*.so"] = "-32bit"
+
     patterns["/usr/lib32/lib*.so.*"] = "-32bit"
 
     patterns["/usr/share/pkgconfig/"] = "-devel"
@@ -340,13 +345,14 @@ def packageit(ymlFile, installDIR, outputXML):
                 package.packageDependencies.append(pkgdep)
 
         # Package replacement
-        if sanity.pkg_replaces is not None and package.name in sanity.pkg_replaces:
-            for rpl in sanity.pkg_replaces[package.name]:
-                replace = pisi.replace.Replace()
-                if not package.replaces:
-                    package.replaces = list()
-                replace.package = rpl
-                package.replaces.append(replace)
+        if sanity.pkg_replaces is not Nonee:
+            if package.name in sanity.pkg_replaces:
+                for rpl in sanity.pkg_replaces[package.name]:
+                    replace = pisi.replace.Replace()
+                    if not package.replaces:
+                        package.replaces = list()
+                    replace.package = rpl
+                    package.replaces.append(replace)
 
         spec.packages.append(package)
 
@@ -355,7 +361,8 @@ def packageit(ymlFile, installDIR, outputXML):
         count += len(pkgFiles[pkg])
     if count == 0:
         print(
-            "\n\nypkg: This package has not installed any files to the $installdir root.\nPlease review your install section. Aborting now.\nInstall dir: %s\n" %
-            build.InstallDir)
+            "\n\nypkg: This package has not installed any files to the "
+            "$installdir root.\nPlease review your install section. "
+            "Aborting now.\nInstall dir: %s\n" % build.InstallDir)
         sys.exit(1)
     spec.write(outputXML)

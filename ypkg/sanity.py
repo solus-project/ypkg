@@ -329,8 +329,11 @@ def get_build_deps(y):
             if not ret:
                 print "Warning: build dep does not exist in repo: %s" % pc
 
-                ret = _idb.get_package_by_pkgconfig(
-                    pc) if not emul32pc else _idb.get_package_by_pkgconfig32(pc)
+                if emul32pc:
+                    ret = _idb.get_package_by_pkgconfig32(pc)
+                else:
+                    ret = _idb.get_package_by_pkgconfig(pc)
+
                 if ret is None:
                     print "Requested build dep does not exist! %s" % pc
                     sys.exit(1)
@@ -463,7 +466,7 @@ def sane(fpath, checkall=False):
         global can_ccache
         can_ccache = bool(y['ccache'])
 
-    if not "source" in y:
+    if "source" not in y:
         print "Required list '%s' is missing" % "source"
         sys.exit(1)
 
@@ -585,7 +588,8 @@ def sane(fpath, checkall=False):
         optimize_type = y["optimize"]
 
         if optimize_type not in ["speed", "size", "none"]:
-            print("Unknown optimize type, expected one of 'speed', 'size', 'none'")
+            print("Unknown optimize type, expected one of "
+                  "'speed', 'size', 'none'")
             sys.exit(1)
 
     # Fuzzy.

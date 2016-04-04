@@ -42,7 +42,8 @@ global arch
 arch = conf.values.general.architecture
 
 global ccache
-ccache = conf.values.build.buildhelper is not None and "ccache" in conf.values.build.buildhelper
+ccache = conf.values.build.buildhelper is not None and \
+    "ccache" in conf.values.build.buildhelper
 
 global fakeroot
 fakeroot = False
@@ -105,8 +106,8 @@ def escape(inp, wdir, name):
     # credit here to Clear Linux autospec
     if sanity.optimize_type is not None:
         if sanity.optimize_type == "speed":
-            exflags = "-flto -ffunction-sections -fno-semantic-interposition -O3".split(
-                " ")
+            exflags = "-flto -ffunction-sections -fno-semantic-interposition" \
+                "-O3".split(" ")
         elif sanity.optimize_type == "size":
             exflags = "-Os -ffunction-sections".split(" ")
 
@@ -138,12 +139,13 @@ def escape(inp, wdir, name):
     macros["%make_install"] = "%make install DESTDIR=%installroot%"
     macros["%installroot%"] = InstallDir
     macros["%workdir%"] = wdir
+    cmake_args = (cflags, cxxflags, ldflags, libsuffix)
     macros["%cmake"] = "cmake -DCMAKE_INSTALL_PREFIX=/usr \
                       -DCMAKE_C_FLAGS=\"%s\" \
                       -DCMAKE_CXX_FLAGS=\"%s\" \
                       -DCMAKE_LD_FLAGS=\"%s\" \
                       -DCMAKE_LIB_SUFFIX=\"%s\" \
-                      -DCMAKE_BUILD_TYPE=RelWithDebInfo" % (cflags, cxxflags, ldflags, libsuffix)
+                      -DCMAKE_BUILD_TYPE=RelWithDebInfo" % cmake_args
 
     # common issues...
     # -mtune=generic -march=x86-64
@@ -159,6 +161,7 @@ def escape(inp, wdir, name):
 
     prefix = "/usr" if not emul32 else "/emul32"
 
+    conf_ops = (prefix, host, libdir, libdir, name)
     macros["$CONFOPTS"] = "--prefix=%s \
                            --build=%s \
                            --libdir=/usr/%s \
@@ -167,7 +170,8 @@ def escape(inp, wdir, name):
                            --datadir=/usr/share/ \
                            --sysconfdir=/etc \
                            --localstatedir=/var \
-                           --libexecdir=/usr/%s/%s" % (prefix, host, libdir, libdir, name)
+                           --libexecdir=/usr/%s/%s" % conf_ops
+
     macros["%CFLAGS%"] = cflags
     macros["%CXXFLAGS%"] = cxxflags
     macros["%LDFLAGS%"] = conf.values.build.ldflags
@@ -175,7 +179,7 @@ def escape(inp, wdir, name):
     macros["%CXX%"] = "%s-g++" % host
     macros["%JOBS%"] = conf.values.build.jobs
     macros["%make"] = "make %JOBS%"
-    macros["%patch"] = "patch -t --remove-empty-files --no-backup-if-mismatch --force"
+    macros["%patch"] = "patch -t -E --no-backup-if-mismatch -f"
     macros["%package%"] = sanity.name
     macros["%version%"] = sanity.version
     macros["%release%"] = sanity.release
@@ -216,7 +220,8 @@ export LD_AS_NEEDED=1
 """ % get_path()
     if emul32:
         header += "\nexport EMUL32BUILD=1\n"
-        header += "\nexport PKG_CONFIG_PATH=\"/usr/lib32/pkgconfig:/usr/share/pkgconfig\"\n"
+        pc_path = "/usr/lib32/pkgconfig:/usr/share/pkgconfig"
+        header += "\nexport PKG_CONFIG_PATH=\"%s\"\n" % pc_path
 
     if sanity.optimize_type is not None and sanity.optimize_type == "speed":
         header += """
