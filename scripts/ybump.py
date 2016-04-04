@@ -10,13 +10,12 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
+from ypkg import sanity
+
+
 import sys
 import yaml
 import os
-
-import sys
-sys.path.append("/usr/share/ypkg")
-import sanity
 
 
 def usage(msg=None, ex=1):

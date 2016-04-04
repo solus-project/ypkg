@@ -10,17 +10,15 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
+
+from ypkg import sanity
+from ypkg.sanity import TarSource
+
 import sys
 import yaml
 import os
 import commands
 import pisi.version
-
-import sys
-sys.path.append("/usr/share/ypkg")
-import sanity
-
-from sanity import TarSource
 
 
 def usage(msg=None, ex=1):
