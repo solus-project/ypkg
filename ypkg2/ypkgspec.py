@@ -30,6 +30,7 @@ class YpkgSpec:
     # Root meta information
     pkg_name = None
     pkg_version = None
+    pkg_release = None
     pkg_homepage = None
 
     # Build control
@@ -47,6 +48,7 @@ class YpkgSpec:
         self.mandatory_tokens = OrderedDict([
             ("name", unicode),
             ("version", unicode),
+            ("release", int),
         ])
         # These guys are optional
         self.optional_tokens = OrderedDict([
