@@ -21,6 +21,12 @@ import re
 iterable_types = [list, dict]
 
 
+class OneOrMoreString:
+    """ Request one or more string """
+    def __init__(self):
+        pass
+
+
 def assertGetType(ymlFile, key, t):
     ''' Ensure a value of the given type exists '''
     if key not in ymlFile:
@@ -28,7 +34,27 @@ def assertGetType(ymlFile, key, t):
                               "Mandatory token '{}' is missing".format(key))
         return None
     val = ymlFile[key]
+    val_type = type(val)
     # YAML might report integer when we want strings, which is OK.
+
+    if t == OneOrMoreString:
+        ret = list()
+        if val_type == str or val_type == unicode:
+            ret.append(val)
+            return ret
+        if val_type != list:
+            console_ui.emit_error("YAML:{}".format(key,
+                                  "Token must be a string or list of strings"))
+        for item in val:
+            if type(item) in iterable_types:
+                console_ui.emit_error("YAML:{}".format(key),
+                                      "Found unexpected iterable type in list")
+                console_ui.emit_error("YAML:{}".format(key),
+                                      "Expected a string")
+                return None
+            ret.append(item)
+        return ret
+
     if t == str:
         if type(val) not in iterable_types:
             val = str(val)

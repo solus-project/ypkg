@@ -14,6 +14,8 @@
 from . import console_ui
 from . import yamlhelper
 
+from yamlhelper import OneOrMoreString
+
 import os
 from collections import OrderedDict
 
@@ -32,6 +34,7 @@ class YpkgSpec:
     pkg_version = None
     pkg_release = None
     pkg_homepage = None
+    pkg_license = None
 
     # Build control
     pkg_devel = False
@@ -58,6 +61,7 @@ class YpkgSpec:
             ("name", unicode),
             ("version", unicode),
             ("release", int),
+            ("license", OneOrMoreString),
         ])
         # These guys are optional
         self.optional_tokens = OrderedDict([
@@ -120,7 +124,7 @@ class YpkgSpec:
                 else:
                     instance_name = "pkg_{}".format(token)
                 if not hasattr(self, instance_name):
-                    console_ui.emit_error("YAML",
+                    console_ui.emit_error("YAML:{}".format(token),
                                           "Internal error for unknown token")
                     return False
                 setattr(self, instance_name, val)
