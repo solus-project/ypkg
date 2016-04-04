@@ -59,6 +59,12 @@ def main():
         print("Unable to continue - aborting")
         sys.exit(1)
 
+    # Dummy content
+    print("Parsing package {} - version {}".format(
+            spec.pkg_name, spec.pkg_version))
+    if spec.pkg_homepage:
+        print("Homepage: {}".format(spec.pkg_homepage))
+
     sys.exit(0)
 
 if __name__ == "__main__":

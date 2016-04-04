@@ -11,10 +11,40 @@
 #  (at your option) any later version.
 #
 
+from . import console_ui
+
 import yaml
 import os
 import sys
 import re
+
+iterable_types = [list, dict]
+
+
+def assertGetType(ymlFile, key, t):
+    ''' Ensure a value of the given type exists '''
+    if key not in ymlFile:
+        console_ui.emit_error("YAML",
+                              "Mandatory token '{}' is missing".format(key))
+        return None
+    val = ymlFile[key]
+    # YAML might report integer when we want strings, which is OK.
+    if t == str:
+        if type(val) not in iterable_types:
+            val = str(val)
+    elif t == unicode:
+        if type(val) not in iterable_types:
+            val = unicode(val)
+
+    if not isinstance(val, t):
+        j = t.__name__
+        f = type(val).__name__
+        console_ui.emit_error("YAML",
+                              "Token '{}' must be of type '{}'".format(key, j))
+        console_ui.emit_error("YAML:{}".format(key),
+                              "Token found was of type '{}".format(f))
+        return None
+    return val
 
 
 def assertGetString(y, n):
