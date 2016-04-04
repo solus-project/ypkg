@@ -116,7 +116,7 @@ class YpkgSpec:
                     # ok to skip optionals
                     continue
                 val = yamlhelper.assertGetType(yaml_data, token, t)
-                if not val:
+                if val is None:
                     return False
                 # Handle build steps differently to avoid collisions
                 if tk_set == self.build_steps:
