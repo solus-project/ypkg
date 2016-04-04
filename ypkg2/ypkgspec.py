@@ -135,4 +135,11 @@ class YpkgSpec:
 
         console_ui.emit_info("TODO", "Parsing not yet completed")
 
+        # Ensure this package would actually be able to build..
+        steps = [self.step_setup, self.step_build, self.step_install]
+        steps = filter(lambda s: s, steps)
+        if len(steps) == 0:
+            console_ui.emit_error("YAML", "No functional build steps found")
+            return False
+
         return True
