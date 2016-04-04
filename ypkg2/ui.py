@@ -68,26 +68,26 @@ class YpkgUI:
             print("{}[{}]{} {}{}{}".format(AnsiColors.RED, key,
                   AnsiColors.RESET, AnsiColors.BOLD, error, AnsiColors.RESET))
 
-    def emit_warning(self, key, error):
+    def emit_warning(self, key, warn):
         """ Report a warning to the user """
         if not self.allow_colors:
-            print("[{}] {}".format(key, error))
+            print("[{}] {}".format(key, warn))
         else:
             print("{}[{}]{} {}{}{}".format(AnsiColors.YELLOW, key,
-                  AnsiColors.RESET, AnsiColors.BOLD, error, AnsiColors.RESET))
+                  AnsiColors.RESET, AnsiColors.BOLD, warn, AnsiColors.RESET))
 
-    def emit_info(self, key, error):
+    def emit_info(self, key, info):
         """ Report information to the user """
         if not self.allow_colors:
-            print("[{}] {}".format(key, error))
+            print("[{}] {}".format(key, info))
         else:
-            print("{}[{}]{} {}{}{}".format(AnsiColors.LBLUE, key,
-                  AnsiColors.RESET, AnsiColors.BOLD, error, AnsiColors.RESET))
+            print("{}[{}]{} {}".format(AnsiColors.BLUE, key,
+                  AnsiColors.RESET, info))
 
-    def emit_success(self, key, error):
+    def emit_success(self, key, success):
         """ Report success to the user """
         if not self.allow_colors:
-            print("[{}] {}".format(key, error))
+            print("[{}] {}".format(key, success))
         else:
-            print("{}[{}]{} {}{}{}".format(AnsiColors.GREEN, key,
-                  AnsiColors.RESET, AnsiColors.BOLD, error, AnsiColors.RESET))
+            print("{}[{}]{} {}".format(AnsiColors.GREEN, key,
+                  AnsiColors.RESET, success))
