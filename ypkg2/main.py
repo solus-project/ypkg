@@ -53,9 +53,11 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    # So yeah we do nothing yet.
+    # Attempt to parse the Ypkg file and ensure that it's sane.
     spec = YpkgSpec()
-    spec.load_from_path(args.filename)
+    if not spec.load_from_path(args.filename):
+        print("Unable to continue - aborting")
+        sys.exit(1)
 
     sys.exit(0)
 

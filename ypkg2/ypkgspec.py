@@ -13,6 +13,8 @@
 
 from . import console_ui
 
+import os
+
 
 class YpkgSpec:
 
@@ -20,5 +22,19 @@ class YpkgSpec:
         pass
 
     def load_from_path(self, path):
-        console_ui.emit_error("Error", "Don't know how to handle %s" % path)
+        if not os.path.exists(path):
+            console_ui.emit_error("Error", "Path does not exist")
+            return False
+        if not os.path.isfile and not os.path.islink(path):
+            console_ui.emit_error("Error", "File specified is not a file")
+            return False
+
+        filename = os.path.basename(path)
+
+        # We'll get rid of this at some point :P
+        if filename != "package.yml":
+            console_ui.emit_warning("Unnecessarily Anal Warning",
+                                    "File is not named package.yml")
+
+        console_ui.emit_info("TODO", "Parsing not yet implemented")
         return False
