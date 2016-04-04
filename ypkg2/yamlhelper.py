@@ -43,8 +43,9 @@ def assertGetType(ymlFile, key, t):
             ret.append(val)
             return ret
         if val_type != list:
-            console_ui.emit_error("YAML:{}".format(key,
-                                  "Token must be a string or list of strings"))
+            console_ui.emit_error("YAML:{}".format(key),
+                                  "Token must be a string or list of strings")
+            return None
         for item in val:
             if type(item) in iterable_types:
                 console_ui.emit_error("YAML:{}".format(key),

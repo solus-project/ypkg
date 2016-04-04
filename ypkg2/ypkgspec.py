@@ -45,6 +45,9 @@ class YpkgSpec:
     pkg_autodep = True
     pkg_extract = True
 
+    # Dependencies
+    pkg_builddeps = None
+
     mandatory_tokens = None
     optional_tokens = None
     build_steps = None
@@ -73,6 +76,7 @@ class YpkgSpec:
             ("emul32", bool),
             ("autodep", bool),
             ("extract", bool),
+            ("builddeps", OneOrMoreString),
         ])
         # Build steps are handled separately
         self.build_steps = OrderedDict([
