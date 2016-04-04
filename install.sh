@@ -12,7 +12,7 @@ fi
 if [[ ! -d "$DESTDIR/usr/bin" ]]; then
     $INST_PREFIX mkdir -vp $DESTDIR/usr/bin
 fi
-$INST_PREFIX cp -v *.py $DESTDIR/usr/share/ypkg/.
+$INST_PREFIX cp -v */*.py $DESTDIR/usr/share/ypkg/.
 $INST_PREFIX chmod -v +x $DESTDIR/usr/share/ypkg/ypkg.py
 if [[ ! -e "$DESTDIR/usr/bin/ypkg" ]]; then
     $INST_PREFIX ln -sv /usr/share/ypkg/ypkg.py $DESTDIR/usr/bin/ypkg
