@@ -1,1 +1,1 @@
-pep8 *.py
+pep8 */*.py
