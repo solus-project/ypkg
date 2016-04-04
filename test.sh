@@ -1,1 +1,1 @@
-pep8 */*.py
+pep8 ypkg2/*.py
