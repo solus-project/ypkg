@@ -35,6 +35,7 @@ class YpkgSpec:
     pkg_release = None
     pkg_homepage = None
     pkg_license = None
+    pkg_source = None
 
     # Build control
     pkg_devel = False
@@ -65,6 +66,7 @@ class YpkgSpec:
             ("version", unicode),
             ("release", int),
             ("license", OneOrMoreString),
+            ("source", list),  # We verify sources later
         ])
         # These guys are optional
         self.optional_tokens = OrderedDict([
