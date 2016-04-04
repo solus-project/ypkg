@@ -13,6 +13,7 @@
 
 from . import console_ui
 from .ypkgspec import YpkgSpec
+from .sources import SourceManager
 
 import sys
 import argparse
@@ -64,6 +65,11 @@ def main():
             spec.pkg_name, spec.pkg_version))
     if spec.pkg_homepage:
         print("Homepage: {}".format(spec.pkg_homepage))
+
+    manager = SourceManager()
+    if not manager.identify_sources(spec):
+        print("Unable to continue - aborting")
+        sys.exit(1)
 
     sys.exit(0)
 

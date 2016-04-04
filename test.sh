@@ -2,5 +2,5 @@
 
 pep8 ypkg2/*.py || exit 1
 for item in examples/*.yml ; do
-    python -m ypkg2.main $item
+    python -m ypkg2.main $item || exit 1
 done
