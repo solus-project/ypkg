@@ -11,7 +11,9 @@
 #  (at your option) any later version.
 #
 
-from ui import YpkgUI
+from . import console_ui
+from .ypkgspec import YpkgSpec
+
 import sys
 import argparse
 
@@ -27,8 +29,6 @@ def show_version():
 
 
 def main():
-    ui = YpkgUI()
-
     parser = argparse.ArgumentParser(description="Ypkg Package Build Tool")
     parser.add_argument("-n", "--no-colors", help="Disable color output",
                         action="store_true")
@@ -48,13 +48,14 @@ def main():
 
     # Grab filename
     if not args.filename:
-        ui.emit_error("Error", "Please provide a filename to ypkg")
+        console_ui.emit_error("Error", "Please provide a filename to ypkg")
         print("")
         parser.print_help()
         sys.exit(1)
 
     # So yeah we do nothing yet.
-    ui.emit_warning("Warning", "Not yet implemented")
+    spec = YpkgSpec()
+    spec.load_from_path(args.filename)
 
     sys.exit(0)
 
