@@ -62,7 +62,7 @@ def main():
 
     # Dummy content
     print("Parsing package {} - version {}".format(
-            spec.pkg_name, spec.pkg_version))
+          spec.pkg_name, spec.pkg_version))
     if spec.pkg_homepage:
         print("Homepage: {}".format(spec.pkg_homepage))
 
