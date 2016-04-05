@@ -72,7 +72,7 @@ The TODO:
  * [x] Add class-based `YpkgSpec` to represent the `package.yml` input file
  * [x] Add dedicated parser
  * [ ] Split dependency install out from main ypkg routine
- * [ ] Add **extensible** macros
+ * [x] Add **extensible** macros
  * [ ] Add the string-based path globbing algo
  * [ ] Add necessary logic to dynamically emit the `YpkgPackage` objects
  * [ ] Emit our first native `.eopkg`
