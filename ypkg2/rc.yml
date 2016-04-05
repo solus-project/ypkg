@@ -3,10 +3,10 @@ actions:
         ./configure %CONFOPTS%
     - reconfigure: |
         autoreconf -vfi
-        ./configure %CONFOPTS
+        %configure
     - autogen: |
         ./autogen.sh %CONFOPTS%
-        ./configure %CONFOPTS%
+        %configure
     - make: |
         make %JOBS%
     - make_install: |
