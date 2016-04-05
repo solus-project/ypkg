@@ -79,7 +79,7 @@ def main():
 
     ctx = YpkgContext()
     # Literally just testing.
-    scr = ScriptGenerator(ctx)
+    scr = ScriptGenerator(ctx, spec)
 
     script = "{}\n{}\n{}\n".format(
         spec.step_setup, spec.step_build, spec.step_install)

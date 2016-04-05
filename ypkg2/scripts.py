@@ -24,10 +24,12 @@ class ScriptGenerator:
 
     macros = None
     context = None
+    spec = None
 
-    def __init__(self, context):
+    def __init__(self, context, spec):
         self.macros = OrderedDict()
         self.context = context
+        self.spec = spec
         self.init_default_macros()
 
     def define_macro(self, key, value):
@@ -47,7 +49,7 @@ class ScriptGenerator:
         self.define_macro("workdir", None)      # FIXME
         self.define_macro("JOBS", "-j{}".format(self.context.build.jobcount))
 
-        self.define_action_macro("configure", "./configure $CONFOPTS")
+        self.define_action_macro("configure", "./configure %CONFOPTS%")
         self.define_action_macro("make", "make %JOBS%")
         self.define_action_macro("make_install",
                                  "%make install DESTDIR=\"%installroot%\"")
@@ -58,6 +60,19 @@ class ScriptGenerator:
         self.define_macro("CFLAGS", self.context.build.cflags)
         self.define_macro("CXXFLAGS", self.context.build.cxxflags)
         self.define_macro("LDFLAGS", self.context.build.ldflags)
+
+        # Make this conditional depending on emul32 in context
+        prefix = "/usr"
+        host = self.context.build.host
+        name = self.spec.pkg_name
+        conf_ops = (prefix, host, libdir, libdir, name)
+
+        self.define_macro("CONFOPTS",
+                          "--prefix=%s --build=%s --libdir=/usr/%s "
+                          "--mandir=/usr/share/man --infodir=/usr/share/man "
+                          "--datadir=/usr/share/ --sysconfdir=/etc "
+                          "--localstatedir=/var --libexecdir=/usr/%s/%s"
+                          % conf_ops)
 
     def is_valid_macro_char(self, char):
         if char.isalpha():
