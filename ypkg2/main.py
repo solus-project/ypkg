@@ -81,6 +81,10 @@ def main():
     # Literally just testing.
     scr = ScriptGenerator(ctx)
 
+    script = "{}\n{}\n{}\n".format(
+        spec.step_setup, spec.step_build, spec.step_install)
+    print(scr.escape_string(script))
+
     sys.exit(0)
 
 if __name__ == "__main__":
