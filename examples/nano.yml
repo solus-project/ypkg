@@ -13,10 +13,8 @@ description: |
     as a replacement for Pico, the ncurses-based editor from the non-free mailer
     package Pine (itself now available under the Apache License as Alpine).
 setup      : |
-    %patch -p1 < $pkgfiles/0001-Sample-patch-merely-for-ypkg-testing.patch
-    %patch -p1 < $pkgfiles/0002-Sample-commit-2.patch
-    
-    %configure --enable-utf8
+    %apply_patches
+    %reconfigure --enable-utf8
 build      : |
     %make
 install    : |
