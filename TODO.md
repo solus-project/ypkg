@@ -73,8 +73,8 @@ The TODO:
  * [x] Add dedicated parser
  * [ ] Split dependency install out from main ypkg routine
  * [x] Add **extensible** macros
- * [ ] Add the string-based path globbing algo
- * [ ] Add necessary logic to dynamically emit the `YpkgPackage` objects
+ * [x] Add the string-based path globbing algo
+ * [x] Add necessary logic to dynamically emit the `YpkgPackage` objects
  * [ ] Emit our first native `.eopkg`
  * [ ] Fold in our dynamic dependency scanning from `eopkg` into `ypkg`
  * [ ] Add stripping
