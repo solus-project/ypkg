@@ -17,6 +17,15 @@ actions:
         -DCMAKE_BUILD_TYPE=RelWithDebInfo
     - patch: |
         patch -t -E --no-backup-if-mismatch -f
+    # Only works if the user has a series file.
+    - apply_patches: |
+        test -e "$pkgfiles/series" || exit 1
+        while read -r pname ; do
+            if [[ "$pname" == "" ]]; then
+                continue
+            fi
+            %patch -p1 -i $pkgfiles/$pname
+        done < $pkgfiles/series
 defines:
     - CONFOPTS: |
         --prefix=%PREFIX% --build=%HOST% --libdir=%LIBDIR% --mandir=/usr/share/man \
