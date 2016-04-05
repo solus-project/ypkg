@@ -87,22 +87,7 @@ def main():
         spec.step_setup, spec.step_build, spec.step_install)
     print(scr.escape_string(script))
 
-    experiments()
     sys.exit(0)
-
-
-def experiments():
-    fpath = os.path.dirname(os.path.abspath(__file__))
-    fpath = os.path.join(os.path.dirname(fpath), "tests/gtk3.pkg_list")
-
-    gen = PackageGenerator()
-
-    with open(fpath, "r") as split_test:
-        for line in split_test.readlines():
-            line = line.strip()
-            if line == "":
-                continue
-            gen.add_file(line)
 
 if __name__ == "__main__":
     main()
