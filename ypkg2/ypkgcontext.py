@@ -16,6 +16,24 @@ from . import console_ui
 import pisi.config
 
 
+class Flags:
+
+    C = 0
+    CXX = 1
+    LD = 2
+
+    @staticmethod
+    def get_desc(f):
+        if f == Flags.C:
+            return "CFLAGS"
+        elif f == Flags.CXX:
+            return "CXXFLAGS"
+        elif f == Flags.LD:
+            return "LDFLAGS"
+        else:
+            return "UNKNOWN_FLAG_SET_CHECK_IT"
+
+
 class BuildConfig:
 
     arch = None
@@ -25,6 +43,15 @@ class BuildConfig:
     cflags = None
     cxxflags = None
     ldflags = None
+
+    def get_flags(self, t):
+        if t == Flags.C:
+            return self.cflags
+        if t == Flags.CXX:
+            return self.cxxflags
+        if t == Flags.LD:
+            return self.ldflags
+        return set([])
 
 
 class YpkgContext:
