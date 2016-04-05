@@ -62,6 +62,7 @@ class YpkgSpec:
     summaries = None
     descriptions = None
     rundeps = None
+    components = None
 
     def add_summary(self, key, value):
         """ Add a summary to a package """
@@ -78,6 +79,10 @@ class YpkgSpec:
             console_ui.emit_warning("YAML", "Duplicate rundep: {}".format(val))
             return
         self.rundeps[key].append(val)
+
+    def add_component(self, key, value):
+        """ Set the component for a package """
+        self.components[key] = value
 
     def __init__(self):
         # These tokens *must* exist
@@ -102,6 +107,7 @@ class YpkgSpec:
             ("extract", bool),
             ("builddeps", OneOrMoreString),
             ("rundeps", MultimapFormat(self, self.add_rundep, "main")),
+            ("component", MultimapFormat(self, self.add_component, "main")),
         ])
         # Build steps are handled separately
         self.build_steps = OrderedDict([
@@ -113,6 +119,7 @@ class YpkgSpec:
         self.summaries = dict()
         self.descriptions = dict()
         self.rundeps = dict()
+        self.components = dict()
 
     def load_from_path(self, path):
         if not os.path.exists(path):
