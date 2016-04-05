@@ -15,6 +15,13 @@ from . import console_ui
 
 from collections import OrderedDict
 import re
+import os
+
+from yaml import load as yaml_load
+try:
+    from yaml import CLoader as Loader
+except Exception as e:
+    from yaml import Loader
 
 
 class ScriptGenerator:
@@ -31,6 +38,7 @@ class ScriptGenerator:
         self.context = context
         self.spec = spec
         self.init_default_macros()
+        self.load_system_macros()
 
     def define_macro(self, key, value):
         """ Define a named macro. This will take the form %name% """
@@ -40,54 +48,66 @@ class ScriptGenerator:
         """ Define an action macro. These take the form %action """
         self.macros["%{}".format(key)] = value
 
+    def load_system_macros(self):
+        path = os.path.join(os.path.dirname(__file__), "rc.yml")
+
+        try:
+            f = open(path, "r")
+            yamlData = yaml_load(f, Loader=Loader)
+            f.close()
+        except Exception as e:
+            console_ui.emit_error("SCRIPTS", "Cannot load system macros")
+            print(e)
+            return
+
+        for section in ["defines", "actions"]:
+            if section not in yamlData:
+                continue
+            v = yamlData[section]
+
+            if not isinstance(v, list):
+                console_ui.emit_error("rc.yml",
+                                      "Expected list of defines in rc config")
+                return
+            for item in v:
+                if not isinstance(item, dict):
+                    console_ui.emit_error("rc.yml",
+                                          "Expected key:value mapping in list")
+                    return
+                keys = item.keys()
+                if len(keys) > 1:
+                    console_ui.emit_error("rc.yml",
+                                          "Expected one key in key:value")
+                    return
+                key = keys[0]
+                value = item[key]
+                if value.endswith("\n"):
+                    value = value[:-1]
+                value = value.strip()
+                if section == "defines":
+                    self.define_macro(key, unicode(value))
+                else:
+                    self.define_action_macro(key, unicode(value))
+
     def init_default_macros(self):
 
         # Until we get more clever, this is /usr/lib64
         libdir = "lib64"
 
-        self.define_macro("libdir", "/usr/{}".format(libdir))
+        self.define_macro("LIBDIR", "/usr/{}".format(libdir))
+        self.define_macro("LIBSUFFIX", "64")
         self.define_macro("installroot", None)  # FIXME
         self.define_macro("workdir", None)      # FIXME
         self.define_macro("JOBS", "-j{}".format(self.context.build.jobcount))
 
-        self.define_action_macro("configure", "./configure %CONFOPTS%")
-        self.define_action_macro("make", "make %JOBS%")
-        self.define_action_macro("make_install",
-                                 "%make install DESTDIR=\"%installroot%\"")
-        self.define_action_macro("patch",
-                                 "patch -t -E --no-backup-if-mismatch -f")
-
         # Consider moving this somewhere else
-        self.define_macro("CFLAGS", self.context.build.cflags)
-        self.define_macro("CXXFLAGS", self.context.build.cxxflags)
-        self.define_macro("LDFLAGS", self.context.build.ldflags)
+        self.define_macro("CFLAGS", " ".join(self.context.build.cflags))
+        self.define_macro("CXXFLAGS", " ".join(self.context.build.cxxflags))
+        self.define_macro("LDFLAGS", " ".join(self.context.build.ldflags))
 
-        # Make this conditional depending on emul32 in context
-        prefix = "/usr"
-        host = self.context.build.host
-        name = self.spec.pkg_name
-        conf_ops = (prefix, host, libdir, libdir, name)
-
-        self.define_macro("CONFOPTS",
-                          "--prefix=%s --build=%s --libdir=/usr/%s "
-                          "--mandir=/usr/share/man --infodir=/usr/share/man "
-                          "--datadir=/usr/share/ --sysconfdir=/etc "
-                          "--localstatedir=/var --libexecdir=/usr/%s/%s"
-                          % conf_ops)
-
-        libsuffix = "64"
-        cmake_args = (" ".join(self.context.build.cflags),
-                      " ".join(self.context.build.cxxflags),
-                      " ".join(self.context.build.ldflags),
-                      libsuffix)
-
-        self.define_action_macro("cmake", "cmake -DCMAKE_INSTALL_PREFIX=/usr "
-                                 "-DCMAKE_C_FLAGS=\"%s\" "
-                                 "-DCMAKE_CXX_FLAGS=\"%s\" "
-                                 "-DCMAKE_LD_FLAGS=\"%s\" "
-                                 "-DCMAKE_LIB_SUFFIX=\"%s\" "
-                                 "-DCMAKE_BUILD_TYPE=RelWithDebInfo" %
-                                 cmake_args)
+        self.define_macro("HOST", self.context.build.host)
+        self.define_macro("PKGNAME", self.spec.pkg_name)
+        self.define_macro("PREFIX", "/usr")
 
     def is_valid_macro_char(self, char):
         if char.isalpha():

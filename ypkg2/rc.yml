@@ -1,0 +1,24 @@
+actions:
+    - configure: |
+        ./configure %CONFOPTS%
+    - reconfigure: |
+        autoreconf -vfi
+        ./configure %CONFOPTS
+    - autogen: |
+        ./autogen.sh %CONFOPTS%
+        ./configure %CONFOPTS%
+    - make: |
+        make %JOBS%
+    - make_install: |
+        %make install DESTDIR="%installroot%"
+    - cmake: |
+        cmake -DCMAKE_CFLAGS="%CFLAGS%" -DCMAKE_CXX_FLAGS="%CXXFLAGS%" \
+        -DCMAKE_LD_FLAGS="%LDFLAGS%" -DCMAKE_LIB_SUFFIX="%LIBSUFFIX%" \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+    - patch: |
+        patch -t -E --no-backup-if-mismatch -f
+defines:
+    - CONFOPTS: |
+        --prefix=%PREFIX% --build=%HOST% --libdir=%LIBDIR% --mandir=/usr/share/man \
+        --infodir=/usr/share/info --datadir=/usr/share --sysconfdir=/etc \
+        --localstatedir=/var --libexecdir=%LIBDIR%/%PKGNAME%
