@@ -29,6 +29,42 @@ except Exception as e:
     from yaml import Loader
 
 
+class PackageSanity:
+
+    @staticmethod
+    def is_name_valid(name):
+        """ Determine if a package name is actually valid. """
+        if " " in name:
+            console_ui.emit_error("YAML:name",
+                                  "Package names cannot contain whitespace")
+            return False
+        illegal = set()
+        permitted = ['-', '_']
+        for char in name[0:]:
+            if char in permitted:
+                continue
+            if not char.isalpha() and not char.isnumeric():
+                illegal.add(char)
+        if len(illegal) == 0:
+            return True
+
+        console_ui.emit_error("YAML:name",
+                              "Illegal characters in package name '{}' : {}".
+                              format(name, ", ".join(illegal)))
+        return False
+
+    @staticmethod
+    def is_version_valid(version):
+        """ Determine if the given version is valid """
+        try:
+            v = pisi.version.make_version(version)
+        except Exception as e:
+            console_ui.emit_error("YAML", "Invalid version: {}".format(
+                                   version))
+            return False
+        return True
+
+
 class YpkgSpec:
 
     # Root meta information
@@ -194,12 +230,11 @@ class YpkgSpec:
             console_ui.emit_error("YAML", "No functional build steps found")
             return False
 
-        # Buh. Validate the names and version
-        try:
-            v = pisi.version.make_version(self.pkg_version)
-        except Exception as e:
-            console_ui.emit_error("YAML", "Invalid version: {}".format(
-                    self.pkg_version))
+        # Validate the names and version
+        if not PackageSanity.is_version_valid(self.pkg_version):
             return False
+        if not PackageSanity.is_name_valid(self.pkg_name):
+            return False
+        # TODO: Collect keys from patterns and determine correctness
 
         return True

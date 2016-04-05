@@ -120,6 +120,10 @@ def assertGetType(ymlFile, key, t):
                               "Mandatory token '{}' is missing".format(key))
         return None
     val = ymlFile[key]
+    if val is None:
+        console_ui.emit_error("YAML:{}".format(key),
+                              "Mandatory token cannot be empty")
+        return None
     val_type = type(val)
     # YAML might report integer when we want strings, which is OK.
 
