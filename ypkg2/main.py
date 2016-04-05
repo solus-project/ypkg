@@ -79,7 +79,7 @@ def main():
 
     ctx = YpkgContext()
     # Literally just testing.
-    scr = ScriptGenerator()
+    scr = ScriptGenerator(ctx)
 
     sys.exit(0)
 

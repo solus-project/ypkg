@@ -86,6 +86,8 @@ class BuildConfig:
     cxxflags = None
     ldflags = None
 
+    jobcount = 2
+
     def get_flags(self, t):
         """ Simple switch to grab a set of flags by a type """
         if t == Flags.C:
@@ -119,5 +121,17 @@ class YpkgContext:
         self.build.cxxflags = set(conf.values.build.cxxflags.split(" "))
         self.build.ldflags = set(conf.values.build.ldflags.split(" "))
         self.build.ccache = "ccache" in conf.values.build.buildhelper
+
+        # We'll export job count ourselves..
+        jobs = conf.values.build.jobs
+        if "-j" in jobs:
+            jobs = jobs.replace("-j", "")
+        try:
+            jcount = int(jobs)
+            self.build.jobcount = jcount
+        except Exception as e:
+            console_ui.emit_warning("BUILD",
+                                    "Invalid job count of {}, defaulting to 2".
+                                    format(jobs))
 
         self.global_archive_dir = conf.values.dirs.archives_dir
