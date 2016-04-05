@@ -54,6 +54,11 @@ class ScriptGenerator:
         self.define_action_macro("patch",
                                  "patch -t -E --no-backup-if-mismatch -f")
 
+        # Consider moving this somewhere else
+        self.define_macro("CFLAGS", self.context.build.cflags)
+        self.define_macro("CXXFLAGS", self.context.build.cxxflags)
+        self.define_macro("LDFLAGS", self.context.build.ldflags)
+
     def escape_string(self, input_string):
         """ Recursively escape our macros out of a string until no more of our
             macros appear in it """
