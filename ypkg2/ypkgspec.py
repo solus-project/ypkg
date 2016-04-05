@@ -167,8 +167,6 @@ class YpkgSpec:
                     return False
                 setattr(self, instance_name, val)
 
-        console_ui.emit_info("TODO", "Parsing not yet completed")
-
         if "main" not in self.summaries:
             console_ui.emit_info("YAML", "Missing summary for package")
             return False

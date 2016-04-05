@@ -69,8 +69,8 @@ The TODO:
 ---------
 
  * [x] Write a new CLI frontend that's option based this time
- * [ ] Add class-based `YpkgSpec` to represent the `package.yml` input file
- * [ ] Add dedicated parser
+ * [x] Add class-based `YpkgSpec` to represent the `package.yml` input file
+ * [x] Add dedicated parser
  * [ ] Split dependency install out from main ypkg routine
  * [ ] Add **extensible** macros
  * [ ] Add the string-based path globbing algo
