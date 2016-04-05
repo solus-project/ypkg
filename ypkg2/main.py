@@ -14,6 +14,7 @@
 from . import console_ui
 from .ypkgspec import YpkgSpec
 from .sources import SourceManager
+from .ypkgcontext import YpkgContext
 
 import sys
 import argparse
@@ -74,6 +75,8 @@ def main():
     if not manager.identify_sources(spec):
         print("Unable to continue - aborting")
         sys.exit(1)
+
+    ctx = YpkgContext()
 
     sys.exit(0)
 
