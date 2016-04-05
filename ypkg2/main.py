@@ -15,6 +15,7 @@ from . import console_ui
 from .ypkgspec import YpkgSpec
 from .sources import SourceManager
 from .ypkgcontext import YpkgContext
+from .scripts import ScriptGenerator
 
 import sys
 import argparse
@@ -77,6 +78,8 @@ def main():
         sys.exit(1)
 
     ctx = YpkgContext()
+    # Literally just testing.
+    scr = ScriptGenerator()
 
     sys.exit(0)
 
