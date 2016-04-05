@@ -12,6 +12,7 @@
 #
 
 import fnmatch
+import os
 
 
 class StringPathGlob:
@@ -24,7 +25,6 @@ class StringPathGlob:
         self.pattern = pattern
         self.prefixMatch = prefixMatch
         self.priority = priority
-        self.tag = tag
 
     @staticmethod
     def is_a_pattern(item):
@@ -76,5 +76,8 @@ class StringPathGlob:
     def __hash__(self):
         return hash((self.pattern, self.priority))
 
-    def getPattern(self):
+    def get_pattern(self):
         return self.pattern
+
+    def get_priority(self):
+        return self.priority
