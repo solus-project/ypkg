@@ -34,8 +34,8 @@ class StringPathGlob:
 
     def match(self, path):
         if self.prefixMatch:
-            if self.pattern.endswith(os.sep) and not
-            StringPathGlob.is_a_pattern(self.pattern):
+            if self.pattern.endswith(os.sep) and not \
+              StringPathGlob.is_a_pattern(self.pattern):
                 if path.startswith(self.pattern):
                     return True
             return False
