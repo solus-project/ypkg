@@ -15,6 +15,13 @@ from . import console_ui
 
 import pisi.config
 
+# These flag sets are courtesy of autospec in
+# Clear Linux Project For Intel Architecture
+SPEED_FLAGS = "-flto -ffunction-sections -fno-semantic-interposition -O3"
+SIZE_FLAGS = "-Os -ffunction-sections"
+PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=pgo"
+PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=pgo -fprofile-correction"
+
 
 class Flags:
 
@@ -24,6 +31,7 @@ class Flags:
 
     @staticmethod
     def get_desc(f):
+        ''' Get descriptor for flag type '''
         if f == Flags.C:
             return "CFLAGS"
         elif f == Flags.CXX:
@@ -32,6 +40,40 @@ class Flags:
             return "LDFLAGS"
         else:
             return "UNKNOWN_FLAG_SET_CHECK_IT"
+
+    @staticmethod
+    def filter_flags(f, filters):
+        """ Filter the flags from this set """
+        nflags = filter(lambda s: s not in filters, f)
+        return nflags
+
+    @staticmethod
+    def optimize_flags(f, opt_type):
+        """ Optimize this flag set for a given optimisation type """
+        optimisations = ["-O%s" % x for x in range(0, 4)]
+        optimisations.extend("-Os")
+
+        newflags = Flags.filter_flags(f, optimisations)
+
+        if opt_type == "speed":
+            newflags.extend(SPEED_FLAGS.split(" "))
+        elif opt_type == "size":
+            newflags.extend(SIZE_FLAGS.split(" "))
+        return newflags
+
+    @staticmethod
+    def pgo_gen_flags(f):
+        """ Update flags with PGO generator flags """
+        r = set(f)
+        r.update(PGO_GEN_FLAGS.split(" "))
+        return r
+
+    @staticmethod
+    def pgo_use_flags(f):
+        """ Update flags with PGO use flags """
+        r = set(f)
+        r.update(PGO_USE_FLAGS.split(" "))
+        return r
 
 
 class BuildConfig:
@@ -45,6 +87,7 @@ class BuildConfig:
     ldflags = None
 
     def get_flags(self, t):
+        """ Simple switch to grab a set of flags by a type """
         if t == Flags.C:
             return self.cflags
         if t == Flags.CXX:
@@ -66,6 +109,7 @@ class YpkgContext:
         self.init_config()
 
     def init_config(self):
+        """ Initialise our configuration prior to building """
         conf = pisi.config.Config()
 
         # For now follow the eopkg.conf..
