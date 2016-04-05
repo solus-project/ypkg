@@ -50,7 +50,7 @@ class ScriptGenerator:
         self.define_action_macro("configure", "./configure $CONFOPTS")
         self.define_action_macro("make", "make %JOBS%")
         self.define_action_macro("make_install",
-                                 "%make install DESTDIR=%installroot%")
+                                 "%make install DESTDIR=\"%installroot%\"")
         self.define_action_macro("patch",
                                  "patch -t -E --no-backup-if-mismatch -f")
 
@@ -59,38 +59,50 @@ class ScriptGenerator:
         self.define_macro("CXXFLAGS", self.context.build.cxxflags)
         self.define_macro("LDFLAGS", self.context.build.ldflags)
 
+    def is_valid_macro_char(self, char):
+        if char.isalpha():
+            return True
+        if char == "_":
+            return True
+
+    def escape_single(self, line):
+        offset = line.find('%')
+        if offset < 0:
+            return (line, False)
+
+        tmp_name = "%"
+        tmp_idx = 0
+        for i in xrange(offset+1, len(line)):
+            if line[i] == "%":
+                tmp_name += "%"
+                break
+            if self.is_valid_macro_char(line[i]):
+                tmp_name += line[i]
+            else:
+                break
+        start = line[0:offset]
+        remnant = line[offset+len(tmp_name):]
+        # TODO: Change to is-valid-macro check and consume anyway
+        if tmp_name in self.macros:
+            mc = self.macros[tmp_name]
+            if mc is None:
+                mc = ""
+            line = "%s%s%s" % (start, mc, remnant)
+            return (line, True)
+        else:
+            line = "%s%s%s" % (start, tmp_name, remnant)
+            return (line, False)
+
     def escape_string(self, input_string):
         """ Recursively escape our macros out of a string until no more of our
             macros appear in it """
-        op = str(input_string)
+        ret = []
 
-        keys = self.macros.keys()
-        keys.reverse()
+        for line in input_string.split("\n"):
+            while (True):
+                (line, cont) = self.escape_single(line)
+                if not cont:
+                    ret.append(line)
+                    break
 
-        while (True):
-            found = False
-            removals = set()
-            for macro in keys:
-                if macro in op:
-                    found = True
-                repla = self.macros[macro]
-                if repla is None:
-                    # Handle undefined symbols
-                    repla = ""
-                if macro not in op:
-                    removals.add(macro)
-                    continue
-                tmp = r"({})\b".format(str(macro))
-                op = re.sub(tmp, repla, op)
-                if macro in op:
-                    tmp = r"({})".format(str(macro))
-                    op = re.sub(tmp, repla, op)
-                if macro not in op:
-                    removals.add(macro)
-                    continue
-            if not found:
-                break
-            for removal in removals:
-                keys.remove(removal)
-
-        return op
+        return "\n".join(ret)
