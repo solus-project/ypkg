@@ -66,6 +66,9 @@ class YpkgSpec:
     rundeps = None
     components = None
 
+    # Path to filename
+    path = None
+
     def add_summary(self, key, value):
         """ Add a summary to a package """
         self.summaries[key] = value
@@ -124,6 +127,7 @@ class YpkgSpec:
         self.components = dict()
 
     def load_from_path(self, path):
+        self.path = path
         if not os.path.exists(path):
             console_ui.emit_error("Error", "Path does not exist")
             return False

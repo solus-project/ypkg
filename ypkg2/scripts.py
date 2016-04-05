@@ -96,7 +96,7 @@ class ScriptGenerator:
 
         self.define_macro("LIBDIR", "/usr/{}".format(libdir))
         self.define_macro("LIBSUFFIX", "64")
-        self.define_macro("installroot", None)  # FIXME
+        self.define_macro("installroot", self.context.get_install_dir())
         self.define_macro("workdir", None)      # FIXME
         self.define_macro("JOBS", "-j{}".format(self.context.build.jobcount))
 
@@ -108,6 +108,7 @@ class ScriptGenerator:
         self.define_macro("HOST", self.context.build.host)
         self.define_macro("PKGNAME", self.spec.pkg_name)
         self.define_macro("PREFIX", "/usr")
+        self.define_macro("PKGFILES", self.context.files_dir)
 
     def is_valid_macro_char(self, char):
         if char.isalpha():

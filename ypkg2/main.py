@@ -79,7 +79,7 @@ def main():
         print("Unable to continue - aborting")
         sys.exit(1)
 
-    ctx = YpkgContext()
+    ctx = YpkgContext(spec)
     # Literally just testing.
     scr = ScriptGenerator(ctx, spec)
 

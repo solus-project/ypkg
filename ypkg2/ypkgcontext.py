@@ -14,6 +14,7 @@
 from . import console_ui
 
 import pisi.config
+import os
 
 # These flag sets are courtesy of autospec in
 # Clear Linux Project For Intel Architecture
@@ -105,10 +106,45 @@ class YpkgContext:
     build = None
 
     global_archive_dir = None
+    is_root = False
+    spec = None
+    emul32 = False
+    files_dir = None
 
-    def __init__(self):
+    def __init__(self, spec, emul32=False):
+        self.spec = spec
+        self.emul32 = emul32
         self.build = BuildConfig()
         self.init_config()
+
+    def get_sources_directory(self):
+        """ Get the configured source directory for fetching sources to """
+        if self.is_root:
+            return self.global_archive_dir
+        return os.path.join(self.get_build_prefix(), "sources")
+
+    def get_build_prefix(self):
+        """ Get the build prefix used by ypkg """
+        if self.is_root:
+            return "/var/ypkg-root"
+        return "{}/YPKG".format(os.path.expanduser("~"))
+
+    def get_install_dir(self):
+        """ Get the install directory for the given package """
+        return os.path.abspath("{}/{}/install".format(
+                               self.get_build_prefix(),
+                               self.spec.pkg_name))
+
+    def get_build_dir(self):
+        """ Get the build directory for the given package """
+        buildSuffix = "build"
+        if self.emul32:
+            buildSuffix = "build-32"
+
+        return os.path.abspath("{}/{}/{}".format(
+                               self.get_build_prefix(),
+                               self.spec.pkg_name,
+                               buildSuffix))
 
     def init_config(self):
         """ Initialise our configuration prior to building """
@@ -121,6 +157,10 @@ class YpkgContext:
         self.build.cxxflags = set(conf.values.build.cxxflags.split(" "))
         self.build.ldflags = set(conf.values.build.ldflags.split(" "))
         self.build.ccache = "ccache" in conf.values.build.buildhelper
+
+        # Set the $pkgfiles up properly
+        spec_dir = os.path.dirname(os.path.abspath(self.spec.path))
+        self.files_dir = os.path.join(spec_dir, "files")
 
         # We'll export job count ourselves..
         jobs = conf.values.build.jobs
