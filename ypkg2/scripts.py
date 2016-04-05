@@ -44,6 +44,7 @@ class ScriptGenerator:
 
         # Until we get more clever, this is /usr/lib64
         libdir = "lib64"
+
         self.define_macro("libdir", "/usr/{}".format(libdir))
         self.define_macro("installroot", None)  # FIXME
         self.define_macro("workdir", None)      # FIXME
@@ -73,6 +74,20 @@ class ScriptGenerator:
                           "--datadir=/usr/share/ --sysconfdir=/etc "
                           "--localstatedir=/var --libexecdir=/usr/%s/%s"
                           % conf_ops)
+
+        libsuffix = "64"
+        cmake_args = (" ".join(self.context.build.cflags),
+                      " ".join(self.context.build.cxxflags),
+                      " ".join(self.context.build.ldflags),
+                      libsuffix)
+
+        self.define_action_macro("cmake", "cmake -DCMAKE_INSTALL_PREFIX=/usr "
+                                 "-DCMAKE_C_FLAGS=\"%s\" "
+                                 "-DCMAKE_CXX_FLAGS=\"%s\" "
+                                 "-DCMAKE_LD_FLAGS=\"%s\" "
+                                 "-DCMAKE_LIB_SUFFIX=\"%s\" "
+                                 "-DCMAKE_BUILD_TYPE=RelWithDebInfo" %
+                                 cmake_args)
 
     def is_valid_macro_char(self, char):
         if char.isalpha():
