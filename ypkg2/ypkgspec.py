@@ -126,7 +126,7 @@ class YpkgSpec:
 
         # We'll get rid of this at some point :P
         if filename != "package.yml":
-            console_ui.emit_warning("Unnecessarily Anal Warning",
+            console_ui.emit_warning("Compliance",
                                     "File is not named package.yml")
 
         # Attempt to parse the input file
