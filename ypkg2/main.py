@@ -42,7 +42,7 @@ def main():
     args = parser.parse_args()
     # Kill colors
     if args.no_colors:
-        ui.allow_colors = False
+        console_ui.allow_colors = False
     # Show version
     if args.version:
         show_version()
