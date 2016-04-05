@@ -108,7 +108,7 @@ def assertMultimap(ymlFile, key, t):
     for key in mapping.keys():
         dat = mapping[key]
         for val in dat:
-            t.ref_function(key, val)
+            t.ref_function(unicode(key), unicode(val))
 
     return True
 
