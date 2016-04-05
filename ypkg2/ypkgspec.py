@@ -18,6 +18,8 @@ from yamlhelper import OneOrMoreString, MultimapFormat
 
 import os
 from collections import OrderedDict
+# Consider moving this into a stub
+import pisi.version
 
 from yaml import load as yaml_load
 try:
@@ -186,6 +188,14 @@ class YpkgSpec:
         steps = filter(lambda s: s, steps)
         if len(steps) == 0:
             console_ui.emit_error("YAML", "No functional build steps found")
+            return False
+
+        # Buh. Validate the names and version
+        try:
+            v = pisi.version.make_version(self.pkg_version)
+        except Exception as e:
+            console_ui.emit_error("YAML", "Invalid version: {}".format(
+                    self.pkg_version))
             return False
 
         return True
