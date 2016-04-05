@@ -59,8 +59,16 @@ class YpkgSpec:
     step_install = None
     step_check = None
 
+    summaries = None
+    descriptions = None
+
     def add_summary(self, key, value):
-        pass
+        """ Add a summary to a package """
+        self.summaries[key] = value
+
+    def add_desc(self, key, value):
+        """ Add a description to a package """
+        self.descriptions[key] = value
 
     def __init__(self):
         # These tokens *must* exist
@@ -70,6 +78,7 @@ class YpkgSpec:
             ("release", int),
             ("license", OneOrMoreString),
             ("summary", MultimapFormat(self, self.add_summary, "main")),
+            ("description", MultimapFormat(self, self.add_desc, "main")),
             ("source", list),  # We verify sources later
         ])
         # These guys are optional
@@ -82,7 +91,6 @@ class YpkgSpec:
             ("emul32", bool),
             ("autodep", bool),
             ("extract", bool),
-            ("rundeps", MultimapFormat),
             ("builddeps", OneOrMoreString),
         ])
         # Build steps are handled separately
@@ -92,6 +100,8 @@ class YpkgSpec:
             ("install", unicode),
             ("check", unicode),
         ])
+        self.summaries = dict()
+        self.descriptions = dict()
 
     def load_from_path(self, path):
         if not os.path.exists(path):
@@ -130,6 +140,7 @@ class YpkgSpec:
                 if isinstance(t, MultimapFormat):
                     if not yamlhelper.assertMultimap(yaml_data, token, t):
                         return False
+                    continue
                 else:
                     val = yamlhelper.assertGetType(yaml_data, token, t)
                 if val is None:
@@ -146,6 +157,13 @@ class YpkgSpec:
                 setattr(self, instance_name, val)
 
         console_ui.emit_info("TODO", "Parsing not yet completed")
+
+        if "main" not in self.summaries:
+            console_ui.emit_info("YAML", "Missing summary for package")
+            return False
+        if "main" not in self.descriptions:
+            console_ui.emit_info("YAML", "Missing description for package")
+            return False
 
         # Ensure this package would actually be able to build..
         steps = [self.step_setup, self.step_build, self.step_install]

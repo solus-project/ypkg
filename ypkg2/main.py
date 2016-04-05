@@ -66,6 +66,10 @@ def main():
     if spec.pkg_homepage:
         print("Homepage: {}".format(spec.pkg_homepage))
 
+    # Further testing
+    print("Summary: {}\nDescription: {}".format(spec.summaries["main"],
+                                                spec.descriptions["main"]))
+
     manager = SourceManager()
     if not manager.identify_sources(spec):
         print("Unable to continue - aborting")

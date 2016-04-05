@@ -17,6 +17,7 @@ import yaml
 import os
 import sys
 import re
+from collections import OrderedDict
 
 iterable_types = [list, dict]
 
@@ -37,17 +38,83 @@ class MultimapFormat:
     def __init__(self, ref_object, ref_function, ref_default):
         self.ref_object = ref_object
         self.ref_function = ref_function
-        self.ref_default = ref_default
+        self.ref_default = unicode(ref_default)
+
+
+def _insert_helper(mapping, key, value):
+    """ Helper to prevent repetetive code """
+    if key not in mapping:
+        mapping[key] = list()
+    mapping[key].append(value)
+
+
+def get_key_value_mapping(data, t):
+    mapping = OrderedDict()
+
+    dicts = filter(lambda s: isinstance(s, dict), data)
+    no_keys = filter(lambda s: type(s) not in iterable_types, data)
+
+    for key in no_keys:
+        _insert_helper(mapping, t.ref_default, key)
+
+    # Explicit key: to value mapping
+    for mapp in dicts:
+        keys = mapp.keys()
+        if len(keys) > 1:
+            console_ui.emit_error("YAML",
+                                  "Encountered multiple keys")
+            return False
+        key = keys[0]
+        val = mapp[key]
+
+        if isinstance(val, list):
+            bad = filter(lambda s: type(s) in iterable_types, val)
+            if len(bad) > 0:
+                console_ui.emit_error("YAML",
+                                      "Multimap does not support inception...")
+                return None
+            for item in val:
+                _insert_helper(mapping, key, unicode(item))
+            continue
+        elif type(val) in iterable_types:
+            # Illegal to have a secondary layer here!!
+            console_ui.emit_error("YAML", "Expected a value here")
+            print("Erronous line: {}".format(str(mapp)))
+            return None
+        else:
+            # This is key->value mapping
+            _insert_helper(mapping, key, unicode(val))
+
+    return mapping
 
 
 def assertMultimap(ymlFile, key, t):
     """ Perform multi-map operations in the given key """
-    console_ui.emit_error("YAML:{}".format(key), "Multimap not yet supported")
-    return False
+
+    if key not in ymlFile:
+        console_ui.emit_error("YAML:{}".format(key),
+                              "Fatally requested a non-existent key!")
+        return False
+
+    val = ymlFile[key]
+    if type(val) not in iterable_types:
+        mapping = get_key_value_mapping([unicode(val)], t)
+    else:
+        mapping = get_key_value_mapping(ymlFile[key], t)
+
+    if mapping is None:
+        return False
+
+    for key in mapping.keys():
+        dat = mapping[key]
+        for val in dat:
+            t.ref_function(key, val)
+
+    return True
 
 
 def assertGetType(ymlFile, key, t):
-    ''' Ensure a value of the given type exists '''
+    """ Ensure a value of the given type exists """
     if key not in ymlFile:
         console_ui.emit_error("YAML",
                               "Mandatory token '{}' is missing".format(key))
@@ -91,123 +158,3 @@ def assertGetType(ymlFile, key, t):
                               "Token found was of type '{}".format(f))
         return None
     return val
-
-
-def assertGetString(y, n):
-    ''' Ensure string value exists '''
-    if n not in y:
-        print "Required string '%s' missing" % n
-        sys.exit(1)
-    try:
-        r = str(y[n])
-    except:
-        print "Key '%s' must be a string" % n
-        sys.exit(1)
-    return r
-
-
-def assertGetInteger(y, n):
-    ''' Ensure integer value exists '''
-    if n not in y:
-        print "Required integer '%s' missing" % n
-        sys.exit(1)
-    r = y[n]
-    if not isinstance(r, int):
-        print "Key '%s' must be a integer" % n
-        sys.exit(1)
-    return r
-
-
-def assertIsString(y, n):
-    ''' Ensure value is string if it exists '''
-    if n not in y:
-        return
-    r = None
-    try:
-        r = str(y[n])
-    except:
-        print "Key '%s' must be a string" % n
-        sys.exit(1)
-    return r
-
-
-def assertStringList(y, n):
-    ''' Ensure value is either a list of strings, or a list
-        Returned value is always a list of strings '''
-    if n not in y:
-        print "Required string '%s' missing" % n
-        sys.exit(1)
-    r = y[n]
-    ret = list()
-    if isinstance(r, str) or isinstance(r, unicode):
-        ret.append(r)
-    elif isinstance(r, list):
-        for i in r:
-            if not isinstance(i, str) and not isinstance(i, unicode):
-                print "[%s] Item '%s' is not a string" % (n, i)
-                sys.exit(1)
-            ret.append(i)
-    else:
-        print "'%s' is neither a string or list of strings" % n
-    return ret
-
-
-def do_multimap(data, fname, func):
-    ''' Crazy looking assumption based logic..
-        Used currently for rundeps, and works in the following way...
-        Provided data needs to be in a list format:
-            - name
-            - name
-
-        Default mapping will place the value "name" as the key
-            - name
-
-        Default mapping places each value in this list with default key:
-            - [name, name, name, name]
-
-        Explicit key and value:
-            - name: rundep
-        '''
-    if not isinstance(data, list):
-        print "'%s' is not a valid list" % fname
-        sys.exit(1)
-    for item in data:
-        if isinstance(item, str) or isinstance(item, unicode):
-            # main package
-            func(name, item)
-        elif isinstance(item, list):
-            for subitem in item:
-                if not isinstance(
-                        subitem,
-                        str) and not isinstance(
-                        subitem,
-                        unicode):
-                    print "'%s' is not a valid string" % v
-                    sys.exit(1)
-                func(name, subitem)
-        elif isinstance(item, dict):
-            key = item.keys()
-            val = item.values()
-            if len(key) != 1 or len(val) != 1:
-                print "%s is not a 1:1 mapping: %s" % item
-                sys.exit(1)
-            k = key[0]
-            v = val[0]
-            if isinstance(v, list):
-                for subitem in v:
-                    if not isinstance(
-                            subitem,
-                            str) and not isinstance(
-                            subitem,
-                            unicode):
-                        print "'%s' is not a valid string" % v
-                        sys.exit(1)
-                    func(k, subitem)
-            elif isinstance(v, str) or isinstance(v, unicode):
-                func(k, v)
-            else:
-                print "'%s' is not a valid string or list of strings" % v
-                sys.exit(1)
-        else:
-            print "Invalid item in '%s': %s" % (fname, item)
-            sys.exit(1)
