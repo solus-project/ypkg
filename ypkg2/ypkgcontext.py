@@ -117,6 +117,22 @@ class YpkgContext:
         self.build = BuildConfig()
         self.init_config()
 
+    def get_path(self):
+        """ Return the path, mutated to include ccache if needed """
+        default_path = "/usr/bin:/bin:/usr/sbin:/sbin"
+
+        if not self.spec.pkg_ccache:
+            return default_path
+        if not self.build.ccache:
+            return default_path
+
+        ccaches = ["/usr/lib64/ccache/bin", "/usr/lib/ccache/bin"]
+        for i in ccaches:
+            if os.path.exists(i):
+                console_ui.emit_info("Build", "Enabling ccache")
+                return "{}:{}".format(i, default_path)
+        return default_path
+
     def get_sources_directory(self):
         """ Get the configured source directory for fetching sources to """
         if self.is_root:

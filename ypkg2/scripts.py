@@ -32,6 +32,7 @@ class ScriptGenerator:
     macros = None
     context = None
     spec = None
+    exports = None
 
     def __init__(self, context, spec):
         self.macros = OrderedDict()
@@ -39,6 +40,7 @@ class ScriptGenerator:
         self.spec = spec
         self.init_default_macros()
         self.load_system_macros()
+        self.init_default_exports()
 
     def define_macro(self, key, value):
         """ Define a named macro. This will take the form %name% """
@@ -47,6 +49,10 @@ class ScriptGenerator:
     def define_action_macro(self, key, value):
         """ Define an action macro. These take the form %action """
         self.macros["%{}".format(key)] = value
+
+    def define_export(self, key, value):
+        """ Define a shell export for scripts """
+        self.exports[key] = value
 
     def load_system_macros(self):
         path = os.path.join(os.path.dirname(__file__), "rc.yml")
@@ -94,7 +100,7 @@ class ScriptGenerator:
         # Until we get more clever, this is /usr/lib64
         libdir = "lib64"
 
-        self.define_macro("LIBDIR", "/usr/{}".format(libdir))
+        self.define_macro("libdir", "/usr/{}".format(libdir))
         self.define_macro("LIBSUFFIX", "64")
         self.define_macro("installroot", self.context.get_install_dir())
         self.define_macro("workdir", None)      # FIXME
@@ -109,6 +115,35 @@ class ScriptGenerator:
         self.define_macro("PKGNAME", self.spec.pkg_name)
         self.define_macro("PREFIX", "/usr")
         self.define_macro("PKGFILES", self.context.files_dir)
+
+        self.define_macro("package", self.context.spec.pkg_name)
+        self.define_macro("release", self.context.spec.pkg_release)
+        self.define_macro("version", self.context.spec.pkg_version)
+        self.define_macro("sources", self.context.get_sources_directory())
+
+    def init_default_exports(self):
+        """ Initialise our exports """
+        self.exports = OrderedDict()
+
+        self.define_export("CFLAGS", " ".join(self.context.build.cflags))
+        self.define_export("CXXFLAGS", " ".join(self.context.build.cxxflags))
+        self.define_export("LDFLAGS", " ".join(self.context.build.ldflags))
+        self.define_export("PATH", self.context.get_path())
+        self.define_export("workdir", "%workdir%")
+        self.define_export("package", "%package%")
+        self.define_export("release", "%release%")
+        self.define_export("version", "%version%")
+        self.define_export("sources", "%sources%")
+        self.define_export("pkgfiles", "%PKGFILES%")
+        # self.define_export("LD_AS_NEEDED", "1")
+
+    def emit_exports(self):
+        """ TODO: Grab known exports into an OrderedDict populated by an rc
+            YAML file to allow easier manipulation """
+        ret = []
+        for key in self.exports:
+            ret.append("export {}=\"{}\"".format(key, self.exports[key]))
+        return ret
 
     def is_valid_macro_char(self, char):
         if char.isalpha():

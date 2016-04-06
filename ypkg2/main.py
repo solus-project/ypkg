@@ -74,6 +74,18 @@ def clean_build_dirs(context):
 
 
 def execute_step(context, step):
+    script = ScriptGenerator(context, context.spec)
+
+    exports = script.emit_exports()
+
+    # Run via bash with enable and error
+    full_text = "#!/bin/bash\nset -e\nset -x\n" + "\n".join(exports)
+
+    # cd to the given directory
+    full_text += "\n\ncd \"$workdir\"\n"
+    full_text += "\n\n{}\n".format(step)
+    output = script.escape_string(full_text)
+    print(output)
     return False
 
 
