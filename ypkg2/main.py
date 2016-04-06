@@ -262,4 +262,14 @@ def remove_prefix(fpath, prefix):
     return fpath
 
 if __name__ == "__main__":
+    # Test who we are
+    if os.geteuid() == 0:
+        if "FAKED_MODE" not in os.environ:
+            console_ui.emit_warning("Warning", "ypkg-build should be run via "
+                                    "fakeroot, not as real root user")
+    else:
+        console_ui.emit_error("Fail", "Ypkg must be run with fakeroot, or "
+                              "as the root user (not recommended)")
+        sys.exit(1)
+
     main()

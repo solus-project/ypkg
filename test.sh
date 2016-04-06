@@ -5,4 +5,4 @@ pep8 ypkg2/*.py || exit 1
 #    python -m ypkg2.main $item || exit 1
 #done
 
-python -m ypkg2.main examples/nano.yml || exit 1
+fakeroot python -m ypkg2.main examples/nano.yml || exit 1
