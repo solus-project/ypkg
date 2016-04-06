@@ -162,6 +162,12 @@ class YpkgContext:
                                self.get_build_prefix(),
                                self.spec.pkg_name))
 
+    def get_packaging_dir(self):
+        """ The temporary packaging directory """
+        return os.path.abspath("{}/root/{}/pkg".format(
+                               self.get_build_prefix(),
+                               self.spec.pkg_name))
+
     def get_build_dir(self):
         """ Get the build directory for the given package """
         buildSuffix = "build"
@@ -283,6 +289,18 @@ class YpkgContext:
     def clean_install(self):
         """ Purge the install directory """
         d = self.get_install_dir()
+        if not os.path.exists(d):
+            return True
+        try:
+            shutil.rmtree(d)
+        except Exception as e:
+            print(e)
+            return False
+        return True
+
+    def clean_pkg(self):
+        """ Purge the packing directory """
+        d = self.get_packaging_dir()
         if not os.path.exists(d):
             return True
         try:

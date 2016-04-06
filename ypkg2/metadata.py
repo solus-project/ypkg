@@ -89,7 +89,7 @@ def create_files_xml(context, package):
         files.append(file_info)
 
     # Temporary!
-    files.write("files.xml")
+    files.write(os.path.join(context.get_packaging_dir(), "files.xml"))
     return files
 
 
@@ -178,7 +178,7 @@ def create_meta_xml(context, package, files):
     meta.package.architecture = config.values.general.architecture
     meta.package.packageFormat = pisi.package.Package.default_format
 
-    meta.write("metadata.xml")
+    meta.write(os.path.join(context.get_packaging_dir(), "metadata.xml"))
 
     return meta
 
@@ -190,16 +190,17 @@ def create_eopkg(context, package):
     console_ui.emit_info("Package", "Creating {} ...".format(name))
 
     # Grab Files XML
+    pdir = context.get_packaging_dir()
     files = create_files_xml(context, package)
     # Grab Meta XML
     meta = create_meta_xml(context, package, files)
     # Start creating a package.
     pkg = pisi.package.Package(name, "w",
                                format=pisi.package.Package.default_format,
-                               tmp_dir="NEEDSADIR")
+                               tmp_dir=pdir)
 
-    pkg.add_metadata_xml("metadata.xml")
-    pkg.add_files_xml("files.xml")
+    pkg.add_metadata_xml(os.path.join(pdir, "metadata.xml"))
+    pkg.add_files_xml(os.path.join(pdir, "files.xml"))
 
     for finfo in pkg.files.list:
         # old eopkg trick to ensure the file names are all valid

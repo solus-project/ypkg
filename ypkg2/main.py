@@ -158,6 +158,8 @@ def build_package(filename):
     if not ctx.clean_install():
         console_ui.emit_error("Build", "Failed to clean install directory")
         sys.exit(1)
+    if not ctx.clean_pkg():
+        console_ui.emit_error("Build", "Failed to clean pkg directory")
 
     possible_sets = [False]
     if spec.pkg_emul32:
@@ -241,6 +243,14 @@ def build_package(filename):
 
             gene.add_file(localpath)
 
+    if not os.path.exists(ctx.get_packaging_dir()):
+        try:
+            os.makedirs(ctx.get_packaging_dir(), mode=00755)
+        except Exception as e:
+            console_ui.emit_error("Package", "Failed to create pkg dir")
+            print(e)
+            sys.exit(1)
+
     # TODO: Ensure main is always first
     for package in sorted(gene.packages):
         pkg = gene.packages[package]
@@ -251,6 +261,7 @@ def build_package(filename):
             continue
         metadata.create_eopkg(ctx, pkg)
 
+    ctx.clean_pkg()
     sys.exit(0)
 
 
