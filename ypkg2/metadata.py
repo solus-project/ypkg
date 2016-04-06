@@ -43,26 +43,6 @@ def create_files_xml(context, package):
             fsize = long(os.path.getsize(full_path))
             st = os.stat(fpath)
 
-        if st.st_uid != 0 and st.st_uid == os.getuid():
-            try:
-                os.chown(full_path, 0, st.st_gid)
-                st.st_uid = 0
-            except Exception as e:
-                console_ui.emit_error("Package", "File belongs to current user"
-                                      " and cannot be chowned to root: {}".
-                                      format(e))
-                return False
-
-        if st.st_gid != 0 and st.st_gid == os.getgid():
-            try:
-                os.chown(full_path, st.st_uid, 0)
-                st.st_gid = 0
-            except Exception as e:
-                console_ui.emit_error("Package", "File belongs to current gid"
-                                      " and cannot be chowned to root: {}".
-                                      format(e))
-                return False
-
         # We don't support this concept right now in ypkg.
         permanent = None
 
