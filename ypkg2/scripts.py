@@ -33,6 +33,7 @@ class ScriptGenerator:
     context = None
     spec = None
     exports = None
+    unexports = None
 
     def __init__(self, context, spec):
         self.macros = OrderedDict()
@@ -53,6 +54,10 @@ class ScriptGenerator:
     def define_export(self, key, value):
         """ Define a shell export for scripts """
         self.exports[key] = value
+
+    def define_unexport(self, key):
+        """ Ensure key is unexported from shell script """
+        self.unexports[key] = (None,)
 
     def load_system_macros(self):
         path = os.path.join(os.path.dirname(__file__), "rc.yml")
@@ -124,6 +129,7 @@ class ScriptGenerator:
     def init_default_exports(self):
         """ Initialise our exports """
         self.exports = OrderedDict()
+        self.unexports = OrderedDict()
 
         self.define_export("CFLAGS", " ".join(self.context.build.cflags))
         self.define_export("CXXFLAGS", " ".join(self.context.build.cxxflags))
@@ -137,12 +143,24 @@ class ScriptGenerator:
         self.define_export("pkgfiles", "%PKGFILES%")
         # self.define_export("LD_AS_NEEDED", "1")
 
+        # Mask display
+        self.define_unexport("DISPLAY")
+        # Mask sudo from anyone
+        self.define_unexport("SUDO_USER")
+        self.define_unexport("SUDO_GID")
+        self.define_unexport("SUDO_UID")
+        self.define_unexport("SUDO_COMMAND")
+        self.define_unexport("CDPATH")
+
     def emit_exports(self):
         """ TODO: Grab known exports into an OrderedDict populated by an rc
             YAML file to allow easier manipulation """
         ret = []
         for key in self.exports:
             ret.append("export {}=\"{}\"".format(key, self.exports[key]))
+
+        unset_line = "unset {} || :".format(" ".join(self.unexports.keys()))
+        ret.append(unset_line)
         return ret
 
     def is_valid_macro_char(self, char):

@@ -79,10 +79,12 @@ def execute_step(context, step):
     exports = script.emit_exports()
 
     # Run via bash with enable and error
-    full_text = "#!/bin/bash\nset -e\nset -x\n" + "\n".join(exports)
-
+    full_text = "#!/bin/bash\nset -e\nset -x\n"
     # cd to the given directory
     full_text += "\n\ncd \"$workdir\"\n"
+
+    # Add our exports
+    full_text += "\n".join(exports)
     full_text += "\n\n{}\n".format(step)
     output = script.escape_string(full_text)
     print(output)
