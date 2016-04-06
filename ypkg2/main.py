@@ -136,38 +136,86 @@ def build_package(filename):
             console_ui.emit_error("Source", "Cannot verify sources")
             sys.exit(1)
 
-    if not clean_build_dirs(ctx):
-        sys.exit(1)
-
-    # Only ever extract the primary source ourselves
-    if spec.pkg_extract:
-        src = manager.sources[0]
-        if not src.extract(ctx):
-            console_ui.emit_error("Source", "Cannot extract sources")
-            sys.exit(1)
-
     steps = {
         'setup': spec.step_setup,
         'build': spec.step_build,
         'install': spec.step_install,
-        'check': spec.step_check
+        'check': spec.step_check,
+        'pgo': spec.step_pgo,
     }
 
-    work_dir = manager.get_working_dir(ctx)
-    if not work_dir:
+    r_runs = list()
+
+    # Before we get started, ensure PGOs are cleaned
+    if not ctx.clean_pgo():
+        console_ui.emit_error("Build", "Failed to clean PGO directories")
         sys.exit(1)
 
-    for step_name in steps:
-        step = steps[step_name]
-        if not step:
-            continue
-        console_ui.emit_info("Build", "Running step: {}".format(step_name))
+    possible_sets = [False]
+    if spec.pkg_emul32:
+        possible_sets.append(True)
+        possible_sets.reverse()  # Always build emul32 first
 
-        if execute_step(ctx, step, step_name, work_dir):
-            console_ui.emit_success("Build", "{} successful".format(step_name))
-            continue
-        console_ui.emit_error("Build", "{} failed".format(step_name))
-        sys.exit(1)
+    for emul32 in possible_sets:
+        r_steps = list()
+        c = YpkgContext(spec, emul32=emul32)
+        if spec.step_pgo is not None:
+            c = YpkgContext(spec, emul32=emul32)
+            c.enable_pgo_generate()
+            r_steps.append(['setup', c])
+            r_steps.append(['build', c])
+            r_steps.append(['pgo', c])
+            c = YpkgContext(spec, emul32=emul32)
+            c.enable_pgo_use()
+            r_steps.append(['setup', c])
+            r_steps.append(['build', c])
+            r_steps.append(['install', c])
+            r_steps.append(['check', c])
+        else:
+            c = YpkgContext(spec, emul32=emul32)
+            r_steps.append(['setup', c])
+            r_steps.append(['build', c])
+            r_steps.append(['install', c])
+            r_steps.append(['check', c])
+        r_runs.append((emul32, r_steps))
+
+    for emul32, run in r_runs:
+        if emul32:
+            console_ui.emit_info("Build", "Building for emul32")
+        else:
+            console_ui.emit_info("Build", "Building native package")
+
+        for step, context in run:
+            # When doing setup, always do pre-work by blasting away any
+            # existing build directories for the current context and then
+            # re-extracting sources
+            if step == "setup":
+                if not clean_build_dirs(ctx):
+                    sys.exit(1)
+
+                # Only ever extract the primary source ourselves
+                if spec.pkg_extract:
+                    src = manager.sources[0]
+                    console_ui.emit_info("Source",
+                                         "Extracting source")
+                    if not src.extract(context):
+                        console_ui.emit_error("Source",
+                                              "Cannot extract sources")
+                        sys.exit(1)
+
+            work_dir = manager.get_working_dir(context)
+            r_step = steps[step]
+            if not r_step:
+                continue
+
+            console_ui.emit_info("Build", "Running step: {}".format(step))
+
+            if execute_step(context, r_step, step, work_dir):
+                console_ui.emit_success("Build", "{} successful".
+                                        format(step))
+                continue
+            console_ui.emit_error("Build", "{} failed".format(step))
+            sys.exit(1)
 
     sys.exit(0)
 

@@ -20,8 +20,8 @@ import os
 # Clear Linux Project For Intel Architecture
 SPEED_FLAGS = "-flto -ffunction-sections -fno-semantic-interposition -O3"
 SIZE_FLAGS = "-Os -ffunction-sections"
-PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=pgo"
-PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=pgo -fprofile-correction"
+PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\""
+PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
 
 
 class Flags:
@@ -63,17 +63,17 @@ class Flags:
         return newflags
 
     @staticmethod
-    def pgo_gen_flags(f):
+    def pgo_gen_flags(f, d):
         """ Update flags with PGO generator flags """
-        r = set(f)
-        r.update(PGO_GEN_FLAGS.split(" "))
+        r = list(f)
+        r.extend((PGO_GEN_FLAGS.format(d).split(" ")))
         return r
 
     @staticmethod
-    def pgo_use_flags(f):
+    def pgo_use_flags(f, d):
         """ Update flags with PGO use flags """
-        r = set(f)
-        r.update(PGO_USE_FLAGS.split(" "))
+        r = list(f)
+        r.extend((PGO_USE_FLAGS.format(d).split(" ")))
         return r
 
 
@@ -164,6 +164,17 @@ class YpkgContext:
                                self.spec.pkg_name,
                                buildSuffix))
 
+    def get_pgo_dir(self):
+        """ Get the PGO data directory for the given package """
+        pgoSuffix = "pgo"
+        if self.emul32:
+            pgoSuffix = "pgo-32"
+
+        return os.path.abspath("{}/root/{}/{}".format(
+                                self.get_build_prefix(),
+                                self.spec.pkg_name,
+                                pgoSuffix))
+
     def init_config(self):
         """ Initialise our configuration prior to building """
         conf = pisi.config.Config()
@@ -171,9 +182,9 @@ class YpkgContext:
         # For now follow the eopkg.conf..
         self.build.host = conf.values.build.host
         self.build.arch = conf.values.build.arch
-        self.build.cflags = set(conf.values.build.cflags.split(" "))
-        self.build.cxxflags = set(conf.values.build.cxxflags.split(" "))
-        self.build.ldflags = set(conf.values.build.ldflags.split(" "))
+        self.build.cflags = list(conf.values.build.cflags.split(" "))
+        self.build.cxxflags = list(conf.values.build.cxxflags.split(" "))
+        self.build.ldflags = list(conf.values.build.ldflags.split(" "))
         self.build.ccache = "ccache" in conf.values.build.buildhelper
 
         # Set the $pkgfiles up properly
@@ -193,3 +204,32 @@ class YpkgContext:
                                     format(jobs))
 
         self.global_archive_dir = conf.values.dirs.archives_dir
+
+    def enable_pgo_generate(self):
+        """ Enable GPO generate step """
+        pgo_dir = self.get_pgo_dir()
+        self.build.cflags = Flags.pgo_gen_flags(self.build.cflags, pgo_dir)
+        self.build.cxxflags = Flags.pgo_gen_flags(self.build.cxxflags, pgo_dir)
+
+    def enable_pgo_use(self):
+        """ Enable PGO use step """
+        pgo_dir = self.get_pgo_dir()
+        self.build.cflags = Flags.pgo_use_flags(self.build.cflags, pgo_dir)
+        self.build.cxxflags = Flags.pgo_use_flags(self.build.cxxflags, pgo_dir)
+
+    def clean_pgo(self):
+        suffixes = ["pgo", "pgo-32"]
+        pgo_dirs = [os.path.abspath("{}/root/{}/{}".format(
+                    self.get_build_prefix(),
+                    self.spec.pkg_name, x)) for x in suffixes]
+
+        for d in pgo_dirs:
+            if not os.path.exists(d):
+                continue
+            try:
+                shutil.rmtree(d)
+            except Exception as e:
+                console_ui.emit_error("Build", "Failed to clean PGO dir")
+                print(e)
+                return False
+        return True
