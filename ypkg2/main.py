@@ -272,4 +272,5 @@ if __name__ == "__main__":
                               "as the root user (not recommended)")
         sys.exit(1)
 
+    console_ui.emit_success("Package", "Building complete")
     main()
