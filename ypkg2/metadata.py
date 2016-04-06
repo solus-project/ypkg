@@ -52,9 +52,7 @@ def readlink(path):
 
 
 def create_files_xml(context, package):
-    console_ui.emit_info("Package", "Emitting files.xml for {}".
-                         format(package.name))
-
+    """ Create an XML representation of our files """
     files = pisi.files.Files()
 
     # TODO: Remove reliance on pisi.util functions completely.
@@ -96,6 +94,7 @@ def create_files_xml(context, package):
 
 
 def create_packager(name, email):
+    """ Factory: Create a packager """
     packager = pisi.specfile.Packager()
     packager.name = unicode(name)
     packager.email = str(email)
@@ -103,6 +102,7 @@ def create_packager(name, email):
 
 
 def metadata_from_package(context, package, files):
+    """ Base metadata cruft. Tedious   """
     meta = pisi.metadata.MetaData()
     spec = context.spec
 
@@ -147,6 +147,7 @@ def metadata_from_package(context, package, files):
 
 
 def construct_package_name(context, package):
+    """ .eopkg path """
     extension = "eopkg"
     name = context.spec.get_package_name(package.name)
     config = context.pconfig
@@ -162,9 +163,7 @@ def construct_package_name(context, package):
 
 
 def create_meta_xml(context, package, files):
-    console_ui.emit_info("Package", "Emtiting metadata.xml for {}".
-                         format(package.name))
-
+    """ Create the main metadata.xml file """
     meta = metadata_from_package(context, package, files)
     config = context.pconfig
 
@@ -181,7 +180,20 @@ def create_meta_xml(context, package, files):
 
     meta.write("metadata.xml")
 
+    return meta
+
+
+def create_eopkg(context, package):
+    """ Do the hard work and write the package out """
     name = construct_package_name(context, package)
+
+    console_ui.emit_info("Package", "Creating {} ...".format(name))
+
+    # Grab Files XML
+    files = create_files_xml(context, package)
+    # Grab Meta XML
+    meta = create_meta_xml(context, package, files)
+    # Start creating a package.
     pkg = pisi.package.Package(name, "w",
                                format=pisi.package.Package.default_format,
                                tmp_dir="NEEDSADIR")
@@ -190,8 +202,8 @@ def create_meta_xml(context, package, files):
     pkg.add_files_xml("files.xml")
 
     for finfo in pkg.files.list:
+        # old eopkg trick to ensure the file names are all valid
         orgname = os.path.join(context.get_install_dir(), finfo.path)
         orgname = orgname.encode('utf-8').decode('utf-8').encode("latin1")
         pkg.add_to_install(orgname, finfo.path)
     pkg.close()
-    return meta
