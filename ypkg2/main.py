@@ -17,6 +17,7 @@ from .sources import SourceManager
 from .ypkgcontext import YpkgContext
 from .scripts import ScriptGenerator
 from .packages import PackageGenerator, PRIORITY_USER
+from . import metadata
 
 import sys
 import argparse
@@ -247,6 +248,8 @@ def build_package(filename):
         for file in sorted(pkg.emit_files()):
             print(" -> {}".format(file))
         print("")
+
+        metadata.create_files_xml(ctx, pkg)
 
     sys.exit(0)
 
