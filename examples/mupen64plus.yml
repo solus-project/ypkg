@@ -24,7 +24,7 @@ description : |
     Mupen64Plus is a cross-platform plugin-based N64 emulator which is capable of accurately playing many games. Included are four MIPS R4300 CPU emulators, with dynamic recompilers for 32-bit x86 and 64-bit amd64 systems, and necessary plugins for audio, graphical rendering (RDP), signal co-processor (RSP), and input. There is 1 included OpenGL video plugin, called RiceVideo. There are 3 other excellent video plugins being maintained by wahrhaft, called Arachnoid, Glide64, and Z64.
 build      : |
     # Build core first.
-    make -C projects/unix all PREFIX=/usr LIBDIR=%libdir%
+    %make -C projects/unix all PREFIX=/usr LIBDIR=%libdir%
     %make_install -C projects/unix PREFIX=/usr LIBDIR=%libdir%
     
     # Build the remaining plugins
@@ -33,7 +33,7 @@ build      : |
     for plugin in audio-sdl input-sdl rsp-hle video-glide64mk2 video-rice ui-console; do
         tar xvf $sources/mupen64plus-${plugin}-src-${version}.tar.gz
         pushd "mupen64plus-${plugin}-src-${version}"
-        CFLAGS="$CFLAGS -I${installdir}/usr/include/mupen64plus" make -C projects/unix all PREFIX=/usr LIBDIR=%libdir% APIDIR="$installdir/usr/include"
+        CFLAGS="$CFLAGS -I${installdir}/usr/include/mupen64plus" %make -C projects/unix all PREFIX=/usr LIBDIR=%libdir% APIDIR="$installdir/usr/include"
         popd
     done
     popd
