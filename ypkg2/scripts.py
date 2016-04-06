@@ -144,7 +144,8 @@ class ScriptGenerator:
         self.define_export("sources", "%sources%")
         self.define_export("pkgfiles", "%PKGFILES%")
         self.define_export("installdir", "%installroot%")
-        # self.define_export("LD_AS_NEEDED", "1")
+        if self.context.build.ld_as_needed:
+            self.define_export("LD_AS_NEEDED", "1")
 
         # Mask display
         self.define_unexport("DISPLAY")

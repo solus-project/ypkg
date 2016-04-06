@@ -87,6 +87,8 @@ class BuildConfig:
     cxxflags = None
     ldflags = None
 
+    ld_as_needed = True  # Make this configurable at some point.
+
     jobcount = 2
 
     def get_flags(self, t):
