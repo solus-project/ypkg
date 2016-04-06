@@ -20,4 +20,4 @@ build      : |
 install    : |
     %make_install
     install -d %installroot%/etc
-    install doc/nanorc.sample %installroot%/etc/nanorc
+    install -m 00644 doc/nanorc.sample %installroot%/etc/nanorc
