@@ -82,7 +82,8 @@ def execute_step(context, step, step_n, work_dir):
     exports = script.emit_exports()
 
     # Run via bash with enable and error
-    full_text = "#!/bin/bash\nset -e\nset -x\n"
+    full_text = "#!/usr/bin/env -i /bin/bash --norc --noprofile\n" \
+                "set -e\nset -x\n"
     # cd to the given directory
     full_text += "\n\ncd \"%workdir%\"\n"
 
@@ -95,7 +96,7 @@ def execute_step(context, step, step_n, work_dir):
         script_ex.write(output)
         script_ex.flush()
 
-        cmd = ["/bin/bash", script_ex.name]
+        cmd = ["/bin/bash", "--norc", "--noprofile", script_ex.name]
         try:
             subprocess.check_call(cmd, stdin=subprocess.PIPE)
         except KeyboardInterrupt:
