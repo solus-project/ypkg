@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/bin/true
 # -*- coding: utf-8 -*-
 #
 #  Re-adapted into ypkg2 from autospec

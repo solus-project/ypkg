@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/bin/true
 # -*- coding: utf-8 -*-
 #
 #  This file is part of ypkg2
