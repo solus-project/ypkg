@@ -1,0 +1,52 @@
+<PISI>
+    <Source>
+        <Name>nano</Name>
+        <Packager>
+            <Name>Ikey Doherty</Name>
+            <Email>ikey@solus-project.com</Email>
+        </Packager>
+    </Source>
+    <Package>
+        <Name>nano</Name>
+        <Summary xml:lang="en">Small, friendly text editor inspired by Pico</Summary>
+        <Description xml:lang="en">GNU nano is an easy-to-use text editor originally designed as a replacement for Pico, the ncurses-based editor from the non-free mailer package Pine (itself now available under the Apache License as Alpine).</Description>
+        <PartOf>system.base</PartOf>
+        <License>GPL-3.0</License>
+        <RuntimeDependencies>
+            <Dependency releaseFrom="7">file</Dependency>
+            <Dependency releaseFrom="6">ncurses</Dependency>
+            <Dependency releaseFrom="26">glibc</Dependency>
+            <Dependency releaseFrom="11">zlib</Dependency>
+        </RuntimeDependencies>
+        <Files>
+            <Path fileType="data">/usr/share/nano</Path>
+            <Path fileType="data">/usr/share/defaults</Path>
+            <Path fileType="localedata">/usr/share/locale</Path>
+            <Path fileType="man">/usr/share/man</Path>
+            <Path fileType="doc">/usr/share/doc</Path>
+            <Path fileType="executable">/usr/bin</Path>
+        </Files>
+        <History>
+            <Update release="44">
+                <Date>2016-03-12</Date>
+                <Version>2.5.3</Version>
+                <Comment>Packaging update</Comment>
+                <Name>Ikey Doherty</Name>
+                <Email>ikey@solus-project.com</Email>
+            </Update>
+        </History>
+        <BuildHost>solus</BuildHost>
+        <Distribution>Solus</Distribution>
+        <DistributionRelease>1</DistributionRelease>
+        <Architecture>x86_64</Architecture>
+        <InstalledSize>1993742</InstalledSize>
+        <PackageFormat>1.2</PackageFormat>
+        <Source>
+            <Name>nano</Name>
+            <Packager>
+                <Name>Ikey Doherty</Name>
+                <Email>ikey@solus-project.com</Email>
+            </Packager>
+        </Source>
+    </Package>
+</PISI>
