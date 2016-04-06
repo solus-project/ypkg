@@ -249,8 +249,6 @@ def build_package(filename):
             console_ui.emit_info("Package", "Skipping empty package: {}".
                                  format(package))
             continue
-        console_ui.emit_info("Package", "Files in package: {}".format(package))
-
         metadata.create_eopkg(ctx, pkg)
 
     sys.exit(0)
