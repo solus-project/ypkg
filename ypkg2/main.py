@@ -74,7 +74,7 @@ def build_package(filename):
         sys.exit(1)
 
     # Dummy content
-    console_ui.emit_info(None, "Building {}-{}".
+    console_ui.emit_info("Info", "Building {}-{}".
                          format(spec.pkg_name, spec.pkg_version))
 
     ctx = YpkgContext(spec)
@@ -85,13 +85,13 @@ def build_package(filename):
             need_verify.append(src)
             continue
         if not src.fetch(ctx):
-            console_ui.emit_error("FETCH", "Cannot continue without sources")
+            console_ui.emit_error("Source", "Cannot continue without sources")
             sys.exit(1)
         need_verify.append(src)
 
     for verify in need_verify:
         if not verify.verify(ctx):
-            console_ui.emit_error("FETCH", "Cannot verify sources")
+            console_ui.emit_error("Source", "Cannot verify sources")
             sys.exit(1)
 
     # Now extract these guys

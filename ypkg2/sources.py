@@ -14,6 +14,7 @@
 from . import console_ui
 
 import os
+import hashlib
 
 
 class YpkgSource:
@@ -58,25 +59,42 @@ class TarSource(YpkgSource):
     def __str__(self):
         return "%s (%s)" % (self.uri, self.hash)
 
+    def _get_full_path(self, context):
+        bpath = os.path.join(context.get_sources_directory(),
+                             self.filename)
+        return bpath
+
     def fetch(self, context):
-        console_ui.emit_error("TAR", "Fetch not yet implemented")
+        console_ui.emit_error("Source", "Fetch not yet implemented")
         return False
 
     def verify(self, context):
-        console_ui.emit_error("TAR", "Verify not yet implemented")
-        return False
+        bpath = self._get_full_path(context)
+
+        hash = None
+
+        with open(bpath, "r") as inp:
+            h = hashlib.sha256()
+            h.update(inp.read())
+            hash = h.hexdigest()
+        if hash != self.hash:
+            console_ui.emit_error("Source", "Incorrect hash for {}".
+                                  format(self.filename))
+            print("Found hash    : {}".format(hash))
+            print("Expected hash : {}".format(self.hash))
+            return False
+        return True
 
     def extract(self, context):
-        console_ui.emit_error("TAR", "Extract not yet implemented")
+        console_ui.emit_error("Source", "Extract not yet implemented")
         return False
 
     def remove(self, context):
-        console_ui.emit_error("TAR", "Remove not yet implemented")
+        console_ui.emit_error("Source", "Remove not yet implemented")
         return False
 
     def cached(self, context):
-        bpath = os.path.join(context.get_sources_directory(),
-                             self.filename)
+        bpath = self._get_full_path(context)
         return os.path.exists(bpath)
 
 
