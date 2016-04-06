@@ -1,0 +1,32 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+#
+#  This file is part of ypkg2
+#
+#  Copyright 2015-2016 Ikey Doherty <ikey@solus-project.com>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+
+from ypkg2.main import main
+from ypkg2 import console_ui
+
+
+import os
+
+if __name__ == "__main__":
+    # Test who we are
+    if os.geteuid() == 0:
+        if "FAKED_MODE" not in os.environ:
+            console_ui.emit_warning("Warning", "ypkg-build should be run via "
+                                    "fakeroot, not as real root user")
+    else:
+        console_ui.emit_error("Fail", "Ypkg must be run with fakeroot, or "
+                              "as the root user (not recommended)")
+        sys.exit(1)
+
+    console_ui.emit_success("Package", "Building complete")
+    main()
