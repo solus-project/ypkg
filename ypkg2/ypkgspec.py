@@ -83,6 +83,7 @@ class YpkgSpec:
     pkg_emul32 = False
     pkg_autodep = True
     pkg_extract = True
+    pkg_optimize = None
 
     # Dependencies
     pkg_builddeps = None
@@ -150,6 +151,7 @@ class YpkgSpec:
             ("builddeps", OneOrMoreString),
             ("rundeps", MultimapFormat(self, self.add_rundep, "main")),
             ("component", MultimapFormat(self, self.add_component, "main")),
+            ("optimize", unicode),
         ])
         # Build steps are handled separately
         self.build_steps = OrderedDict([

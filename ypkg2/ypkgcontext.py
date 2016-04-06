@@ -60,6 +60,10 @@ class Flags:
             newflags.extend(SPEED_FLAGS.split(" "))
         elif opt_type == "size":
             newflags.extend(SIZE_FLAGS.split(" "))
+        else:
+            console_ui.emit_warning("Flags", "Uknown optimization: {}".
+                                    format(opt_type))
+            return f
         return newflags
 
     @staticmethod
@@ -196,6 +200,10 @@ class YpkgContext:
         else:
             self.build.cc = "{}-gcc".format(conf.values.build.host)
             self.build.cxx = "{}-g++".format(conf.values.build.host)
+
+        if self.spec.pkg_optimize is not None:
+            self.build.cflags = Flags.optimize_flags(self.build.cflags,
+                                                     self.spec.pkg_optimize)
 
         if self.emul32:
             ncflags = list()

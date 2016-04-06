@@ -152,6 +152,12 @@ class ScriptGenerator:
         if self.context.build.ld_as_needed:
             self.define_export("LD_AS_NEEDED", "1")
 
+        # Handle lto correctly
+        if self.context.spec.pkg_optimize == "speed":
+            self.define_export("AR", "gcc-ar")
+            self.define_export("RANLIB", "gcc-ranlib")
+            self.define_export("NM", "gcc-nm")
+
         # Mask display
         self.define_unexport("DISPLAY")
         # Mask sudo from anyone
