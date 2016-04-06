@@ -107,6 +107,9 @@ class YpkgSpec:
     # Path to filename
     path = None
 
+    # Custom user provided patterns
+    patterns = None
+
     def add_summary(self, key, value):
         """ Add a summary to a package """
         self.summaries[key] = value
@@ -126,6 +129,13 @@ class YpkgSpec:
     def add_component(self, key, value):
         """ Set the component for a package """
         self.components[key] = value
+
+    def add_pattern(self, key, pt):
+        if key not in self.patterns:
+            self.patterns[key] = list()
+        if pt in self.patterns[key]:
+            console_ui.emit_warning("YAML", "Duplicate pattern: {}".format(pt))
+        self.patterns[key].append(pt)
 
     def __init__(self):
         # These tokens *must* exist
@@ -148,6 +158,7 @@ class YpkgSpec:
             ("emul32", bool),
             ("autodep", bool),
             ("extract", bool),
+            ("patterns", MultimapFormat(self, self.add_pattern, "main")),
             ("builddeps", OneOrMoreString),
             ("rundeps", MultimapFormat(self, self.add_rundep, "main")),
             ("component", MultimapFormat(self, self.add_component, "main")),
@@ -165,6 +176,7 @@ class YpkgSpec:
         self.descriptions = dict()
         self.rundeps = dict()
         self.components = dict()
+        self.patterns = OrderedDict()
 
     def load_from_path(self, path):
         self.path = path

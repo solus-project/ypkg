@@ -16,7 +16,7 @@ from .ypkgspec import YpkgSpec
 from .sources import SourceManager
 from .ypkgcontext import YpkgContext
 from .scripts import ScriptGenerator
-from .packages import PackageGenerator
+from .packages import PackageGenerator, PRIORITY_USER
 
 import sys
 import argparse
@@ -219,8 +219,12 @@ def build_package(filename):
             console_ui.emit_error("Build", "{} failed".format(step))
             sys.exit(1)
 
-    # Now package the root.. ?
+    # Add user patterns
     gene = PackageGenerator()
+    for pkg in spec.patterns:
+        for pt in spec.patterns[pkg]:
+            gene.add_pattern(pt, pkg, priority=PRIORITY_USER)
+
     idir = ctx.get_install_dir()
     for root, dirs, files in os.walk(idir):
         # TODO: Handle empty directories
