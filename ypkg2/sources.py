@@ -13,18 +13,71 @@
 
 from . import console_ui
 
+import os
 
-class TarSource:
+
+class YpkgSource:
+
+    def __init__(self):
+        pass
+
+    def fetch(self, context):
+        """ Fetch this source from it's given location """
+        return False
+
+    def verify(self, context):
+        """ Verify the locally obtained source """
+        return False
+
+    def extract(self, context):
+        """ Attempt extraction of this source type, if needed """
+        return False
+
+    def remove(self, context):
+        """ Attempt removal of this source type """
+        return False
+
+    def cached(self, context):
+        """ Report on whether this source is cached """
+        return False
+
+
+class TarSource(YpkgSource):
     """ Represents a simple tarball source """
+
     uri = None
     hash = None
+    filename = None
 
     def __init__(self, uri, hash):
+        YpkgSource.__init__(self)
         self.uri = uri
+        self.filename = os.path.basename(uri)
         self.hash = hash
 
     def __str__(self):
         return "%s (%s)" % (self.uri, self.hash)
+
+    def fetch(self, context):
+        console_ui.emit_error("TAR", "Fetch not yet implemented")
+        return False
+
+    def verify(self, context):
+        console_ui.emit_error("TAR", "Verify not yet implemented")
+        return False
+
+    def extract(self, context):
+        console_ui.emit_error("TAR", "Extract not yet implemented")
+        return False
+
+    def remove(self, context):
+        console_ui.emit_error("TAR", "Remove not yet implemented")
+        return False
+
+    def cached(self, context):
+        bpath = os.path.join(context.get_sources_directory(),
+                             self.filename)
+        return os.path.exists(bpath)
 
 
 class SourceManager:

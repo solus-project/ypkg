@@ -58,36 +58,46 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    # Attempt to parse the Ypkg file and ensure that it's sane.
+    build_package(args.filename)
+
+
+def build_package(filename):
+    """ Will in future be moved to a separate part of the module """
     spec = YpkgSpec()
-    if not spec.load_from_path(args.filename):
+    if not spec.load_from_path(filename):
         print("Unable to continue - aborting")
         sys.exit(1)
-
-    # Dummy content
-    print("Parsing package {} - version {}".format(
-          spec.pkg_name, spec.pkg_version))
-    if spec.pkg_homepage:
-        print("Homepage: {}".format(spec.pkg_homepage))
-
-    # Further testing
-    print("Summary: {}\nDescription: {}".format(spec.summaries["main"],
-                                                spec.descriptions["main"]))
 
     manager = SourceManager()
     if not manager.identify_sources(spec):
         print("Unable to continue - aborting")
         sys.exit(1)
 
-    ctx = YpkgContext(spec)
-    # Literally just testing.
-    scr = ScriptGenerator(ctx, spec)
+    # Dummy content
+    console_ui.emit_info(None, "Building {}-{}".
+                         format(spec.pkg_name, spec.pkg_version))
 
-    script = "{}\n{}\n{}\n".format(
-        spec.step_setup, spec.step_build, spec.step_install)
-    print(scr.escape_string(script))
+    ctx = YpkgContext(spec)
+
+    need_verify = []
+    for src in manager.sources:
+        if src.cached(ctx):
+            need_verify.append(src)
+            continue
+        if not src.fetch(ctx):
+            console_ui.emit_error("FETCH", "Cannot continue without sources")
+            sys.exit(1)
+        need_verify.append(src)
+
+    for verify in need_verify:
+        if not verify.verify(ctx):
+            console_ui.emit_error("FETCH", "Cannot verify sources")
+            sys.exit(1)
+
+    # Now extract these guys
 
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
