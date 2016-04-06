@@ -90,7 +90,7 @@ class TarSource(YpkgSource):
 
         console_ui.emit_info("Source", "Fetching: {}".format(self.uri))
         fpath = self._get_full_path(context)
-        cmd = "curl -o \"{}\" --url \"{}\"".format(
+        cmd = "curl -o \"{}\" --url \"{}\" --location".format(
                fpath, self.uri)
         try:
             r = subprocess.check_call(cmd, shell=True)
