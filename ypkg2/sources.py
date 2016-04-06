@@ -15,6 +15,7 @@ from . import console_ui
 
 import os
 import hashlib
+import subprocess
 
 
 class YpkgSource:
@@ -65,8 +66,30 @@ class TarSource(YpkgSource):
         return bpath
 
     def fetch(self, context):
-        console_ui.emit_error("Source", "Fetch not yet implemented")
-        return False
+        source_dir = context.get_sources_directory()
+
+        # Ensure source dir exists
+        if not os.path.exists(source_dir):
+            try:
+                os.makedirs(source_dir, mode=00755)
+            except Exception as e:
+                console_ui.emit_error("Source", "Cannot create sources "
+                                      "directory: {}".format(e))
+                return False
+
+        console_ui.emit_info("Source", "Fetching: {}".format(self.uri))
+        fpath = self._get_full_path(context)
+        cmd = "curl -o \"{}\" --url \"{}\"".format(
+               fpath, self.uri)
+        try:
+            r = subprocess.check_call(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_error("Source", "Failed to fetch {}".format(
+                                  self.uri))
+            print("Error follows: {}".format(e))
+            return False
+
+        return True
 
     def verify(self, context):
         bpath = self._get_full_path(context)

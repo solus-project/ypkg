@@ -95,9 +95,13 @@ def build_package(filename):
             sys.exit(1)
 
     # Now extract these guys
+    if spec.pkg_extract:
+        for src in manager.sources:
+            if not src.extract(ctx):
+                console_ui.emit_error("Source", "Cannot extract sources")
+                sys.exit(1)
 
     sys.exit(0)
-
 
 if __name__ == "__main__":
     main()
