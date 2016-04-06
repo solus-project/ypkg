@@ -139,12 +139,12 @@ def build_package(filename):
     if not clean_build_dirs(ctx):
         sys.exit(1)
 
-    # Now extract these guys
+    # Only ever extract the primary source ourselves
     if spec.pkg_extract:
-        for src in manager.sources:
-            if not src.extract(ctx):
-                console_ui.emit_error("Source", "Cannot extract sources")
-                sys.exit(1)
+        src = manager.sources[0]
+        if not src.extract(ctx):
+            console_ui.emit_error("Source", "Cannot extract sources")
+            sys.exit(1)
 
     steps = {
         'setup': spec.step_setup,
