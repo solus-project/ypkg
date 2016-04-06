@@ -140,8 +140,8 @@ class YpkgSpec:
     def __init__(self):
         # These tokens *must* exist
         self.mandatory_tokens = OrderedDict([
-            ("name", unicode),
-            ("version", unicode),
+            ("name", str),
+            ("version", str),
             ("release", int),
             ("license", OneOrMoreString),
             ("summary", MultimapFormat(self, self.add_summary, "main")),
@@ -150,7 +150,7 @@ class YpkgSpec:
         ])
         # These guys are optional
         self.optional_tokens = OrderedDict([
-            ("homepage", unicode),
+            ("homepage", str),
             ("devel", bool),
             ("clang", bool),
             ("strip", bool),

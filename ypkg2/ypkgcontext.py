@@ -120,6 +120,7 @@ class YpkgContext:
     spec = None
     emul32 = False
     files_dir = None
+    pconfig = None
 
     def __init__(self, spec, emul32=False):
         self.spec = spec
@@ -194,6 +195,8 @@ class YpkgContext:
         self.build.cxxflags = list(conf.values.build.cxxflags.split(" "))
         self.build.ldflags = list(conf.values.build.ldflags.split(" "))
         self.build.ccache = "ccache" in conf.values.build.buildhelper
+
+        self.pconfig = conf
 
         if self.spec.pkg_clang:
             self.build.cc = "clang"

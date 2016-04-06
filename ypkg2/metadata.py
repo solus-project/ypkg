@@ -14,10 +14,16 @@ from . import console_ui
 
 import os
 import pisi.util
+import pisi.metadata
+import pisi.specfile
+import pisi.package
 import stat
 from collections import OrderedDict
 
 FileTypes = OrderedDict([
+    ("/usr/lib/pkgconfig", "data"),
+    ("/usr/lib64/pkgconfig", "data"),
+    ("/usr/lib32/pkgconfig", "data"),
     ("/usr/lib", "library"),
     ("/usr/share/info", "info"),
     ("/usr/share/man", "man"),
@@ -86,4 +92,92 @@ def create_files_xml(context, package):
 
     # Temporary!
     files.write("files.xml")
-    return True
+    return files
+
+
+def create_packager(name, email):
+    packager = pisi.specfile.Packager()
+    packager.name = unicode(name)
+    packager.email = str(email)
+    return packager
+
+
+def metadata_from_package(context, package, files):
+    meta = pisi.metadata.MetaData()
+    spec = context.spec
+
+    packager = create_packager("FIXME", "FIXME@NOTFIXED.FIXIT??")
+
+    component = "fixme"
+    summary = "also fix me"
+    description = "seriously, just fix me"
+
+    # We have no histroy?!?!
+    # this just copies fields, it doesn't fix every necessary field
+    meta.source.name = spec.pkg_name
+    meta.source.homepage = spec.pkg_homepage
+    meta.source.packager = packager
+
+    meta.package.source = meta.source
+    meta.package.source.name = spec.pkg_name
+    meta.package.source.packager = packager
+    meta.package.name = package.name
+
+    update = pisi.specfile.Update()
+    update.comment = "GRAB THE CORRECT COMMENT!!"
+    update.name = packager.name
+    update.email = packager.email
+    update.date = "MAKE ME A DATE!!"
+    update.release = str(spec.pkg_release)
+    update.version = spec.pkg_version
+    meta.package.history.append(update)
+
+    meta.package.summary['en'] = summary
+    meta.package.description['en'] = description
+
+    meta.package.partOf = component
+    for license in spec.pkg_license:
+        meta.package.license.append(str(license))
+
+    for pat in package.emit_files_by_pattern():
+        path = pisi.specfile.Path()
+        path.path = pat
+        path.fileType = get_file_type(pat)
+        meta.package.files.append(path)
+
+    # TODO: Add everything else...
+    meta.source.version = spec.pkg_version
+    meta.source.release = spec.pkg_release
+    meta.package.version = spec.pkg_version
+    meta.package.release = spec.pkg_release
+
+    return meta
+
+
+def my_error_cb():
+    print("Got called, dafuq")
+
+
+def create_meta_xml(context, package, files):
+    console_ui.emit_info("Package", "Emtiting metadata.xml for {}".
+                         format(package.name))
+
+    meta = metadata_from_package(context, package, files)
+    config = context.pconfig
+
+    iSize = sum([x.size for x in files.list])
+    meta.package.installedSize = iSize
+
+    meta.package.buildHost = config.values.build.build_host
+
+    meta.package.distribution = config.values.general.distribution
+    meta.package.distributionRelease = \
+        config.values.general.distribution_release
+    meta.package.architecture = config.values.general.architecture
+    meta.package.packageFormat = pisi.package.Package.default_format
+
+    # print(metadata)
+    # TEMP!!
+    # metadata.errors = my_error_cb
+    meta.write("metadata.xml")
+    return meta

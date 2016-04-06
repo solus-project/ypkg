@@ -250,7 +250,8 @@ def build_package(filename):
                                  format(package))
             continue
         console_ui.emit_info("Package", "Files in package: {}".format(package))
-        metadata.create_files_xml(ctx, pkg)
+        files = metadata.create_files_xml(ctx, pkg)
+        spec = metadata.create_meta_xml(ctx, pkg, files)
 
     sys.exit(0)
 
