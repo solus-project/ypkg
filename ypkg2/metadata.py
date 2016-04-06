@@ -15,6 +15,30 @@ from . import console_ui
 import os
 import pisi.util
 import stat
+from collections import OrderedDict
+
+FileTypes = OrderedDict([
+    ("/usr/lib", "library"),
+    ("/usr/share/info", "info"),
+    ("/usr/share/man", "man"),
+    ("/usr/share/doc", "doc"),
+    ("/usr/share/gtk-doc", "doc"),
+    ("/usr/share/locale", "localedata"),
+    ("/usr/include", "header"),
+    ("/usr/bin", "executable"),
+    ("/bin", "executable"),
+    ("/usr/sbin", "executable"),
+    ("/sbin", "executable"),
+    ("/etc", "config"),
+])
+
+
+def get_file_type(t):
+    """ Return the fileType for a given file. Defaults to data """
+    for prefix in FileTypes:
+        if t.startswith(prefix):
+            return FileTypes[prefix]
+    return "data"
 
 
 def readlink(path):
@@ -45,9 +69,7 @@ def create_files_xml(context, package):
 
         # We don't support this concept right now in ypkg.
         permanent = None
-
-        # TODO: Fix this
-        ftype = "data"
+        ftype = get_file_type("/" + path)
 
         path = path.decode("latin1").encode('utf-8')
         file_info = pisi.files.FileInfo(path=path, type=ftype,
