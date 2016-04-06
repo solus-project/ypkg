@@ -75,7 +75,7 @@ The TODO:
  * [x] Add **extensible** macros
  * [x] Add the string-based path globbing algo
  * [x] Add necessary logic to dynamically emit the `YpkgPackage` objects
- * [ ] Emit our first native `.eopkg`
+ * [x] Emit our first native `.eopkg`
  * [ ] Fold in our dynamic dependency scanning from `eopkg` into `ypkg`
  * [ ] Add stripping
  * [ ] Add enhanced `debuginfo` packages
