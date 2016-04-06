@@ -133,7 +133,8 @@ def metadata_from_package(context, package, files):
     meta.package.summary['en'] = summary
     meta.package.description['en'] = description
 
-    meta.package.partOf = component
+    if component is not None:
+        meta.package.partOf = str(component)
     for license in spec.pkg_license:
         meta.package.license.append(str(license))
 

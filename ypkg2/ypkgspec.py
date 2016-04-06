@@ -43,7 +43,7 @@ class PackageSanity:
         for char in name[0:]:
             if char in permitted:
                 continue
-            if not char.isalpha() and not char.isnumeric():
+            if not char.isalpha() and not char.isdigit():
                 illegal.add(char)
         if len(illegal) == 0:
             return True
@@ -178,6 +178,29 @@ class YpkgSpec:
         self.components = dict()
         self.patterns = OrderedDict()
 
+    def init_defaults(self):
+        # Add some sane defaults
+        name = self.pkg_name
+        if "devel" not in self.summaries:
+            self.add_summary("devel", "Development files for {}".format(name))
+        if "32bit" not in self.summaries:
+            self.add_summary("32bit", "32-bit libraries for {}".format(name))
+        if "32bit-devel" not in self.summaries:
+            self.add_summary("32bit-devel", "Development files for 32-bit {}".
+                             format(name))
+
+        if "devel" not in self.components:
+            if self.pkg_devel:
+                self.add_component("devel", "system.devel")
+            else:
+                self.add_component("devel", "programming.devel")
+        if "32bit" not in self.components:
+            self.add_component("32bit", "emul32")
+        if "32bit-devel" not in self.components:
+            self.add_component("32bit-devel", "programming.devel")
+        if "docs" not in self.components:
+            self.add_component("docs", "programming.docs")
+
     def load_from_path(self, path):
         self.path = path
         if not os.path.exists(path):
@@ -251,7 +274,13 @@ class YpkgSpec:
             return False
         if not PackageSanity.is_name_valid(self.pkg_name):
             return False
-        # TODO: Collect keys from patterns and determine correctness
+
+        for name in self.patterns:
+            fname = self.get_package_name(name)
+            if not PackageSanity.is_name_valid(fname):
+                return False
+
+        self.init_defaults()
 
         return True
 
