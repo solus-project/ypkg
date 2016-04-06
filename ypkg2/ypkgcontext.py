@@ -15,6 +15,7 @@ from . import console_ui
 
 import pisi.config
 import os
+import shutil
 
 # These flag sets are courtesy of autospec in
 # Clear Linux Project For Intel Architecture
