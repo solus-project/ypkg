@@ -97,6 +97,8 @@ def execute_step(context, step, step_n, work_dir):
         cmd = ["/bin/bash", script_ex.name]
         try:
             subprocess.check_call(cmd, stdin=subprocess.PIPE)
+        except KeyboardInterrupt:
+            pass
         except Exception as e:
             print(e)
             return False
