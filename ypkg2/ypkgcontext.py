@@ -131,7 +131,7 @@ class YpkgContext:
 
     def get_install_dir(self):
         """ Get the install directory for the given package """
-        return os.path.abspath("{}/{}/install".format(
+        return os.path.abspath("{}/root/{}/install".format(
                                self.get_build_prefix(),
                                self.spec.pkg_name))
 
@@ -141,7 +141,7 @@ class YpkgContext:
         if self.emul32:
             buildSuffix = "build-32"
 
-        return os.path.abspath("{}/{}/{}".format(
+        return os.path.abspath("{}/root/{}/{}".format(
                                self.get_build_prefix(),
                                self.spec.pkg_name,
                                buildSuffix))

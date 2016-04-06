@@ -16,6 +16,17 @@ from . import console_ui
 import os
 import hashlib
 import subprocess
+import fnmatch
+
+KnownSourceTypes = {
+    'tar': [
+        '*.tar.*',
+        '*.tgz',
+    ],
+    'zip': [
+        '*.zip',
+    ],
+}
 
 
 class YpkgSource:
@@ -108,9 +119,65 @@ class TarSource(YpkgSource):
             return False
         return True
 
+        target = os.path.join(BallDir, os.path.basename(x))
+        ext = "unzip" if target.endswith(".zip") else "tar xf"
+        diropt = "-d" if target.endswith(".zip") else "-C"
+        cmd = "%s \"%s\" %s \"%s\"" % (ext, target, diropt, bd)
+
+    def get_extract_command_zip(self, context, bpath):
+        """ Get a command tailored for zip usage """
+        cmd = "unzip \"{}\" -d \"{}/\"".format(bpath, context.get_build_dir())
+        return cmd
+
+    def get_extract_command_tar(self, context, bpath):
+        """ Get a command tailored for tar usage """
+        cmd = "tar xf \"{}\" -C \"{}/\"".format(bpath, context.get_build_dir())
+        return cmd
+
     def extract(self, context):
-        console_ui.emit_error("Source", "Extract not yet implemented")
-        return False
+        """ Extract an archive into the context.get_build_dir() """
+        bpath = self._get_full_path(context)
+
+        # Grab the correct extraction command
+        fileType = None
+        for key in KnownSourceTypes:
+            lglobs = KnownSourceTypes[key]
+            for lglob in lglobs:
+                if fnmatch.fnmatch(self.filename, lglob):
+                    fileType = key
+                    break
+            if fileType:
+                break
+
+        if not fileType:
+            console_ui.emit_warning("Source", "Type of file {} is unknown, "
+                                    "falling back to tar handler".
+                                    format(self.filename))
+            fileType = "tar"
+
+        cmd_name = "get_extract_command_{}".format(fileType)
+        if not hasattr(self, cmd_name):
+            console_ui.emit_error("Source", "Fatal error: No handler for {}".
+                                  format(fileType))
+            return False
+
+        if not os.path.exists(context.get_build_dir()):
+            try:
+                os.makedirs(context.get_build_dir(), mode=00755)
+            except Exception as e:
+                console_ui.emit_error("Source", "Failed to construct build "
+                                      "directory")
+                print(e)
+                return False
+
+        cmd = getattr(self, cmd_name)(context, bpath)
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_error("Source", "Failed to extract {}".
+                                  format(self.filename))
+            return False
+        return True
 
     def remove(self, context):
         console_ui.emit_error("Source", "Remove not yet implemented")
