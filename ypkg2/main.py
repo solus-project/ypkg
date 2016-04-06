@@ -154,6 +154,10 @@ def build_package(filename):
         console_ui.emit_error("Build", "Failed to clean PGO directories")
         sys.exit(1)
 
+    if not ctx.clean_install():
+        console_ui.emit_error("Build", "Failed to clean install directory")
+        sys.exit(1)
+
     possible_sets = [False]
     if spec.pkg_emul32:
         possible_sets.append(True)
@@ -245,10 +249,6 @@ def build_package(filename):
                                  format(package))
             continue
         console_ui.emit_info("Package", "Files in package: {}".format(package))
-        for file in sorted(pkg.emit_files()):
-            print(" -> {}".format(file))
-        print("")
-
         metadata.create_files_xml(ctx, pkg)
 
     sys.exit(0)

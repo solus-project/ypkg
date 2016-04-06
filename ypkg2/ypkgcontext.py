@@ -276,3 +276,15 @@ class YpkgContext:
                 print(e)
                 return False
         return True
+
+    def clean_install(self):
+        """ Purge the install directory """
+        d = self.get_install_dir()
+        if not os.path.exists(d):
+            return True
+        try:
+            shutil.rmtree(d)
+        except Exception as e:
+            print(e)
+            return False
+        return True

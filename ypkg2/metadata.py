@@ -71,6 +71,11 @@ def create_files_xml(context, package):
         permanent = None
         ftype = get_file_type("/" + path)
 
+        if (stat.S_IMODE(st.st_mode) & stat.S_ISUID):
+            # Preserve compatibility with older eopkg implementation
+            console_ui.emit_warning("Package", "{} has suid bit set".
+                                    format(full_path))
+
         path = path.decode("latin1").encode('utf-8')
         file_info = pisi.files.FileInfo(path=path, type=ftype,
                                         permanent=permanent, size=fsize,
