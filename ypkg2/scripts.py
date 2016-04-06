@@ -34,8 +34,10 @@ class ScriptGenerator:
     spec = None
     exports = None
     unexports = None
+    work_dir = None
 
-    def __init__(self, context, spec):
+    def __init__(self, context, spec, work_dir):
+        self.work_dir = work_dir
         self.macros = OrderedDict()
         self.context = context
         self.spec = spec
@@ -108,7 +110,7 @@ class ScriptGenerator:
         self.define_macro("libdir", "/usr/{}".format(libdir))
         self.define_macro("LIBSUFFIX", "64")
         self.define_macro("installroot", self.context.get_install_dir())
-        self.define_macro("workdir", None)      # FIXME
+        self.define_macro("workdir", self.work_dir)
         self.define_macro("JOBS", "-j{}".format(self.context.build.jobcount))
 
         # Consider moving this somewhere else

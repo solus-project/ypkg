@@ -22,6 +22,8 @@ import sys
 import argparse
 import os
 import shutil
+import tempfile
+import subprocess
 
 
 def show_version():
@@ -73,22 +75,32 @@ def clean_build_dirs(context):
     return True
 
 
-def execute_step(context, step):
-    script = ScriptGenerator(context, context.spec)
+def execute_step(context, step, step_n, work_dir):
+    script = ScriptGenerator(context, context.spec, work_dir)
 
     exports = script.emit_exports()
 
     # Run via bash with enable and error
     full_text = "#!/bin/bash\nset -e\nset -x\n"
     # cd to the given directory
-    full_text += "\n\ncd \"$workdir\"\n"
+    full_text += "\n\ncd \"%workdir%\"\n"
 
     # Add our exports
     full_text += "\n".join(exports)
     full_text += "\n\n{}\n".format(step)
     output = script.escape_string(full_text)
-    print(output)
-    return False
+
+    with tempfile.NamedTemporaryFile(prefix="ypkg-%s" % step_n) as script_ex:
+        script_ex.write(output)
+        script_ex.flush()
+
+        cmd = ["/bin/bash", script_ex.name]
+        try:
+            subprocess.check_call(cmd, stdin=subprocess.PIPE)
+        except Exception as e:
+            print(e)
+            return False
+    return True
 
 
 def build_package(filename):
@@ -141,15 +153,17 @@ def build_package(filename):
         'check': spec.step_check
     }
 
+    work_dir = manager.get_working_dir(ctx)
+    if not work_dir:
+        sys.exit(1)
+
     for step_name in steps:
         step = steps[step_name]
         if not step:
-            console_ui.emit_info("Build", "Skipping empty step: {}".
-                                 format(step))
             continue
         console_ui.emit_info("Build", "Running step: {}".format(step_name))
 
-        if execute_step(ctx, step):
+        if execute_step(ctx, step, step_name, work_dir):
             console_ui.emit_success("Build", "{} successful".format(step_name))
             continue
         console_ui.emit_error("Build", "{} failed".format(step_name))

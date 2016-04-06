@@ -221,3 +221,16 @@ class SourceManager:
             self.sources.append(TarSource(uri, hash))
 
         return True
+
+    def get_working_dir(self, context):
+        """ Need to make this.. better. It's very tar-type now"""
+        build_dir = context.get_build_dir()
+
+        source0 = self.sources[0].filename
+        items = os.listdir(build_dir)
+        if len(items) == 1:
+            return os.path.join(build_dir, items[0])
+        for item in items:
+            if source0.startswith(item):
+                return os.path.join(build_dir, item)
+        return build_dir
