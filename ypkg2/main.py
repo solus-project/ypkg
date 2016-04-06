@@ -21,6 +21,7 @@ from .packages import PackageGenerator
 import sys
 import argparse
 import os
+import shutil
 
 
 def show_version():
@@ -61,6 +62,21 @@ def main():
     build_package(args.filename)
 
 
+def clean_build_dirs(context):
+    if os.path.exists(context.get_build_dir()):
+        try:
+            shutil.rmtree(context.get_build_dir())
+        except Exception as e:
+            console_ui.emit_error("BUILD", "Could not clean build directory")
+            print(e)
+            return False
+    return True
+
+
+def execute_step(context, step):
+    return False
+
+
 def build_package(filename):
     """ Will in future be moved to a separate part of the module """
     spec = YpkgSpec()
@@ -94,12 +110,36 @@ def build_package(filename):
             console_ui.emit_error("Source", "Cannot verify sources")
             sys.exit(1)
 
+    if not clean_build_dirs(ctx):
+        sys.exit(1)
+
     # Now extract these guys
     if spec.pkg_extract:
         for src in manager.sources:
             if not src.extract(ctx):
                 console_ui.emit_error("Source", "Cannot extract sources")
                 sys.exit(1)
+
+    steps = {
+        'setup': spec.step_setup,
+        'build': spec.step_build,
+        'install': spec.step_install,
+        'check': spec.step_check
+    }
+
+    for step_name in steps:
+        step = steps[step_name]
+        if not step:
+            console_ui.emit_info("Build", "Skipping empty step: {}".
+                                 format(step))
+            continue
+        console_ui.emit_info("Build", "Running step: {}".format(step_name))
+
+        if execute_step(ctx, step):
+            console_ui.emit_success("Build", "{} successful".format(step_name))
+            continue
+        console_ui.emit_error("Build", "{} failed".format(step_name))
+        sys.exit(1)
 
     sys.exit(0)
 
