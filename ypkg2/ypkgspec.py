@@ -254,3 +254,23 @@ class YpkgSpec:
         # TODO: Collect keys from patterns and determine correctness
 
         return True
+
+    def get_package_name(self, name):
+        if name == "main":
+            return self.pkg_name
+        return "{}-{}".format(self.pkg_name, name)
+
+    def get_component(self, name):
+        if name in self.components:
+            return self.components[name]
+        return None
+
+    def get_description(self, name):
+        if name not in self.descriptions:
+            return self.descriptions["main"]
+        return self.summaries[name]
+
+    def get_summary(self, name):
+        if name not in self.summaries:
+            return self.summaries["main"]
+        return self.summaries[name]

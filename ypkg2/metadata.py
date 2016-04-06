@@ -108,12 +108,10 @@ def metadata_from_package(context, package, files):
 
     packager = create_packager("FIXME", "FIXME@NOTFIXED.FIXIT??")
 
-    component = "fixme"
-    summary = "also fix me"
-    description = "seriously, just fix me"
+    component = context.spec.get_component(package.name)
+    summary = context.spec.get_summary(package.name)
+    description = context.spec.get_description(package.name)
 
-    # We have no histroy?!?!
-    # this just copies fields, it doesn't fix every necessary field
     meta.source.name = spec.pkg_name
     meta.source.homepage = spec.pkg_homepage
     meta.source.packager = packager
@@ -121,7 +119,7 @@ def metadata_from_package(context, package, files):
     meta.package.source = meta.source
     meta.package.source.name = spec.pkg_name
     meta.package.source.packager = packager
-    meta.package.name = context.get_package_name(package.name)
+    meta.package.name = context.spec.get_package_name(package.name)
 
     update = pisi.specfile.Update()
     update.comment = "GRAB THE CORRECT COMMENT!!"
@@ -139,12 +137,6 @@ def metadata_from_package(context, package, files):
     for license in spec.pkg_license:
         meta.package.license.append(str(license))
 
-    for pat in package.emit_files_by_pattern():
-        path = pisi.specfile.Path()
-        path.path = pat
-        path.fileType = get_file_type(pat)
-        meta.package.files.append(path)
-
     # TODO: Add everything else...
     meta.source.version = spec.pkg_version
     meta.source.release = spec.pkg_release
@@ -154,13 +146,9 @@ def metadata_from_package(context, package, files):
     return meta
 
 
-def my_error_cb():
-    print("Got called, dafuq")
-
-
 def construct_package_name(context, package):
     extension = "eopkg"
-    name = context.get_package_name(package.name)
+    name = context.spec.get_package_name(package.name)
     config = context.pconfig
 
     did = config.values.general.distribution_release
