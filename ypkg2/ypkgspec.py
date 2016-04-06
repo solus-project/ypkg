@@ -97,7 +97,7 @@ class YpkgSpec:
     step_build = None
     step_install = None
     step_check = None
-    step_pgo = None
+    step_profile = None
 
     summaries = None
     descriptions = None
@@ -159,7 +159,7 @@ class YpkgSpec:
             ("build", unicode),
             ("install", unicode),
             ("check", unicode),
-            ("pgo", unicode),
+            ("profile", unicode),
         ])
         self.summaries = dict()
         self.descriptions = dict()

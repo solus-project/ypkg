@@ -141,7 +141,7 @@ def build_package(filename):
         'build': spec.step_build,
         'install': spec.step_install,
         'check': spec.step_check,
-        'pgo': spec.step_pgo,
+        'profile': spec.step_profile,
     }
 
     r_runs = list()
@@ -159,12 +159,12 @@ def build_package(filename):
     for emul32 in possible_sets:
         r_steps = list()
         c = YpkgContext(spec, emul32=emul32)
-        if spec.step_pgo is not None:
+        if spec.step_profile is not None:
             c = YpkgContext(spec, emul32=emul32)
             c.enable_pgo_generate()
             r_steps.append(['setup', c])
             r_steps.append(['build', c])
-            r_steps.append(['pgo', c])
+            r_steps.append(['profile', c])
             c = YpkgContext(spec, emul32=emul32)
             c.enable_pgo_use()
             r_steps.append(['setup', c])
