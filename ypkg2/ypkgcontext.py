@@ -128,6 +128,11 @@ class YpkgContext:
         self.build = BuildConfig()
         self.init_config()
 
+    def get_package_name(self, name):
+        if name == "main":
+            return self.spec.pkg_name
+        return "{}-{}".format(self.spec.pkg_name, name)
+
     def get_path(self):
         """ Return the path, mutated to include ccache if needed """
         default_path = "/usr/bin:/bin:/usr/sbin:/sbin"

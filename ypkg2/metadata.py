@@ -121,7 +121,7 @@ def metadata_from_package(context, package, files):
     meta.package.source = meta.source
     meta.package.source.name = spec.pkg_name
     meta.package.source.packager = packager
-    meta.package.name = package.name
+    meta.package.name = context.get_package_name(package.name)
 
     update = pisi.specfile.Update()
     update.comment = "GRAB THE CORRECT COMMENT!!"
@@ -158,6 +158,21 @@ def my_error_cb():
     print("Got called, dafuq")
 
 
+def construct_package_name(context, package):
+    extension = "eopkg"
+    name = context.get_package_name(package.name)
+    config = context.pconfig
+
+    did = config.values.general.distribution_release
+    parts = [
+              name,
+              context.spec.pkg_version,
+              str(context.spec.pkg_release),
+              did,
+              config.values.general.architecture]
+    return "{}.{}".format("-".join(parts), extension)
+
+
 def create_meta_xml(context, package, files):
     console_ui.emit_info("Package", "Emtiting metadata.xml for {}".
                          format(package.name))
@@ -176,8 +191,19 @@ def create_meta_xml(context, package, files):
     meta.package.architecture = config.values.general.architecture
     meta.package.packageFormat = pisi.package.Package.default_format
 
-    # print(metadata)
-    # TEMP!!
-    # metadata.errors = my_error_cb
     meta.write("metadata.xml")
+
+    name = construct_package_name(context, package)
+    pkg = pisi.package.Package(name, "w",
+                               format=pisi.package.Package.default_format,
+                               tmp_dir="NEEDSADIR")
+
+    pkg.add_metadata_xml("metadata.xml")
+    pkg.add_files_xml("files.xml")
+
+    for finfo in pkg.files.list:
+        orgname = os.path.join(context.get_install_dir(), finfo.path)
+        orgname = orgname.encode('utf-8').decode('utf-8').encode("latin1")
+        pkg.add_to_install(orgname, finfo.path)
+    pkg.close()
     return meta
