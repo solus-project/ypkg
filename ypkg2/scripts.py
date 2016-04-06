@@ -143,6 +143,7 @@ class ScriptGenerator:
         self.define_export("version", "%version%")
         self.define_export("sources", "%sources%")
         self.define_export("pkgfiles", "%PKGFILES%")
+        self.define_export("installdir", "%installroot%")
         # self.define_export("LD_AS_NEEDED", "1")
 
         # Mask display
