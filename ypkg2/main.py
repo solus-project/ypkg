@@ -219,7 +219,40 @@ def build_package(filename):
             console_ui.emit_error("Build", "{} failed".format(step))
             sys.exit(1)
 
+    # Now package the root.. ?
+    gene = PackageGenerator()
+    idir = ctx.get_install_dir()
+    for root, dirs, files in os.walk(idir):
+        # TODO: Handle empty directories
+        for f in files:
+            fpath = os.path.join(root, f)
+
+            localpath = remove_prefix(fpath, idir)
+
+            gene.add_file(localpath)
+
+    # TODO: Ensure main is always first
+    for package in sorted(gene.packages):
+        pkg = gene.packages[package]
+        files = sorted(pkg.emit_files())
+        if len(files) == 0:
+            console_ui.emit_info("Package", "Skipping empty package: {}".
+                                 format(package))
+            continue
+        console_ui.emit_info("Package", "Files in package: {}".format(package))
+        for file in sorted(pkg.emit_files()):
+            print(" -> {}".format(file))
+        print("")
+
     sys.exit(0)
+
+
+def remove_prefix(fpath, prefix):
+    if fpath.startswith(prefix):
+        fpath = fpath[len(prefix)+1:]
+    if fpath[0] != '/':
+        fpath = "/" + fpath
+    return fpath
 
 if __name__ == "__main__":
     main()

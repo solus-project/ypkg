@@ -118,6 +118,21 @@ class PackageGenerator:
         self.patterns = dict()
         self.packages = dict()
 
+        # TODO: Make this come from a config file!
+        self.add_pattern("/usr/lib64/lib*.so", "devel")
+        self.add_pattern("/usr/lib64/lib*.a", "devel")
+        self.add_pattern("/usr/lib/lib*.so", "devel")
+        self.add_pattern("/usr/lib/lib*.a", "devel")
+        self.add_pattern("/usr/lib/pkgconfig/*.pc", "devel")
+        self.add_pattern("/usr/lib64/pkgconfig/*.pc", "devel")
+        self.add_pattern("/usr/include/", "devel")
+        self.add_pattern("/usr/share/man3/", "devel")
+
+        self.add_pattern("/usr/lib32/lib*.so", "32bit-devel")
+        self.add_pattern("/usr/lib32/lib*.a", "32bit-devel")
+        self.add_pattern("/usr/lib32/pkgconfig/*.pc", "32bit-devel")
+        self.add_pattern("/usr/lib32/lib*.so.*", "32bit")
+
     def add_file(self, path):
         """ Add a file path to the owned list and place it into the correct
             package (main or named subpackage) according to the highest found
