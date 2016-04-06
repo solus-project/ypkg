@@ -104,11 +104,15 @@ class ScriptGenerator:
 
     def init_default_macros(self):
 
-        # Until we get more clever, this is /usr/lib64
-        libdir = "lib64"
+        if self.context.emul32:
+            self.define_macro("libdir", "/usr/lib32")
+            self.define_macro("LIBSUFFIX", "32")
+            self.define_macro("PREFIX", "/usr")
+        else:
+            self.define_macro("libdir", "/usr/lib64")
+            self.define_macro("LIBSUFFIX", "64")
+            self.define_macro("PREFIX", "/emul32")
 
-        self.define_macro("libdir", "/usr/{}".format(libdir))
-        self.define_macro("LIBSUFFIX", "64")
         self.define_macro("installroot", self.context.get_install_dir())
         self.define_macro("workdir", self.work_dir)
         self.define_macro("JOBS", "-j{}".format(self.context.build.jobcount))
@@ -120,7 +124,6 @@ class ScriptGenerator:
 
         self.define_macro("HOST", self.context.build.host)
         self.define_macro("PKGNAME", self.spec.pkg_name)
-        self.define_macro("PREFIX", "/usr")
         self.define_macro("PKGFILES", self.context.files_dir)
 
         self.define_macro("package", self.context.spec.pkg_name)
@@ -144,6 +147,8 @@ class ScriptGenerator:
         self.define_export("sources", "%sources%")
         self.define_export("pkgfiles", "%PKGFILES%")
         self.define_export("installdir", "%installroot%")
+        self.define_export("CC", self.context.build.cc)
+        self.define_export("CXX", self.context.build.cxx)
         if self.context.build.ld_as_needed:
             self.define_export("LD_AS_NEEDED", "1")
 

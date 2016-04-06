@@ -87,6 +87,9 @@ class BuildConfig:
     cxxflags = None
     ldflags = None
 
+    cc = None
+    cxx = None
+
     ld_as_needed = True  # Make this configurable at some point.
 
     jobcount = 2
@@ -186,6 +189,37 @@ class YpkgContext:
         self.build.cxxflags = list(conf.values.build.cxxflags.split(" "))
         self.build.ldflags = list(conf.values.build.ldflags.split(" "))
         self.build.ccache = "ccache" in conf.values.build.buildhelper
+
+        if self.spec.pkg_clang:
+            self.build.cc = "clang"
+            self.build.cxx = "clang++"
+        else:
+            self.build.cc = "{}-gcc".format(conf.values.build.host)
+            self.build.cxx = "{}-g++".format(conf.values.build.host)
+
+        if self.emul32:
+            ncflags = list()
+            for flag in self.build.cflags:
+                if flag.startswith("-march="):
+                    flag = "-march=i686"
+                ncflags.append(flag)
+            self.build.cflags = ncflags
+            ncxxflags = list()
+            for flag in self.build.cxxflags:
+                if flag.startswith("-march="):
+                    flag = "-march=i686"
+                ncxxflags.append(flag)
+            self.build.cxxflags = ncxxflags
+
+            self.build.host = "i686-pc-linux-gnu"
+
+            # Get the multilib gcc stuff set up
+            if self.spec.pkg_clang:
+                self.build.cc = "clang -m32"
+                self.build.cxx = "clang++ -m32"
+            else:
+                self.build.cc = "gcc -m32"
+                self.build.cxx = "g++ -m32"
 
         # Set the $pkgfiles up properly
         spec_dir = os.path.dirname(os.path.abspath(self.spec.path))
