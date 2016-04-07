@@ -289,6 +289,12 @@ def build_package(filename):
 
                     gene.add_file(localpath)
 
+    if len(gene.packages) == 0:
+        console_ui.emit_error("Package", "No resulting packages found")
+        wk = "https://wiki.solus-project.com/Packaging"
+        print("Ensure your files end up in $installdir. Did you mean to "
+              "use %make_install?\n\nPlease see the wiki: {}".format(wk))
+
     # TODO: Ensure main is always first
     for package in sorted(gene.packages):
         pkg = gene.packages[package]
