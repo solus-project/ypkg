@@ -297,7 +297,7 @@ class YpkgSpec:
     def get_description(self, name):
         if name not in self.descriptions:
             return self.descriptions["main"]
-        return self.summaries[name]
+        return self.descriptions[name]
 
     def get_summary(self, name):
         if name not in self.summaries:
