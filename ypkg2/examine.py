@@ -55,6 +55,9 @@ class PackageExaminer:
         return None
 
     def store_debug(self, context, pretty, file, magic_string):
+        if not context.can_dbginfo:
+            return
+
         did = self.get_debug_path(context, file, magic_string)
 
         if did is None:
