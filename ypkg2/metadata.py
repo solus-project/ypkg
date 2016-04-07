@@ -18,6 +18,7 @@ import pisi.metadata
 import pisi.specfile
 import pisi.package
 import stat
+import subprocess
 from collections import OrderedDict
 
 FileTypes = OrderedDict([
@@ -37,6 +38,9 @@ FileTypes = OrderedDict([
     ("/sbin", "executable"),
     ("/etc", "config"),
 ])
+
+# 1980, Jan 1, for zip
+TSTAMP_META = 315532800
 
 
 def get_file_type(t):
@@ -88,8 +92,9 @@ def create_files_xml(context, package):
                                         mode=oct(stat.S_IMODE(st.st_mode)))
         files.append(file_info)
 
-    # Temporary!
-    files.write(os.path.join(context.get_packaging_dir(), "files.xml"))
+    fpath = os.path.join(context.get_packaging_dir(), "files.xml")
+    files.write(fpath)
+    os.utime(fpath, (TSTAMP_META, TSTAMP_META))
     return files
 
 
@@ -179,7 +184,9 @@ def create_meta_xml(context, package, files):
     meta.package.architecture = config.values.general.architecture
     meta.package.packageFormat = pisi.package.Package.default_format
 
-    meta.write(os.path.join(context.get_packaging_dir(), "metadata.xml"))
+    mpath = os.path.join(context.get_packaging_dir(), "metadata.xml")
+    meta.write(mpath)
+    os.utime(mpath, (TSTAMP_META, TSTAMP_META))
 
     return meta
 
@@ -207,5 +214,21 @@ def create_eopkg(context, package):
         # old eopkg trick to ensure the file names are all valid
         orgname = os.path.join(context.get_install_dir(), finfo.path)
         orgname = orgname.encode('utf-8').decode('utf-8').encode("latin1")
+        """
+            This is all that's needed for reproducible builds right now.
+            We need to grab the build time from somewhere sensible though
+
+        if os.path.islink(orgname) and not os.path.isdir(orgname):
+            cmd = "touch -d \"@{}\" -h \"{}\"".format(TSTAMP_META, orgname)
+            try:
+                subprocess.check_call(cmd, shell=True)
+            except Exception as e:
+                print e
+                pass
+        else:
+            os.utime(orgname, (TSTAMP_META, TSTAMP_META))"""
         pkg.add_to_install(orgname, finfo.path)
+
+    pfile = os.path.join(pdir, "install.tar.xz")
+    os.utime(pfile, (TSTAMP_META, TSTAMP_META))
     pkg.close()

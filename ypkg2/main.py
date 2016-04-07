@@ -19,6 +19,7 @@ from .scripts import ScriptGenerator
 from .packages import PackageGenerator, PRIORITY_USER
 from .examine import PackageExaminer
 from . import metadata
+from .metadata import TSTAMP_META
 
 import sys
 import argparse
@@ -257,11 +258,16 @@ def build_package(filename):
 
             localpath = remove_prefix(fpath, idir)
 
+            os.utime(fpath, (TSTAMP_META, TSTAMP_META))
             gene.add_file(localpath)
         if len(dirs) == 0 and len(files) == 0:
             console_ui.emit_warning("Package", "Including empty directory: {}".
                                     format(remove_prefix(root, idir)))
             gene.add_file(remove_prefix(root, idir))
+
+        for d in dirs:
+            fpath = os.path.join(root, d)
+            os.utime(fpath, (TSTAMP_META, TSTAMP_META))
 
     if not os.path.exists(ctx.get_packaging_dir()):
         try:
