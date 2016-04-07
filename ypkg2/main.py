@@ -249,7 +249,6 @@ def build_package(filename):
 
     idir = ctx.get_install_dir()
     for root, dirs, files in os.walk(idir):
-        # TODO: Handle empty directories
         for f in files:
             fpath = os.path.join(root, f)
 
