@@ -220,7 +220,6 @@ class PackageExaminer:
         # TODO: Grab new dependencies from the examine operation and apply
         infos = [x.get() for x in results]
 
-
         for r in removed:
             package.remove_file(r)
         return True
