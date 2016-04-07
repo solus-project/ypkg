@@ -271,6 +271,21 @@ def build_package(filename):
                               "packages.")
         sys.exit(1)
 
+    dbgs = ["/usr/lib64/debug", "/usr/lib/debug", "/usr/lib32/debug"]
+    if ctx.can_dbginfo:
+        for dbg in dbgs:
+            fpath = os.path.join(ctx.get_install_dir(), dbg[1:])
+            if not os.path.exists(fpath):
+                continue
+            for roots, dirs, files in os.walk(fpath):
+                # TODO: Handle empty directories
+                for f in files:
+                    fpath = os.path.join(root, f)
+
+                    localpath = remove_prefix(fpath, idir)
+
+                    gene.add_file(localpath)
+
     # TODO: Ensure main is always first
     for package in sorted(gene.packages):
         pkg = gene.packages[package]

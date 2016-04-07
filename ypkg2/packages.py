@@ -29,6 +29,7 @@ class DefaultPolicy(StringPathGlob):
         StringPathGlob.__init__(self, "a")
         pass
 
+
 class Package:
 
     patterns = None
@@ -158,6 +159,11 @@ class PackageGenerator:
         self.add_pattern("/usr/lib32/lib*.a", "32bit-devel")
         self.add_pattern("/usr/lib32/pkgconfig/*.pc", "32bit-devel")
         self.add_pattern("/usr/lib32/lib*.so.*", "32bit")
+
+        # Debug infos
+        self.add_pattern("/usr/lib64/debug/", "dbginfo")
+        self.add_pattern("/usr/lib/debug/", "dbginfo")
+        self.add_pattern("/usr/lib32/debug/", "32bit-dbginfo")
 
     def add_file(self, path):
         """ Add a file path to the owned list and place it into the correct

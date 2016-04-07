@@ -122,6 +122,8 @@ class YpkgContext:
     files_dir = None
     pconfig = None
 
+    can_dbginfo = False
+
     def __init__(self, spec, emul32=False):
         self.spec = spec
         self.emul32 = emul32
@@ -202,6 +204,7 @@ class YpkgContext:
         self.build.ldflags = list(conf.values.build.ldflags.split(" "))
         self.build.ccache = "ccache" in conf.values.build.buildhelper
 
+        self.can_dbginfo = conf.values.build.generatedebug
         self.pconfig = conf
 
         if self.spec.pkg_clang:

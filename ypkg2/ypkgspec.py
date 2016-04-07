@@ -201,6 +201,17 @@ class YpkgSpec:
         if "docs" not in self.components:
             self.add_component("docs", "programming.docs")
 
+        # debuginfos
+        if "dbginfo" not in self.components:
+            self.add_component("dbginfo", "debug")
+        if "dbginfo" not in self.summaries:
+            self.add_summary("dbginfo", "Debug symbols for {}".format(name))
+        if "32bit-dbginfo" not in self.components:
+            self.add_component("32bit-dbginfo", "debug")
+        if "32bit-dbginfo" not in self.summaries:
+            self.add_summary("32bit-dbginfo", "32-bit debug symbols for {}"
+                             .format(name))
+
     def load_from_path(self, path):
         self.path = path
         if not os.path.exists(path):
