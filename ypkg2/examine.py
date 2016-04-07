@@ -218,10 +218,8 @@ class PackageExaminer:
         pool.join()
 
         # TODO: Grab new dependencies from the examine operation and apply
-        for i in results:
-            b = i.get()
-            if not b:
-                return False
+        infos = [x.get() for x in results]
+
 
         for r in removed:
             package.remove_file(r)
