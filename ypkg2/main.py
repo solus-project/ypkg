@@ -57,10 +57,23 @@ def main():
 
     # Grab filename
     if not args.filename:
-        console_ui.emit_error("Error", "Please provide a filename to ypkg")
+        console_ui.emit_error("Error",
+                              "Please provide a filename to ypkg-build")
         print("")
         parser.print_help()
         sys.exit(1)
+
+    # Test who we are
+    if os.geteuid() == 0:
+        if "FAKED_MODE" not in os.environ:
+            console_ui.emit_warning("Warning", "ypkg-build should be run via "
+                                    "fakeroot, not as real root user")
+    else:
+        console_ui.emit_error("Fail", "ypkg-build must be run with fakeroot, "
+                              "or as the root user (not recommended)")
+        sys.exit(1)
+
+    console_ui.emit_success("Package", "Building complete")
 
     build_package(args.filename)
 

@@ -15,18 +15,5 @@ from ypkg2.main import main
 from ypkg2 import console_ui
 
 
-import os
-
 if __name__ == "__main__":
-    # Test who we are
-    if os.geteuid() == 0:
-        if "FAKED_MODE" not in os.environ:
-            console_ui.emit_warning("Warning", "ypkg-build should be run via "
-                                    "fakeroot, not as real root user")
-    else:
-        console_ui.emit_error("Fail", "Ypkg must be run with fakeroot, or "
-                              "as the root user (not recommended)")
-        sys.exit(1)
-
-    console_ui.emit_success("Package", "Building complete")
     main()
