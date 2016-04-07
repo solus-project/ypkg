@@ -16,6 +16,7 @@ import magic
 import re
 import os
 import subprocess
+import shutil
 
 
 class PackageExaminer:
@@ -169,7 +170,10 @@ class PackageExaminer:
                 return False
             if self.should_nuke_file("/" + file, fpath, mgs):
                 try:
-                    os.unlink(fpath)
+                    if os.path.isfile(fpath):
+                        os.unlink(fpath)
+                    else:
+                        shutil.rmtree(fpath)
                 except Exception as e:
                     console_ui.emit_error("Clean", "Failed to remove unwanted"
                                           "file: {}".format(e))
