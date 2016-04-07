@@ -17,6 +17,7 @@ from .sources import SourceManager
 from .ypkgcontext import YpkgContext
 from .scripts import ScriptGenerator
 from .packages import PackageGenerator, PRIORITY_USER
+from .examine import PackageExaminer
 from . import metadata
 
 import sys
@@ -263,6 +264,12 @@ def build_package(filename):
             console_ui.emit_error("Package", "Failed to create pkg dir")
             print(e)
             sys.exit(1)
+
+    exa = PackageExaminer()
+    if not exa.examine_packages(ctx, gene.packages):
+        console_ui.emit_error("Package", "Failed to correctly examine all "
+                              "packages.")
+        sys.exit(1)
 
     # TODO: Ensure main is always first
     for package in sorted(gene.packages):
