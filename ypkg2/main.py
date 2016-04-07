@@ -266,7 +266,7 @@ def build_package(filename):
             sys.exit(1)
 
     exa = PackageExaminer()
-    if not exa.examine_packages(ctx, gene.packages):
+    if not exa.examine_packages(ctx, gene.packages.values()):
         console_ui.emit_error("Package", "Failed to correctly examine all "
                               "packages.")
         sys.exit(1)
