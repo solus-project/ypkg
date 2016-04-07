@@ -78,6 +78,6 @@ The TODO:
  * [x] Emit our first native `.eopkg`
  * [ ] Fold in our dynamic dependency scanning from `eopkg` into `ypkg`
  * [x] Add stripping
- * [ ] Add enhanced `debuginfo` packages
+ * [x] Add enhanced `debuginfo` packages
  * [ ] Release "ypkg2"
  * [ ] Add support for reproducible builds
