@@ -21,6 +21,7 @@ import os
 
 PRIORITY_DEFAULT = 0    # Standard internal priority for a pattern
 PRIORITY_USER = 100     # Priority for a user pattern, do what they say.
+DBG = 200               # Never allow the user to override these guys.
 
 
 class DefaultPolicy(StringPathGlob):
@@ -160,10 +161,10 @@ class PackageGenerator:
         self.add_pattern("/usr/lib32/pkgconfig/*.pc", "32bit-devel")
         self.add_pattern("/usr/lib32/lib*.so.*", "32bit")
 
-        # Debug infos
-        self.add_pattern("/usr/lib64/debug/", "dbginfo")
-        self.add_pattern("/usr/lib/debug/", "dbginfo")
-        self.add_pattern("/usr/lib32/debug/", "32bit-dbginfo")
+        # Debug infos get highest priority. you don't override these guys.
+        self.add_pattern("/usr/lib64/debug/", "dbginfo", priority=DBG)
+        self.add_pattern("/usr/lib/debug/", "dbginfo", priority=DBG)
+        self.add_pattern("/usr/lib32/debug/", "32bit-dbginfo", priority=DBG)
 
     def add_file(self, path):
         """ Add a file path to the owned list and place it into the correct
