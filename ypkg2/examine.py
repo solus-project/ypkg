@@ -33,7 +33,62 @@ class PackageExaminer:
         self.r_soname = re.compile(r".*Library soname: \[(.*)\].*")
         self.libtool_file = re.compile("libtool library file, ASCII text.*")
 
-    def strip_file(self, context, pretty, file, mode=None):
+    def get_debug_path(self, context, file, magic_string):
+        """ Grab the NT_GNU_BUILD_ID """
+        cmd = "LC_ALL=C readelf -n \"{}\"".format(file)
+        try:
+            lines = subprocess.check_output(cmd, shell=True)
+        except Exception as e:
+            return None
+
+        for line in lines.split("\n"):
+            if "Build ID:" not in line:
+                continue
+            v = line.split(":")[1].strip()
+
+            libdir = "/usr/lib"
+            if "ELF 32" in magic_string:
+                libdir = "/usr/lib32"
+
+            path = os.path.join(libdir, "debug", ".build-id", v[0:2], v[2:])
+            return path + ".debug"
+        return None
+
+    def store_debug(self, context, pretty, file, magic_string):
+        did = self.get_debug_path(context, file, magic_string)
+
+        if did is None:
+            if "ELF 32" in magic_string:
+                did = "/usr/lib32/debug/{}.debug".format(pretty)
+            else:
+                did = "/usr/lib/debug/{}.debug".format(pretty)
+
+        did_full = os.path.join(context.get_install_dir(), did[1:])
+
+        dirs = os.path.dirname(did_full)
+        if not os.path.exists(dirs):
+            try:
+                os.makedirs(dirs, mode=00755)
+            except Exception as e:
+                console_ui.emit_error("Debug", "Failed to make directory")
+                print e
+                return
+
+        cmd = "objcopy --only-keep-debug \"{}\" \"{}\"".format(file, did_full)
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_warning("objcopy", "Failed --only-keep-debug")
+            return
+        cmd = "objcopy --add-gnu-debuglink=\"{}\" \"{}\"".format(did_full,
+                                                                 file)
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_warning("objcopy", "Failed --add-gnu-debuglink")
+            return
+
+    def strip_file(self, context, pretty, file, magic_string, mode=None):
         """ Schedule a strip, basically. """
         if not context.spec.pkg_strip:
             return
@@ -61,29 +116,35 @@ class PackageExaminer:
                                     format(pretty))
             print(e)
 
-    def examine_file(self, context, package, pretty, file, magic_string):
+    def examine_file(self, context, package, pretty, file, mgs):
 
-        if self.v_dyn.match(magic_string):
+        if self.v_dyn.match(mgs):
             # Get soname, direct deps and strip
-            self.strip_file(context, pretty, file, mode="shared")
-        elif self.v_bin.match(magic_string):
+            self.store_debug(context, pretty, file, mgs)
+            self.strip_file(context, pretty, file, mgs, mode="shared")
+        elif self.v_bin.match(mgs):
             # Get direct deps, and strip
-            self.strip_file(context, pretty, file, mode="executable")
-        elif self.v_rel.match(magic_string):
+            self.store_debug(context, pretty, file, mgs)
+            self.strip_file(context, pretty, file, mgs, mode="executable")
+        elif self.v_rel.match(mgs):
             # Kernel object in all probability
             if file.endswith(".ko"):
-                self.strip_file(context, pretty, file, mode="ko")
-        elif magic_string == "current ar archive":
+                self.store_debug(context, pretty, file, mgs)
+                self.strip_file(context, pretty, file, mgs, mode="ko")
+        elif mgs == "current ar archive":
             # Strip only.
-            self.strip_file(context, pretty, file, mode="ar")
+            self.strip_file(context, pretty, file, mgs, mode="ar")
         else:
             return True
         return True
 
-    def should_nuke_file(self, file, mgs):
+    def should_nuke_file(self, pretty, file, mgs):
         # it's not that we hate.. Actually, no, we do. We hate you libtool.
         if self.libtool_file.match(mgs):
             return True
+        if pretty == "/usr/share/info/dir":
+            return True
+        return False
 
     def examine_package(self, context, package):
         """ Examine the given package and update symbols, etc. """
@@ -103,7 +164,7 @@ class PackageExaminer:
                 continue
             if not self.examine_file(context, package, "/" + file, fpath, mgs):
                 return False
-            if self.should_nuke_file(fpath, mgs):
+            if self.should_nuke_file("/" + file, fpath, mgs):
                 try:
                     os.unlink(fpath)
                 except Exception as e:

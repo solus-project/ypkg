@@ -277,7 +277,7 @@ def build_package(filename):
             fpath = os.path.join(ctx.get_install_dir(), dbg[1:])
             if not os.path.exists(fpath):
                 continue
-            for roots, dirs, files in os.walk(fpath):
+            for root, dirs, files in os.walk(fpath):
                 # TODO: Handle empty directories
                 for f in files:
                     fpath = os.path.join(root, f)
