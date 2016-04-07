@@ -29,7 +29,6 @@ class DefaultPolicy(StringPathGlob):
         StringPathGlob.__init__(self, "a")
         pass
 
-
 class Package:
 
     patterns = None
@@ -67,6 +66,7 @@ class Package:
         self.depend_symbols = set()
         self.depend_pkgconfig = set()
         self.depend_pkgconfig32 = set()
+        self.default_policy = DefaultPolicy()
 
     def get_pattern(self, path):
         """ Return a matching pattern for the given path.
@@ -74,7 +74,7 @@ class Package:
             multiple layers of priorities """
         matches = [p for p in self.patterns if p.match(path)]
         if len(matches) == 0:
-            return None
+            return self.default_policy
 
         matches = sorted(matches, key=StringPathGlob.get_priority,
                          reverse=True)
@@ -83,7 +83,7 @@ class Package:
     def add_file(self, pattern, path):
         """ Add a file by a given pattern to this package """
         if pattern is None:
-            pattern = DefaultPolicy()
+            pattern = self.default_policy
         if pattern not in self.patterns:
             self.patterns[pattern] = set()
         self.patterns[pattern].add(path)
@@ -94,8 +94,8 @@ class Package:
         pat = self.get_pattern(path)
         if not pat:
             return
-        if path in self.patterns[pattern]:
-            self.patterns[pattern].remove(path)
+        if path in self.patterns[pat]:
+            self.patterns[pat].remove(path)
         if path in self.files:
             self.files.remove(path)
 

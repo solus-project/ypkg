@@ -31,6 +31,7 @@ class PackageExaminer:
         self.shared_lib = re.compile(r".*Shared library: \[(.*)\].*")
         self.r_path = re.compile(r".*Library rpath: \[(.*)\].*")
         self.r_soname = re.compile(r".*Library soname: \[(.*)\].*")
+        self.libtool_file = re.compile("libtool library file, ASCII text.*")
 
     def strip_file(self, context, pretty, file, mode=None):
         """ Schedule a strip, basically. """
@@ -79,11 +80,18 @@ class PackageExaminer:
             return True
         return True
 
+    def should_nuke_file(self, file, mgs):
+        # it's not that we hate.. Actually, no, we do. We hate you libtool.
+        if self.libtool_file.match(mgs):
+            return True
+
     def examine_package(self, context, package):
         """ Examine the given package and update symbols, etc. """
         install_dir = context.get_install_dir()
 
         # Right now we actually only care about magic matching
+        removed = set()
+
         for file in package.emit_files():
             if file[0] == '/':
                 file = file[1:]
@@ -95,6 +103,20 @@ class PackageExaminer:
                 continue
             if not self.examine_file(context, package, "/" + file, fpath, mgs):
                 return False
+            if self.should_nuke_file(fpath, mgs):
+                try:
+                    os.unlink(fpath)
+                except Exception as e:
+                    console_ui.emit_error("Clean", "Failed to remove unwanted"
+                                          "file: {}".format(e))
+                    return False
+                console_ui.emit_info("Clean", "Removed unwanted file: {}".
+                                     format("/" + file))
+                removed.add("/" + file)
+
+        for r in removed:
+            package.remove_file(r)
+
         return True
 
     def examine_packages(self, context, packages):
