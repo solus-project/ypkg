@@ -14,7 +14,7 @@
 from . import console_ui
 from . import yamlhelper
 
-from yamlhelper import OneOrMoreString, MultimapFormat
+from .yamlhelper import OneOrMoreString, MultimapFormat
 
 import os
 from collections import OrderedDict
