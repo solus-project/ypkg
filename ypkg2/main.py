@@ -241,11 +241,14 @@ def build_package(filename):
             console_ui.emit_error("Build", "{} failed".format(step))
             sys.exit(1)
 
-    # Add user patterns
+    # Add user patterns - each consecutive package has higher priority than the
+    # package before it, ensuring correct levels of control
     gene = PackageGenerator()
+    count = 0
     for pkg in spec.patterns:
         for pt in spec.patterns[pkg]:
-            gene.add_pattern(pt, pkg, priority=PRIORITY_USER)
+            gene.add_pattern(pt, pkg, priority=PRIORITY_USER + count)
+        count += 1
 
     idir = ctx.get_install_dir()
     for root, dirs, files in os.walk(idir):
