@@ -21,7 +21,7 @@ import os
 
 PRIORITY_DEFAULT = 0    # Standard internal priority for a pattern
 PRIORITY_USER = 100     # Priority for a user pattern, do what they say.
-DBG = 200               # Never allow the user to override these guys.
+DBG = 1000              # Never allow the user to override these guys.
 
 
 class DefaultPolicy(StringPathGlob):
