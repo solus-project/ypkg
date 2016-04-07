@@ -36,7 +36,14 @@ class PackageExaminer:
         """ Schedule a strip, basically. """
         if not context.spec.pkg_strip:
             return
-        cmd = "strip {} \"{}\""
+        exports = ["LC_ALL=C"]
+        if context.spec.pkg_optimize == "speed":
+            exports.extend([
+                "AR=\"gcc-ar\"",
+                "RANLIB=\"gcc-ranlib\"",
+                "NM=\"gcc-nm\""])
+
+        cmd = "{} strip {} \"{}\""
         flags = ""
         if mode == "shared":
             flags = "--strip-unneeded"
@@ -45,7 +52,8 @@ class PackageExaminer:
         elif mode == "ar":
             flags = "--strip-debug"
         try:
-            subprocess.check_call(cmd.format(flags, file), shell=True)
+            s = " ".join(exports)
+            subprocess.check_call(cmd.format(s, flags, file), shell=True)
             console_ui.emit_info("Stripped", pretty)
         except Exception as e:
             console_ui.emit_warning("Strip", "Failed to strip '{}'".
