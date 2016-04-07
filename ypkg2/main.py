@@ -305,6 +305,14 @@ def build_package(filename):
             continue
         metadata.create_eopkg(ctx, pkg)
 
+    for pkg in spec.patterns:
+        if pkg in gene.packages:
+            continue
+        nm = spec.get_package_name(pkg)
+        console_ui.emit_warning("Package:{}".format(pkg),
+                                "Did not produce {} by any pattern".format(nm))
+
+    # TODO: Consider warning about unused patterns
     ctx.clean_pkg()
     sys.exit(0)
 
