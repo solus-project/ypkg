@@ -77,7 +77,7 @@ The TODO:
  * [x] Add necessary logic to dynamically emit the `YpkgPackage` objects
  * [x] Emit our first native `.eopkg`
  * [ ] Fold in our dynamic dependency scanning from `eopkg` into `ypkg`
- * [ ] Add stripping
+ * [x] Add stripping
  * [ ] Add enhanced `debuginfo` packages
  * [ ] Release "ypkg2"
  * [ ] Add support for reproducible builds
