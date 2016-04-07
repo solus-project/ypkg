@@ -256,6 +256,10 @@ def build_package(filename):
             localpath = remove_prefix(fpath, idir)
 
             gene.add_file(localpath)
+        if len(dirs) == 0 and len(files) == 0:
+            console_ui.emit_warning("Package", "Including empty directory: {}".
+                                    format(remove_prefix(root, idir)))
+            gene.add_file(remove_prefix(root, idir))
 
     if not os.path.exists(ctx.get_packaging_dir()):
         try:
@@ -278,7 +282,7 @@ def build_package(filename):
             if not os.path.exists(fpath):
                 continue
             for root, dirs, files in os.walk(fpath):
-                # TODO: Handle empty directories
+                # Empty directories in dbginfo we don't care about.
                 for f in files:
                     fpath = os.path.join(root, f)
 
