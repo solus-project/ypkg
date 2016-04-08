@@ -12,13 +12,42 @@
 #
 
 from . import console_ui
+from pisi.db.installdb import InstallDB
+from pisi.db.packagedb import PackageDB
 
 
 class DependencyResolver:
 
+    idb = None
+    pdb = None
+
+    global_rpaths = set()
+    global_sonames = set()
+    global_pkgconfigs = set()
+    global_pkgconfig32s = set()
+
     def __init__(self):
-        pass
+        """ Allows us to do look ups on all packages """
+        self.idb = InstallDB()
+        self.pdb = PackageDB()
 
     def compute_for_packages(self, context, packageSet):
         """ packageSet is a dict mapping here. """
+
+        # First iteration, collect the globals
+        for packageName in packageSet:
+            for info in packageSet[packageName]:
+                if info.rpaths:
+                    self.global_rpaths.update(info.rpaths)
+                if info.soname:
+                    self.global_sonames.add(info.soname)
+                if info.pkgconfig_name:
+                    if info.emul32:
+                        self.global_pkgconfig32s.add(info.pkgconfig_name)
+                    else:
+                        self.global_pkgconfigs.add(info.pkgconfig_name)
+
+        print("Global rpaths: {}".format(", ".join(self.global_rpaths)))
+        print("Global sonames: {}".format(", ".join(self.global_sonames)))
+
         return False
