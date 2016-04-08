@@ -51,6 +51,8 @@ class FileReport:
     soname = None
     symbol_deps = None
 
+    rpaths = None
+
     def scan_binary(self, file, check_soname=False):
         cmd = "LC_ALL=C /usr/bin/readelf -d \"{}\"".format(file)
         try:
@@ -61,6 +63,15 @@ class FileReport:
         for line in output.split("\n"):
             line = line.strip()
 
+            # Match rpath
+            r = r_path.match(line)
+            if r:
+                if self.rpaths is None:
+                    self.rpaths = set()
+                self.rpaths.add(r.group(1))
+                continue
+
+            # Match direct needed dependency
             m = shared_lib.match(line)
             if m:
                 if self.symbol_deps is None:
@@ -68,6 +79,7 @@ class FileReport:
                 self.symbol_deps.add(m.group(1))
                 continue
 
+            # Check the soname for this binary file
             if check_soname:
                 so = r_soname.match(line)
                 if so:
@@ -342,6 +354,9 @@ class PackageExaminer:
             if info.symbol_deps:
                 print("{} depends on sonames: {}".
                       format(info.pretty, ", ".join(info.symbol_deps)))
+            if info.rpaths:
+                print("{} has rpaths: {}".
+                      format(info.pretty, ", ".join(info.rpaths)))
         for r in removed:
             package.remove_file(r)
         return infos
