@@ -336,6 +336,7 @@ class PackageExaminer:
         infos = [x.get() for x in results]
 
         # TODO: Anything useful. Really.
+        '''
         for info in infos:
             if info.pkgconfig_name:
                 if info.emul32:
@@ -351,12 +352,9 @@ class PackageExaminer:
             elif info.soname:
                 print("{} provides soname: {}".
                       format(info.pretty, info.soname))
-            if info.symbol_deps:
-                print("{} depends on sonames: {}".
-                      format(info.pretty, ", ".join(info.symbol_deps)))
             if info.rpaths:
                 print("{} has rpaths: {}".
-                      format(info.pretty, ", ".join(info.rpaths)))
+                      format(info.pretty, ", ".join(info.rpaths)))'''
         for r in removed:
             package.remove_file(r)
         return infos
