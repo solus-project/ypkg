@@ -33,6 +33,9 @@ class DependencyResolver:
     bindeps_cache = dict()
     bindeps_emul32 = dict()
 
+    pkgconfig_cache = dict()
+    pkgconfig32_cache = dict()
+
     def search_file(self, fname):
         if fname[0] == '/':
             fname = fname[1:]
@@ -57,7 +60,7 @@ class DependencyResolver:
                 return self.ctx.spec.get_package_name(pkg.name)
         return None
 
-    def get_symbol_external(self, info, symbol):
+    def get_symbol_external(self, info, symbol, paths=None):
         """ Get the provider of the required symbol from the files database,
             i.e. installed binary dependencies
         """
@@ -69,12 +72,13 @@ class DependencyResolver:
             if symbol in self.bindeps_cache:
                 return self.bindeps_cache[symbol]
 
-        paths = ["/usr/lib64", "/usr/lib"]
-        if info.emul32:
-            paths = ["/usr/lib32", "/usr/lib", "/usr/lib64"]
+        if not paths:
+            paths = ["/usr/lib64", "/usr/lib"]
+            if info.emul32:
+                paths = ["/usr/lib32", "/usr/lib", "/usr/lib64"]
 
-        if info.rpaths:
-            paths.extend(info.rpaths)
+            if info.rpaths:
+                paths.extend(info.rpaths)
 
         pkg = None
         for path in paths:
@@ -91,6 +95,48 @@ class DependencyResolver:
                                      format(info.pretty, symbol, lpkg))
                 return lpkg
         return None
+
+    def get_pkgconfig_provider(self, info, name):
+        """ Get the internal provider for a pkgconfig name """
+        if info.emul32:
+            if name in self.global_pkgconfig32s:
+                pkg = self.global_pkgconfig32s[name]
+                return self.ctx.spec.get_package_name(pkg)
+        if name in self.global_pkgconfigs:
+            pkg = self.global_pkgconfigs[name]
+            return self.ctx.spec.get_package_name(pkg)
+
+    def get_pkgconfig_external(self, info, name):
+        """ Get the external provider of a pkgconfig name """
+        pkg = None
+
+        if info.emul32:
+            if name in self.pkgconfig32_cache:
+                return self.pkgconfig32_cache[name]
+        if name in self.pkgconfig_cache:
+            return self.pkgconfig_cache[name]
+
+        if info.emul32:
+            pkg = self.idb.get_package_by_pkgconfig32(name)
+            if not pkg:
+                pkg = self.idb.get_package_by_pkgconfig(name)
+            if not pkg:
+                pkg = self.pdb.get_package_by_pkgconfig32(name)
+            if not pkg:
+                pkg = self.pdb.get_package_by_pkgconfig(name)
+        else:
+            pkg = self.idb.get_package_by_pkgconfig(name)
+            if not pkg:
+                pkg = self.pdb.get_package_by_pkgconfig(name)
+
+        if not pkg:
+            return None
+        if info.emul32:
+            self.pkgconfig32_cache[name] = pkg.name
+        else:
+            self.pkgconfig_cache[name] = pkg.name
+
+        return pkg.name
 
     def compute_for_packages(self, context, gene, packageSet):
         """ packageSet is a dict mapping here. """
@@ -115,15 +161,29 @@ class DependencyResolver:
         # Ok now find the dependencies
         for packageName in packageSet:
             for info in packageSet[packageName]:
-                if not info.symbol_deps:
-                    continue
-                for sym in info.symbol_deps:
-                    r = self.get_symbol_provider(sym)
-                    if not r:
-                        r = self.get_symbol_external(info, sym)
+                if info.symbol_deps:
+                    for sym in info.symbol_deps:
+                        r = self.get_symbol_provider(sym)
                         if not r:
-                            print("Fatal: Unknown symbol: {}".format(sym))
+                            r = self.get_symbol_external(info, sym)
+                            if not r:
+                                print("Fatal: Unknown symbol: {}".format(sym))
+                                continue
+                if info.pkgconfig_deps:
+                    for item in info.pkgconfig_deps:
+                        pkgName = self.ctx.spec.get_package_name(packageName)
+
+                        prov = self.get_pkgconfig_provider(info, item)
+                        if prov:
+                            print("internal: {}/{} depends on {}.pc from {}".
+                                  format(pkgName, info.pretty, item, prov))
                             continue
+                        prov = self.get_pkgconfig_external(info, item)
+                        if not prov:
+                            print("Fatal: Unknown pc: {}".format(item))
+                        print("External pc dep: {}, {}".
+                              format(pkgName, prov))
+                        print(prov)
                     # DO SOMETHING USEFUL.
 
         return False
