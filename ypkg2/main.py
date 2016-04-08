@@ -20,6 +20,7 @@ from .packages import PackageGenerator, PRIORITY_USER
 from .examine import PackageExaminer
 from . import metadata
 from .metadata import TSTAMP_META
+from .dependencies import DependencyResolver
 
 import sys
 import argparse
@@ -275,9 +276,16 @@ def build_package(filename):
             sys.exit(1)
 
     exa = PackageExaminer()
-    if not exa.examine_packages(ctx, gene.packages.values()):
+    exaResults = exa.examine_packages(ctx, gene.packages.values())
+    if not exaResults:
         console_ui.emit_error("Package", "Failed to correctly examine all "
                               "packages.")
+        sys.exit(1)
+
+    deps = DependencyResolver()
+    if not deps.compute_for_packages(ctx, exaResults):
+        console_ui.emit_error("Dependencies", "Failed to compute all"
+                              " dependencies")
         sys.exit(1)
 
     dbgs = ["/usr/lib64/debug", "/usr/lib/debug", "/usr/lib32/debug"]
