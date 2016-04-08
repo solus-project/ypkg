@@ -95,12 +95,15 @@ class FileReport:
             for line in out.split("\n"):
                 line = line.strip()
 
+                if line == "":
+                    continue
                 name = None
                 # In future we'll do something useful with versions
                 if ">=" in line:
                     name = line.split(">=")[0]
-                elif "==" in line:
-                    name = line.split("==")[0]
+                elif "=" in line:
+                    # This is an internal dependency
+                    name = line.split("=")[0]
                 else:
                     name = line
                 name = name.strip()
@@ -110,6 +113,7 @@ class FileReport:
                 self.pkgconfig_deps.add(name)
 
     def __init__(self, pretty, file, mgs):
+        global share_ctx
         self.pretty = pretty
         self.file = file
 
@@ -118,10 +122,12 @@ class FileReport:
         if is_pkgconfig_file(pretty, mgs):
             self.scan_pkgconfig(file)
 
-        if v_dyn.match(mgs):
-            self.scan_binary(file, True)
-        elif v_bin.match(mgs):
-            self.scan_binary(file, False)
+        # Some things omit automatic dependencies
+        if share_ctx.spec.pkg_autodep:
+            if v_dyn.match(mgs):
+                self.scan_binary(file, True)
+            elif v_bin.match(mgs):
+                self.scan_binary(file, False)
 
 
 def strip_file(context, pretty, file, magic_string, mode=None):
@@ -326,21 +332,29 @@ class PackageExaminer:
                 else:
                     print("Provides pkgconfig name: {}".
                           format(info.pkgconfig_name))
+                if info.pkgconfig_deps:
+                    deps = ", ".join(info.pkgconfig_deps)
+                    print("{} requires pkgconfig names: {}".
+                          format(info.pkgconfig_name, deps))
             elif info.soname:
                 print("{} provides soname: {}".
                       format(info.pretty, info.soname))
-            elif info.symbol_deps:
+            if info.symbol_deps:
                 print("{} depends on sonames: {}".
                       format(info.pretty, ", ".join(info.symbol_deps)))
         for r in removed:
             package.remove_file(r)
-        return True
+        return infos
 
     def examine_packages(self, context, packages):
         """ Examine all packages, in order to update dependencies, etc """
         console_ui.emit_info("Examine", "Examining packages")
-        for package in packages:
-            if not self.examine_package(context, package):
-                return False
 
-        return True
+        examinations = dict()
+        for package in packages:
+            ir = self.examine_package(context, package)
+            if not ir:
+                return False
+            examinations[package.name] = ir
+
+        return examinations
