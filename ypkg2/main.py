@@ -12,6 +12,7 @@
 #
 
 from . import console_ui
+from . import remove_prefix
 from .ypkgspec import YpkgSpec
 from .sources import SourceManager
 from .ypkgcontext import YpkgContext
@@ -329,11 +330,3 @@ def build_package(filename):
     # TODO: Consider warning about unused patterns
     ctx.clean_pkg()
     sys.exit(0)
-
-
-def remove_prefix(fpath, prefix):
-    if fpath.startswith(prefix):
-        fpath = fpath[len(prefix)+1:]
-    if fpath[0] != '/':
-        fpath = "/" + fpath
-    return fpath

@@ -12,6 +12,8 @@
 #
 
 from . import console_ui
+from .metadata import readlink
+from . import remove_prefix
 import magic
 import re
 import os
@@ -41,6 +43,16 @@ def is_pkgconfig_file(pretty, mgs):
     return False
 
 
+def is_soname_link(file, mgs):
+    """ Used to detect soname links """
+    if not file.endswith(".so"):
+        return False
+
+    if os.path.islink(file) and not os.path.isdir(file):
+        return True
+    return False
+
+
 class FileReport:
 
     pkgconfig_deps = None
@@ -52,6 +64,8 @@ class FileReport:
     symbol_deps = None
 
     rpaths = None
+
+    soname_links = None
 
     def scan_binary(self, file, check_soname=False):
         cmd = "LC_ALL=C /usr/bin/readelf -d \"{}\"".format(file)
@@ -124,6 +138,36 @@ class FileReport:
                     self.pkgconfig_deps = set()
                 self.pkgconfig_deps.add(name)
 
+    def add_solink(self, file, pretty):
+        """ .so links are almost always split into -devel subpackages in ypkg,
+            unless explicitly overriden. However, they are useless without the
+            actual versioned so they link to. Therefore, we add an automatic
+            dependency to the hosting package when we find one of these, i.e:
+
+            zlib:
+                /usr/lib64/libz.so.1.2.8
+            zlib-devel:
+                /usr/lib64/libz.so -> libz.so.1.2.8
+
+            zlib-devel -> zlib
+            """
+        fpath = readlink(file)
+
+        dirn = os.path.dirname(file)
+        fobj = os.path.join(dirn, fpath)
+
+        try:
+            mg = magic.from_file(fobj)
+        except Exception as e:
+            return
+
+        if not v_dyn.match(mg):
+            return
+        fpath = remove_prefix(fobj, share_ctx.get_install_dir())
+        if not self.soname_links:
+            self.soname_links = set()
+        self.soname_links.add(fpath)
+
     def __init__(self, pretty, file, mgs):
         global share_ctx
         self.pretty = pretty
@@ -136,7 +180,9 @@ class FileReport:
 
         # Some things omit automatic dependencies
         if share_ctx.spec.pkg_autodep:
-            if v_dyn.match(mgs):
+            if is_soname_link(file, mgs):
+                self.add_solink(file, pretty)
+            elif v_dyn.match(mgs):
                 self.scan_binary(file, True)
             elif v_bin.match(mgs):
                 self.scan_binary(file, False)
@@ -278,11 +324,13 @@ class PackageExaminer:
             return True
         return False
 
-    def file_is_of_interest(self, pretty, mgs):
+    def file_is_of_interest(self, pretty, file, mgs):
         """ So we can keep our list of things to check low """
         if v_dyn.match(mgs) or v_bin.match(mgs) or v_rel.match(mgs):
             return True
         if is_pkgconfig_file(pretty, mgs):
+            return True
+        if is_soname_link(file, mgs):
             return True
         return False
 
@@ -323,7 +371,7 @@ class PackageExaminer:
                                      format("/" + file))
                 removed.add("/" + file)
 
-            if not self.file_is_of_interest("/" + file, mgs):
+            if not self.file_is_of_interest("/" + file, fpath, mgs):
                 continue
             # Handle this asynchronously
             results.append(pool.apply_async(examine_file, [

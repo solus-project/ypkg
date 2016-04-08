@@ -16,3 +16,11 @@ from .ui import YpkgUI
 global console_ui
 
 console_ui = YpkgUI()
+
+
+def remove_prefix(fpath, prefix):
+    if fpath.startswith(prefix):
+        fpath = fpath[len(prefix)+1:]
+    if fpath[0] != '/':
+        fpath = "/" + fpath
+    return fpath
