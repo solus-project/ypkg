@@ -51,6 +51,28 @@ class FileReport:
     soname = None
     symbol_deps = None
 
+    def scan_binary(self, file, check_soname=False):
+        cmd = "LC_ALL=C /usr/bin/readelf -d \"{}\"".format(file)
+        try:
+            output = subprocess.check_output(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_warning("File", "Failed to scan binary deps for"
+                                    " path: {}".format(file))
+        for line in output.split("\n"):
+            line = line.strip()
+
+            m = shared_lib.match(line)
+            if m:
+                if self.symbol_deps is None:
+                    self.symbol_deps = set()
+                self.symbol_deps.add(m.group(1))
+                continue
+
+            if check_soname:
+                so = r_soname.match(line)
+                if so:
+                    self.soname = so.group(1)
+
     def scan_pkgconfig(self, file):
         sub = ""
         if self.emul32:
@@ -88,10 +110,18 @@ class FileReport:
                 self.pkgconfig_deps.add(name)
 
     def __init__(self, pretty, file, mgs):
+        self.pretty = pretty
+        self.file = file
+
         if pretty.startswith("/usr/lib32/") or pretty.startswith("/lib32"):
             self.emul32 = True
         if is_pkgconfig_file(pretty, mgs):
             self.scan_pkgconfig(file)
+
+        if v_dyn.match(mgs):
+            self.scan_binary(file, True)
+        elif v_bin.match(mgs):
+            self.scan_binary(file, False)
 
 
 def strip_file(context, pretty, file, magic_string, mode=None):
@@ -296,6 +326,12 @@ class PackageExaminer:
                 else:
                     print("Provides pkgconfig name: {}".
                           format(info.pkgconfig_name))
+            elif info.soname:
+                print("{} provides soname: {}".
+                      format(info.pretty, info.soname))
+            elif info.symbol_deps:
+                print("{} depends on sonames: {}".
+                      format(info.pretty, ", ".join(info.symbol_deps)))
         for r in removed:
             package.remove_file(r)
         return True
