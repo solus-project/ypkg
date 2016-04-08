@@ -37,23 +37,12 @@ class Package:
     files = None
     excludes = None
 
-    # Symbols provided by this package
+    # Symbols provided by this package, right now this is limited to
+    # pkgconfig() and pkgconfig32()
     provided_symbols = None
 
     # Symbols depended upon by this package
-    depend_symbols = None
-
-    # pkgconfigs provided by this package
-    provided_pkgconfig = None
-
-    # pkgconfig32's provided by this package
-    provided_pkgconfig32 = None
-
-    # pkgconfig's we depend on
-    depend_pkgconfig = None
-
-    # pkgconfig32's we probably depend on
-    depend_pkgconfig32 = None
+    depend_packages = None
 
     def __init__(self, name):
         self.name = name
@@ -62,12 +51,8 @@ class Package:
         self.excludes = set()
 
         self.provided_symbols = set()
-        self.provided_pkgconfig = set()
-        self.provided_pkgconfig32 = set()
+        self.depend_packages = set()
 
-        self.depend_symbols = set()
-        self.depend_pkgconfig = set()
-        self.depend_pkgconfig32 = set()
         self.default_policy = DefaultPolicy()
 
     def get_pattern(self, path):

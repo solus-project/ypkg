@@ -138,6 +138,36 @@ class DependencyResolver:
 
         return pkg.name
 
+    def handle_binary_deps(self, packageName, info):
+        """ Handle direct binary dependencies """
+        for sym in info.symbol_deps:
+            r = self.get_symbol_provider(sym)
+            if not r:
+                r = self.get_symbol_external(info, sym)
+                if not r:
+                    print("Fatal: Unknown symbol: {}".format(sym))
+                    continue
+
+    def handle_pkgconfig_deps(self, packageName, info):
+        """ Handle pkgconfig dependencies """
+        for item in info.pkgconfig_deps:
+            pkgName = self.ctx.spec.get_package_name(packageName)
+
+            prov = self.get_pkgconfig_provider(info, item)
+            if prov:
+                print("internal: {}/{} depends on {}.pc from {}".
+                      format(pkgName, info.pretty, item, prov))
+                continue
+            prov = self.get_pkgconfig_external(info, item)
+            if not prov:
+                print("Fatal: Unknown pc: {}".format(item))
+            print("External pc dep: {}, {}".
+                  format(pkgName, prov))
+            print(prov)
+
+    def handle_pkgconfig_provides(self, packageName, info):
+        pass
+
     def compute_for_packages(self, context, gene, packageSet):
         """ packageSet is a dict mapping here. """
         self.gene = gene
@@ -162,28 +192,12 @@ class DependencyResolver:
         for packageName in packageSet:
             for info in packageSet[packageName]:
                 if info.symbol_deps:
-                    for sym in info.symbol_deps:
-                        r = self.get_symbol_provider(sym)
-                        if not r:
-                            r = self.get_symbol_external(info, sym)
-                            if not r:
-                                print("Fatal: Unknown symbol: {}".format(sym))
-                                continue
-                if info.pkgconfig_deps:
-                    for item in info.pkgconfig_deps:
-                        pkgName = self.ctx.spec.get_package_name(packageName)
+                    self.handle_binary_deps(packageName, info)
 
-                        prov = self.get_pkgconfig_provider(info, item)
-                        if prov:
-                            print("internal: {}/{} depends on {}.pc from {}".
-                                  format(pkgName, info.pretty, item, prov))
-                            continue
-                        prov = self.get_pkgconfig_external(info, item)
-                        if not prov:
-                            print("Fatal: Unknown pc: {}".format(item))
-                        print("External pc dep: {}, {}".
-                              format(pkgName, prov))
-                        print(prov)
-                    # DO SOMETHING USEFUL.
+                if info.pkgconfig_deps:
+                    self.handle_pkgconfig_deps(packageName, info)
+
+                if info.pkgconfig_name:
+                    self.handle_pkgconfig_provides(packageName, info)
 
         return False
