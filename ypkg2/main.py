@@ -283,7 +283,7 @@ def build_package(filename):
         sys.exit(1)
 
     deps = DependencyResolver()
-    if not deps.compute_for_packages(ctx, exaResults):
+    if not deps.compute_for_packages(ctx, gene, exaResults):
         console_ui.emit_error("Dependencies", "Failed to compute all"
                               " dependencies")
         sys.exit(1)

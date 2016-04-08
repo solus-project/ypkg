@@ -233,3 +233,11 @@ class PackageGenerator:
                     self.packages[package].exclude_file(file)
 
         return []
+
+    def get_file_owner(self, file):
+        """ Return the owning package for the specified file """
+        for pkg in self.packages:
+            package = self.packages[pkg]
+            if file in package.files:
+                return package
+        return None
