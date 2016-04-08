@@ -29,6 +29,70 @@ shared_lib = re.compile(r".*Shared library: \[(.*)\].*")
 r_path = re.compile(r".*Library rpath: \[(.*)\].*")
 r_soname = re.compile(r".*Library soname: \[(.*)\].*")
 
+EMUL32PC = "/usr/lib32/pkgconfig:/usr/share/pkgconfig:/usr/lib/pkgconfig"
+
+
+def is_pkgconfig_file(pretty, mgs):
+    """ Simple as it sounds, work out if this is a pkgconfig file """
+    if pretty.endswith(".pc"):
+        pname = os.path.basename(os.path.dirname(pretty))
+        if pname == "pkgconfig" and "ASCII" in mgs:
+            return True
+    return False
+
+
+class FileReport:
+
+    pkgconfig_deps = None
+    pkgconfig_name = None
+
+    emul32 = False
+
+    soname = None
+    symbol_deps = None
+
+    def scan_pkgconfig(self, file):
+        sub = ""
+        if self.emul32:
+            sub = "PKG_CONFIG_PATH=\"{}\" ".format(EMUL32PC)
+
+        cmds = [
+            "LC_ALL=C {}pkg-config --print-requires \"{}\"",
+            "LC_ALL=C {}pkg-config --print-requires-private \"{}\""
+        ]
+
+        pcname = os.path.basename(file).split(".pc")[0]
+        self.pkgconfig_name = pcname
+        for cmd in cmds:
+            try:
+                out = subprocess.check_output(cmd.format(sub, file),
+                                              shell=True)
+            except Exception as e:
+                print(e)
+                continue
+            for line in out.split("\n"):
+                line = line.strip()
+
+                name = None
+                # In future we'll do something useful with versions
+                if ">=" in line:
+                    name = line.split(">=")[0]
+                elif "==" in line:
+                    name = line.split("==")[0]
+                else:
+                    name = line
+                name = name.strip()
+
+                if not self.pkgconfig_deps:
+                    self.pkgconfig_deps = set()
+                self.pkgconfig_deps.add(name)
+
+    def __init__(self, pretty, file, mgs):
+        if pretty.startswith("/usr/lib32/") or pretty.startswith("/lib32"):
+            self.emul32 = True
+        if is_pkgconfig_file(pretty, mgs):
+            self.scan_pkgconfig(file)
+
 
 def strip_file(context, pretty, file, magic_string, mode=None):
     """ Schedule a strip, basically. """
@@ -106,7 +170,9 @@ def examine_file(*args):
     elif mgs == "current ar archive":
         # Strip only.
         strip_file(context, pretty, file, mgs, mode="ar")
-    return True
+
+    freport = FileReport(pretty, file, mgs)
+    return freport
 
 
 def store_debug(context, pretty, file, magic_string):
@@ -164,9 +230,11 @@ class PackageExaminer:
             return True
         return False
 
-    def file_is_of_interest(self, mgs):
+    def file_is_of_interest(self, pretty, mgs):
         """ So we can keep our list of things to check low """
         if v_dyn.match(mgs) or v_bin.match(mgs) or v_rel.match(mgs):
+            return True
+        if is_pkgconfig_file(pretty, mgs):
             return True
         return False
 
@@ -207,7 +275,7 @@ class PackageExaminer:
                                      format("/" + file))
                 removed.add("/" + file)
 
-            if not self.file_is_of_interest(mgs):
+            if not self.file_is_of_interest("/" + file, mgs):
                 continue
             # Handle this asynchronously
             results.append(pool.apply_async(examine_file, [
@@ -217,9 +285,17 @@ class PackageExaminer:
         pool.close()
         pool.join()
 
-        # TODO: Grab new dependencies from the examine operation and apply
         infos = [x.get() for x in results]
 
+        # TODO: Anything useful. Really.
+        for info in infos:
+            if info.pkgconfig_name:
+                if info.emul32:
+                    print("Provides pkgconfig32 name: {}".
+                          format(info.pkgconfig_name))
+                else:
+                    print("Provides pkgconfig name: {}".
+                          format(info.pkgconfig_name))
         for r in removed:
             package.remove_file(r)
         return True
