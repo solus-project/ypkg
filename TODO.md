@@ -79,5 +79,7 @@ The TODO:
  * [x] Fold in our dynamic dependency scanning from `eopkg` into `ypkg`
  * [x] Add stripping
  * [x] Add enhanced `debuginfo` packages
+ * [ ] Support solus packager file
+ * [ ] Support history.xml file (evobuild will generate this.)
  * [ ] Release "ypkg2"
  * [ ] Add support for reproducible builds
