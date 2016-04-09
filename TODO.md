@@ -80,6 +80,6 @@ The TODO:
  * [x] Add stripping
  * [x] Add enhanced `debuginfo` packages
  * [ ] Support solus packager file
- * [ ] Support history.xml file (evobuild will generate this.)
+ * [x] Support history.xml file (evobuild will generate this.)
  * [ ] Release "ypkg2"
  * [ ] Add support for reproducible builds
