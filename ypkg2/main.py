@@ -83,7 +83,6 @@ def main():
 
 
     build_package(args.filename)
-    console_ui.emit_success("Package", "Building complete")
 
 
 def clean_build_dirs(context):
@@ -373,4 +372,5 @@ def build_package(filename):
 
     # TODO: Consider warning about unused patterns
     ctx.clean_pkg()
+    console_ui.emit_success("Package", "Building complete")
     sys.exit(0)

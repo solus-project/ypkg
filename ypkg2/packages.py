@@ -151,6 +151,8 @@ class PackageGenerator:
         self.add_pattern("/usr/lib/debug/", "dbginfo", priority=DBG)
         self.add_pattern("/usr/lib32/debug/", "32bit-dbginfo", priority=DBG)
 
+        self.add_pattern("/usr/share/gtk-doc/html/", "docs")
+
     def add_file(self, path):
         """ Add a file path to the owned list and place it into the correct
             package (main or named subpackage) according to the highest found
