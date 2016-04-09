@@ -158,6 +158,9 @@ class ScriptGenerator:
             self.define_export("RANLIB", "gcc-ranlib")
             self.define_export("NM", "gcc-nm")
 
+        if not console_ui.allow_colors:
+            self.define_export("TERM", "dumb")
+
         # Mask display
         self.define_unexport("DISPLAY")
         # Mask sudo from anyone
