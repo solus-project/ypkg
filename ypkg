@@ -1,0 +1,32 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+#
+#  This file is part of ypkg2
+#
+#  Copyright 2015-2016 Ikey Doherty <ikey@solus-project.com>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+
+from ypkg2 import console_ui
+import subprocess
+import sys
+
+
+def main():
+    if len(sys.argv) < 2:
+        console_ui.emit_error("ypkg", "Please provide path to package.yml")
+        sys.exit(1)
+
+    args = sys.argv[1:]
+    try:
+        subprocess.check_call("ypkg-install-deps {}".format(args), shell=True)
+        subprocess.check_call("ypkg-build {}".format(args, shell=True))
+    except Exception as e:
+        sys.exit(1)
+    
+if __name__ == "__main__":
+    main()
