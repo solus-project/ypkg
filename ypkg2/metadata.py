@@ -22,6 +22,8 @@ from pisi.db.installdb import InstallDB
 import stat
 import subprocess
 from collections import OrderedDict
+import datetime
+
 
 FileTypes = OrderedDict([
     ("/usr/lib/pkgconfig", "data"),
@@ -113,7 +115,7 @@ def metadata_from_package(context, package, files):
     meta = pisi.metadata.MetaData()
     spec = context.spec
 
-    packager = create_packager(packager_name, packager_email)
+    packager = create_packager(spec.packager_name, spec.packager_email)
 
     component = context.spec.get_component(package.name)
     summary = context.spec.get_summary(package.name)
@@ -148,7 +150,11 @@ def metadata_from_package(context, package, files):
         update.comment = "Packaging update"
         update.name = packager.name
         update.email = packager.email
-        update.date = "MAKE ME A DATE!!"
+
+        dt = datetime.datetime.now()
+        # s = dt.strftime("%M-%D-%Y") # Why? Why couldn't it be this?
+        s = dt.strftime("%Y-%m-%d")
+        update.date = s
         update.release = str(spec.pkg_release)
         update.version = spec.pkg_version
         meta.package.history.append(update)

@@ -22,6 +22,9 @@ from .examine import PackageExaminer
 from . import metadata
 from .metadata import TSTAMP_META
 from .dependencies import DependencyResolver
+from . import packager_name, packager_email
+
+import ypkg2
 
 import sys
 import argparse
@@ -29,6 +32,7 @@ import os
 import shutil
 import tempfile
 import subprocess
+from configobj import ConfigObj
 
 
 def show_version():
@@ -131,6 +135,39 @@ def build_package(filename):
         print("Unable to continue - aborting")
         sys.exit(1)
 
+    possibles = ["{}/.solus/packager", "{}/.evolveos/packager"]
+
+    packager_name = ypkg2.packager_name
+    packager_email = ypkg2.packager_email
+
+    dflt = True
+    for item in possibles:
+        fpath = item.format(os.path.expanduser("~"))
+        if not os.path.exists(fpath):
+            continue
+        try:
+            c = ConfigObj(fpath)
+            pname = c["Packager"]["Name"]
+            pemail = c["Packager"]["Email"]
+
+            packager_name = pname
+            packager_email = pemail
+            dflt = False
+            break
+        except Exception as e:
+            console_ui.emit_error("Config", "Error in packager config:")
+            print(e)
+            dflt = True
+            break
+    if dflt:
+        packager_name = ypkg2.packager_name
+        packager_email = ypkg2.packager_email
+        console_ui.emit_warning("Config", "Using default packager values")
+        print("  Name: {}".format(packager_name))
+        print("  Email: {}".format(packager_email))
+
+    spec.packager_name = packager_name
+    spec.packager_email = packager_email
     # Try to load history
     dirn = os.path.dirname(filename)
     hist = os.path.join(dirn, "history.xml")
