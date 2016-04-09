@@ -124,17 +124,35 @@ def metadata_from_package(context, package, files):
 
     meta.package.source = meta.source
     meta.package.source.name = spec.pkg_name
-    meta.package.source.packager = packager
     meta.package.name = context.spec.get_package_name(package.name)
 
-    update = pisi.specfile.Update()
-    update.comment = "GRAB THE CORRECT COMMENT!!"
-    update.name = packager.name
-    update.email = packager.email
-    update.date = "MAKE ME A DATE!!"
-    update.release = str(spec.pkg_release)
-    update.version = spec.pkg_version
-    meta.package.history.append(update)
+    update = None
+    if context.spec.history:
+        topup = context.spec.history.history[0]
+        l_release = int(topup.release)
+        l_version = topup.version
+        version = context.spec.pkg_version
+        release = context.spec.pkg_release
+        if l_release != release or l_version != version:
+            console_ui.emit_info("History", "Constructing new history entry")
+        else:
+            # Last updater is listed as maintainer in eopkg blame
+            update = topup
+            packager.name = topup.name
+            packager.email = topup.email
+        meta.package.history = context.spec.history.history
+
+    if not update:
+        update = pisi.specfile.Update()
+        update.comment = "Packaging update"
+        update.name = packager.name
+        update.email = packager.email
+        update.date = "MAKE ME A DATE!!"
+        update.release = str(spec.pkg_release)
+        update.version = spec.pkg_version
+        meta.package.history.append(update)
+
+    meta.package.source.packager = packager
 
     meta.package.summary['en'] = summary
     meta.package.description['en'] = description

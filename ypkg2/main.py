@@ -131,6 +131,13 @@ def build_package(filename):
         print("Unable to continue - aborting")
         sys.exit(1)
 
+    # Try to load history
+    dirn = os.path.dirname(filename)
+    hist = os.path.join(dirn, "history.xml")
+    if os.path.exists(hist):
+        if not spec.load_history(hist):
+            sys.exit(1)
+
     manager = SourceManager()
     if not manager.identify_sources(spec):
         print("Unable to continue - aborting")

@@ -20,6 +20,9 @@ import os
 from collections import OrderedDict
 # Consider moving this into a stub
 import pisi.version
+import pisi.history
+import pisi.pxml.xmlfile as xmlfile
+import pisi.pxml.autoxml as autoxml
 
 from yaml import load as yaml_load
 try:
@@ -109,6 +112,8 @@ class YpkgSpec:
 
     # Custom user provided patterns
     patterns = None
+
+    history = None
 
     def add_summary(self, key, value):
         """ Add a summary to a package """
@@ -295,6 +300,24 @@ class YpkgSpec:
 
         return True
 
+    def load_history(self, path):
+        try:
+            self.history = PackageHistory()
+            self.history.read(path)
+            up = self.history.history[0]
+            release = int(up.release)
+            version = up.version
+
+            if release != self.pkg_release:
+                console_ui.emit_warning("HISTORY", "Release not consistent")
+            if version != self.pkg_version:
+                console_ui.emit_warning("HISTORY", "Version not consistent..")
+        except Exception as e:
+            console_ui.emit_error("HISTORY", "Could not load history file")
+            print(e)
+            return False
+        return True
+
     def get_package_name(self, name):
         if name == "main":
             return self.pkg_name
@@ -314,3 +337,12 @@ class YpkgSpec:
         if name not in self.summaries:
             return self.summaries["main"]
         return self.summaries[name]
+
+
+class PackageHistory(xmlfile.XmlFile):
+
+    __metaclass__ = autoxml.autoxml
+
+    tag = "YPKG"
+
+    t_History = [[pisi.specfile.Update], autoxml.mandatory]
