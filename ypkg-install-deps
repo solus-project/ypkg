@@ -41,17 +41,18 @@ def main():
                          format(spec.pkg_name, spec.pkg_version,
                                 spec.pkg_release))
 
-    for dep in spec.pkg_builddeps:
-        em32 = pkgconfig32_dep.match(dep)
-        if em32:
-            pc32deps.add(em32.group(1))
-            continue
-        em = pkgconfig_dep.match(dep)
-        if em:
-            pcdeps.add(em.group(1))
-            continue
-        if not idb.has_package(dep):
-            ndeps.add(dep)
+    if spec.pkg_builddeps:
+        for dep in spec.pkg_builddeps:
+            em32 = pkgconfig32_dep.match(dep)
+            if em32:
+                pc32deps.add(em32.group(1))
+                continue
+            em = pkgconfig_dep.match(dep)
+            if em:
+                pcdeps.add(em.group(1))
+                continue
+            if not idb.has_package(dep):
+                ndeps.add(dep)
 
     for i in pc32deps:
         local = False
