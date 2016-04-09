@@ -129,6 +129,8 @@ class YpkgContext:
         self.emul32 = emul32
         self.build = BuildConfig()
         self.init_config()
+        if os.geteuid() == 0 and "FAKED_MODE" not in os.environ:
+            self.is_root = True
 
     def get_path(self):
         """ Return the path, mutated to include ccache if needed """
