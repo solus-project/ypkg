@@ -23,6 +23,7 @@ import stat
 import subprocess
 from collections import OrderedDict
 import datetime
+import calendar
 
 
 FileTypes = OrderedDict([
@@ -43,8 +44,43 @@ FileTypes = OrderedDict([
     ("/etc", "config"),
 ])
 
-# 1980, Jan 1, for zip
-TSTAMP_META = 315532800
+history_timestamp = None
+history_date = None
+fallback_timestamp = None
+
+
+def unix_seconds_for_date(date):
+    tp = datetime.datetime.timetuple(date)
+    return calendar.timegm(tp)
+
+
+def utc_date_for_date_only(date):
+    d = datetime.datetime.strptime(date, "%Y-%m-%d")
+    offset = datetime.datetime.utcnow() - datetime.datetime.now()
+    lutc = d - offset
+    history_timestamp = unix_seconds_for_date(lutc)
+    return unix_seconds_for_date(lutc)
+
+
+def initialize_timestamp(spec):
+    """ To support reproducible builds, we need to ensure we utime them to
+        some valid value. This is basically whatever the next update time
+        would be in our spec.. """
+    global history_date
+    global history_timestamp
+    global fallback_timestamp
+
+    dt = datetime.datetime.utcnow()
+    s = dt.strftime("%Y-%m-%d")
+    fallback_timestamp = utc_date_for_date_only(s)
+
+    if spec.history:
+        up = spec.history.history[0]
+        history_timestamp = utc_date_for_date_only(up.date)
+    else:
+        history_timestamp = fallback_timestamp
+
+    history_date = s
 
 
 def get_file_type(t):
@@ -62,6 +98,7 @@ def readlink(path):
 def create_files_xml(context, package):
     """ Create an XML representation of our files """
     files = pisi.files.Files()
+    global history_timestamp
 
     # TODO: Remove reliance on pisi.util functions completely.
 
@@ -98,7 +135,7 @@ def create_files_xml(context, package):
 
     fpath = os.path.join(context.get_packaging_dir(), "files.xml")
     files.write(fpath)
-    os.utime(fpath, (TSTAMP_META, TSTAMP_META))
+    os.utime(fpath, (history_timestamp, history_timestamp))
     return files
 
 
@@ -112,6 +149,10 @@ def create_packager(name, email):
 
 def metadata_from_package(context, package, files):
     """ Base metadata cruft. Tedious   """
+    global history_date
+    global history_timestamp
+    global fallback_timestamp
+
     meta = pisi.metadata.MetaData()
     spec = context.spec
 
@@ -138,6 +179,7 @@ def metadata_from_package(context, package, files):
         release = context.spec.pkg_release
         if l_release != release or l_version != version:
             console_ui.emit_info("History", "Constructing new history entry")
+            history_timestamp = fallback_timestamp
         else:
             # Last updater is listed as maintainer in eopkg blame
             update = topup
@@ -151,10 +193,7 @@ def metadata_from_package(context, package, files):
         update.name = packager.name
         update.email = packager.email
 
-        dt = datetime.datetime.now()
-        # s = dt.strftime("%M-%D-%Y") # Why? Why couldn't it be this?
-        s = dt.strftime("%Y-%m-%d")
-        update.date = s
+        update.date = history_date
         update.release = str(spec.pkg_release)
         update.version = spec.pkg_version
         meta.package.history.append(update)
@@ -273,6 +312,8 @@ def handle_dependencies(context, gene, metadata, package, files):
 
 def create_meta_xml(context, gene, package, files):
     """ Create the main metadata.xml file """
+    global history_timestamp
+
     meta = metadata_from_package(context, package, files)
     config = context.pconfig
 
@@ -291,13 +332,15 @@ def create_meta_xml(context, gene, package, files):
 
     mpath = os.path.join(context.get_packaging_dir(), "metadata.xml")
     meta.write(mpath)
-    os.utime(mpath, (TSTAMP_META, TSTAMP_META))
+    os.utime(mpath, (history_timestamp, history_timestamp))
 
     return meta
 
 
 def create_eopkg(context, gene, package):
     """ Do the hard work and write the package out """
+    global history_timestamp
+
     name = construct_package_name(context, package)
 
     console_ui.emit_info("Package", "Creating {} ...".format(name))
@@ -311,6 +354,8 @@ def create_eopkg(context, gene, package):
     pkg = pisi.package.Package(name, "w",
                                format=pisi.package.Package.default_format,
                                tmp_dir=pdir)
+    if history_timestamp:
+        pkg.history_timestamp = history_timestamp
 
     pkg.add_metadata_xml(os.path.join(pdir, "metadata.xml"))
     pkg.add_files_xml(os.path.join(pdir, "files.xml"))
@@ -319,21 +364,24 @@ def create_eopkg(context, gene, package):
         # old eopkg trick to ensure the file names are all valid
         orgname = os.path.join(context.get_install_dir(), finfo.path)
         orgname = orgname.encode('utf-8').decode('utf-8').encode("latin1")
-        """
-            This is all that's needed for reproducible builds right now.
-            We need to grab the build time from somewhere sensible though
 
         if os.path.islink(orgname) and not os.path.isdir(orgname):
-            cmd = "touch -d \"@{}\" -h \"{}\"".format(TSTAMP_META, orgname)
+            t = history_timestamp
+            cmd = "touch -d \"@{}\" -h \"{}\"".format(t, orgname)
             try:
                 subprocess.check_call(cmd, shell=True)
             except Exception as e:
-                print e
-                pass
+                console_ui.emit_warning("utime", "Failed to modify utime")
+                print("Reproducible builds will be affected: {}".format(e))
         else:
-            os.utime(orgname, (TSTAMP_META, TSTAMP_META))"""
+            try:
+                os.utime(orgname, (history_timestamp, history_timestamp))
+            except Exception as e:
+                console_ui.emit_warning("utime", "Failed to modify utime")
+                print("Reproducible builds will be affected: {}".format(e))
+
         pkg.add_to_install(orgname, finfo.path)
 
     pfile = os.path.join(pdir, "install.tar.xz")
-    os.utime(pfile, (TSTAMP_META, TSTAMP_META))
+    os.utime(pfile, (history_timestamp, history_timestamp))
     pkg.close()

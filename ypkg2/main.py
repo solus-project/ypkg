@@ -20,7 +20,6 @@ from .scripts import ScriptGenerator
 from .packages import PackageGenerator, PRIORITY_USER
 from .examine import PackageExaminer
 from . import metadata
-from .metadata import TSTAMP_META
 from .dependencies import DependencyResolver
 from . import packager_name, packager_email
 
@@ -172,6 +171,8 @@ def build_package(filename):
     if os.path.exists(hist):
         if not spec.load_history(hist):
             sys.exit(1)
+
+    metadata.initialize_timestamp(spec)
 
     manager = SourceManager()
     if not manager.identify_sources(spec):
