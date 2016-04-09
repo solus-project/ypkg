@@ -11,9 +11,6 @@
 #  (at your option) any later version.
 #
 
-from ypkg import sanity
-from ypkg.sanity import TarSource
-
 import sys
 import yaml
 import os

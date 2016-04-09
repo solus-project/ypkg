@@ -10,9 +10,6 @@
 #  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
-from ypkg import sanity
-
-
 import sys
 import yaml
 import os
@@ -34,10 +31,6 @@ if __name__ == "__main__":
         usage("Specified file does not exist")
     if not ymlfile.endswith(".yml"):
         usage("%s does not look like a valid package.yml file")
-
-    if not sanity.sane(ymlfile):
-        print "File does not appear to be valid, aborting"
-        sys.exit(1)
 
     buf = list()
     with open(ymlfile, "r") as infile:
