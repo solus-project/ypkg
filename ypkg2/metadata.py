@@ -198,8 +198,6 @@ def handle_dependencies(context, gene, metadata, package, files):
 
     dependencies = set(package.depend_packages)
 
-    if not package.depend_packages:
-        return
     for dependency in package.depend_packages:
         release = context.spec.pkg_release
 
@@ -219,9 +217,21 @@ def handle_dependencies(context, gene, metadata, package, files):
             newDep.releaseFrom = pkg.release
         else:
             newDep.package = dependency
-            newDep.release
+            newDep.release = release
 
         metadata.package.packageDependencies.append(newDep)
+
+    if package.name not in context.spec.rundeps:
+        return
+    # Handle pattern/ypkg spec rundep
+    for depname in context.spec.rundeps[package.name]:
+        if depname in dependencies:
+            continue
+        dep = pisi.dependency.Dependency()
+        if depname in all_names:
+            dep.releaseFrom = context.spec.pkg_release
+        dep.package = str(depname)
+        metadata.package.packageDependencies.append(dep)
 
 
 def create_meta_xml(context, gene, package, files):

@@ -415,7 +415,6 @@ class PackageExaminer:
         for package in packages:
             ir = self.examine_package(context, package)
             if not ir:
-                return False
+                continue
             examinations[package.name] = ir
-
         return examinations
