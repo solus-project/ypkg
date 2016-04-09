@@ -127,6 +127,9 @@ def main():
     if args.force:
         cmd += " --yes-all"
 
+    if args.no_colors:
+        cmd += " -N"
+
     console_ui.emit_info("BuildDep", "Requesting installation of: {}".
                          format(", ".join(ndeps)))
     try:
