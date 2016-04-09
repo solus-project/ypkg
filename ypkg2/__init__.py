@@ -30,3 +30,11 @@ def remove_prefix(fpath, prefix):
 
 pkgconfig32_dep = re.compile("^pkgconfig32\((.*)\)$")
 pkgconfig_dep = re.compile("^pkgconfig\((.*)\)$")
+
+
+global packager_name
+global packager_email
+
+
+packager_name = "Automated Package Build"
+packager_email = "no.email.set.in.config"

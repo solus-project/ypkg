@@ -11,6 +11,7 @@
 #  (at your option) any later version.
 
 from . import console_ui, pkgconfig_dep, pkgconfig32_dep
+from . import packager_name, packager_email
 
 import os
 import pisi.util
@@ -112,7 +113,7 @@ def metadata_from_package(context, package, files):
     meta = pisi.metadata.MetaData()
     spec = context.spec
 
-    packager = create_packager("FIXME", "FIXME@NOTFIXED.FIXIT??")
+    packager = create_packager(packager_name, packager_email)
 
     component = context.spec.get_component(package.name)
     summary = context.spec.get_summary(package.name)
