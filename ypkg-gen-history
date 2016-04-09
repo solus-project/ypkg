@@ -17,6 +17,7 @@ import subprocess
 import sys
 import os
 import pisi.specfile
+import re
 
 from yaml import load as yaml_load
 try:
@@ -25,6 +26,8 @@ except Exception as e:
     from yaml import Loader
     
 MAX_HISTORY_LEN = 20
+
+cve_hit = re.compile(r".*(CVE\-[0-9]+\-[0-9]+).*")
 
 class CommiterInfo:
 
@@ -134,10 +137,11 @@ def main():
         if com.body:
             comment += "\n" + com.body
         update.comment = comment
+        if cve_hit.match(comment):
+            update.type = "security"
         hist_obj.history.append(update)
 
     hist_obj.write(hist)
-    print(tags)
 
 if __name__ == "__main__":
     main()
