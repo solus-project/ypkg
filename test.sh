@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pep8 ypkg-build ypkg2/*.py || exit 1
+pep8 ypkg-build ypkg2/*.py ypkg-gen-history || exit 1
 #for item in examples/*.yml ; do
 #    python -m ypkg2.main $item || exit 1
 #done
