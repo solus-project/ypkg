@@ -1,0 +1,143 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+#
+#  This file is part of ypkg2
+#
+#  Copyright 2015-2016 Ikey Doherty <ikey@solus-project.com>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+
+from ypkg2.ypkgspec import YpkgSpec, PackageHistory
+
+import subprocess
+import sys
+import os
+import pisi.specfile
+
+from yaml import load as yaml_load
+try:
+    from yaml import CLoader as Loader
+except Exception as e:
+    from yaml import Loader
+    
+MAX_HISTORY_LEN = 20
+
+class CommiterInfo:
+
+    name = None
+    email = None
+    date = None
+    subject = None
+    body = None
+
+def get_git_tags(wdir):
+    cmd = "git -C \"{}\" tag --sort=-refname".format(wdir)
+
+    ret = list()
+
+    try:
+        out = subprocess.check_output(cmd, shell=True)
+    except Exception as e:
+        return None
+
+    counter = 0
+    for i in out.split("\n"):
+        if counter >= MAX_HISTORY_LEN:
+            break
+        i = i.strip()
+        counter += 1
+        ret.append(i)
+    return sorted(ret)
+
+def get_yml_at_tag(wdir, tag):
+    cmd = "git -C \"{}\" show {}:package.yml".format(wdir, tag)
+
+    ret = None
+    try:
+        out = subprocess.check_output(cmd, shell=True)
+    except Exception as e:
+        return None
+    yml = YpkgSpec()
+
+    try:
+        yaml_data = yaml_load(out, Loader=Loader)
+    except Exception as e:
+        return False
+        
+    if not yml.load_from_data(yaml_data):
+        return None
+    return yml
+
+def get_commiter_infos(wdir, tag):
+    fmt = "%an\n%ae\n%ad\n%s\n%b"
+    cmd = "git -C \"{}\" log --pretty=format:\"{}\" {} -1 --date=iso". \
+          format(wdir, fmt, tag)
+
+    out = None
+    try:
+        out = subprocess.check_output(cmd, shell=True)
+    except Exception as e:
+        return None
+
+    splits = out.split("\n")
+    if len(splits) < 4:
+        return None
+    com = CommiterInfo()
+    com.name = splits[0].strip()
+    com.email = splits[1].strip()
+    com.date = splits[2].split(" ")[0].strip()
+    com.subject = splits[3].strip()
+    if len(splits) > 4:
+        com.body = "\n".join(splits[4:])
+
+    return com
+
+def main():
+    if len(sys.argv) < 2:
+        sys.exit(1)
+
+    yml = os.path.abspath(sys.argv[1])
+    wdir = os.path.dirname(yml)
+
+    tags = get_git_tags(wdir)
+
+    history = list()
+
+    for tag in tags:
+        spec = get_yml_at_tag(wdir, tag)
+        if not spec:
+            continue
+        info = get_commiter_infos(wdir, tag)
+        if not info:
+            continue
+        history.append((spec, info))
+
+    history = sorted(history, key=lambda x: x[0].pkg_release, reverse=True)
+
+    hist = os.path.join(wdir, "history.xml")
+
+    hist_obj = PackageHistory()
+    for i in history:
+        com = i[1]
+        spec = i[0]
+        update = pisi.specfile.Update()
+        update.name = unicode(com.name)
+        update.email = com.email
+        update.version = spec.pkg_version
+        update.release = str(spec.pkg_release)
+        update.date = com.date
+        comment = com.subject
+        if com.body:
+            comment += "\n" + com.body
+        update.comment = comment
+        hist_obj.history.append(update)
+
+    hist_obj.write(hist)
+    print(tags)
+
+if __name__ == "__main__":
+    main()

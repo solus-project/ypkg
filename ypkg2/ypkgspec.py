@@ -242,6 +242,9 @@ class YpkgSpec:
                 print(e)
                 return False
 
+        return self.load_from_data(yaml_data)
+
+    def load_from_data(self, yaml_data):
         # Grab the main root elements (k->v mapping)
         sets = [self.mandatory_tokens, self.optional_tokens, self.build_steps]
         for tk_set in sets:
