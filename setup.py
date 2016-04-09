@@ -13,7 +13,7 @@ setup(
     packages=['ypkg2'],
     scripts=['ypkg', 'ypkg-install-deps', 'ypkg-gen-history', 'ypkg-build'],
     classifiers=[
-        "License :: OSI Approved :: GPL License",
+        "License :: OSI Approved :: GPL-3.0 License",
     ],
     package_data={'ypkg2': ['rc.yml']},
 )
