@@ -81,7 +81,6 @@ def main():
                               "or as the root user (not recommended)")
         sys.exit(1)
 
-
     build_package(args.filename)
 
 

@@ -140,6 +140,8 @@ class PackageGenerator:
         self.add_pattern("/usr/lib64/pkgconfig/*.pc", "devel")
         self.add_pattern("/usr/include/", "devel")
         self.add_pattern("/usr/share/man3/", "devel")
+        self.add_pattern("/usr/share/aclocal/*.m4", "devel")
+        self.add_pattern("/usr/share/aclocal/*.ac", "devel")
 
         self.add_pattern("/usr/lib32/lib*.so", "32bit-devel")
         self.add_pattern("/usr/lib32/lib*.a", "32bit-devel")
@@ -152,6 +154,16 @@ class PackageGenerator:
         self.add_pattern("/usr/lib32/debug/", "32bit-dbginfo", priority=DBG)
 
         self.add_pattern("/usr/share/gtk-doc/html/", "docs")
+
+        # cmake stuffs
+        self.add_pattern("/usr/share/cmake/", "devel")
+        self.add_pattern("/usr/lib64/cmake/", "devel")
+        self.add_pattern("/usr/lib/cmake/", "devel")
+        self.add_pattern("/usr/lib32/cmake/", "32bit-devel")
+
+        # Vala..
+        self.add_pattern("/usr/share/vala*/vapi/*", "devel")
+        self.add_pattern("/usr/share/vala*/vapi/*", "devel")
 
     def add_file(self, path):
         """ Add a file path to the owned list and place it into the correct
