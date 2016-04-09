@@ -95,5 +95,7 @@ The TODO:
  * [x] Add enhanced `debuginfo` packages
  * [x] Support solus packager file
  * [x] Support history.xml file (evobuild will generate this.)
+ * [ ] Emit legacy `pspec_$ARCH.xml` for sake of consistency/accounting
+ * [ ] Add a secondary collider loop in for the patterns in pspec
  * [ ] Release "ypkg2"
  * [ ] Add support for reproducible builds
