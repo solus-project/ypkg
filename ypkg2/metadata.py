@@ -207,8 +207,8 @@ def handle_dependencies(context, gene, metadata, package, files):
 
         local_fullname = context.spec.get_package_name(package.name)
 
+        # Don't self depend.
         if dependency == local_fullname:
-            print("Avoiding self dependency")
             continue
         if dependency not in all_names:
             # External dependency
