@@ -24,6 +24,7 @@ import subprocess
 from collections import OrderedDict
 import datetime
 import calendar
+import sys
 
 
 FileTypes = OrderedDict([
@@ -351,9 +352,16 @@ def create_eopkg(context, gene, package):
     # Grab Meta XML
     meta = create_meta_xml(context, gene, package, files)
     # Start creating a package.
-    pkg = pisi.package.Package(name, "w",
-                               format=pisi.package.Package.default_format,
-                               tmp_dir=pdir)
+
+    try:
+        pkg = pisi.package.Package(name, "w",
+                                   format=pisi.package.Package.default_format,
+                                   tmp_dir=pdir)
+    except Exception as e:
+        console_ui.emit_error("Build", "Failed to emit package: {}".
+                              format(e))
+        sys.exit(1)
+
     if history_timestamp:
         pkg.history_timestamp = history_timestamp
 
@@ -384,4 +392,9 @@ def create_eopkg(context, gene, package):
 
     pfile = os.path.join(pdir, "install.tar.xz")
     os.utime(pfile, (history_timestamp, history_timestamp))
-    pkg.close()
+    try:
+        pkg.close()
+    except Exception as e:
+        console_ui.emit_error("Build", "Failed to emit package: {}".
+                              format(e))
+        sys.exit(1)
