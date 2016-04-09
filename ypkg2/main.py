@@ -81,9 +81,9 @@ def main():
                               "or as the root user (not recommended)")
         sys.exit(1)
 
-    console_ui.emit_success("Package", "Building complete")
 
     build_package(args.filename)
+    console_ui.emit_success("Package", "Building complete")
 
 
 def clean_build_dirs(context):
