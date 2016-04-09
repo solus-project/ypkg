@@ -25,7 +25,7 @@ try:
 except Exception as e:
     from yaml import Loader
     
-MAX_HISTORY_LEN = 20
+MAX_HISTORY_LEN = 10
 
 cve_hit = re.compile(r".*(CVE\-[0-9]+\-[0-9]+).*")
 
