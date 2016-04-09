@@ -1,0 +1,111 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+#
+#  This file is part of ypkg2
+#
+#  Copyright 2015-2016 Ikey Doherty <ikey@solus-project.com>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+
+from ypkg2 import console_ui
+from ypkg2.ypkgspec import YpkgSpec
+from pisi.db.installdb import InstallDB
+from pisi.db.packagedb import PackageDB
+from ypkg2 import pkgconfig_dep, pkgconfig32_dep
+
+import sys
+import os
+import subprocess
+
+
+def main():
+    spec = YpkgSpec()
+
+    path = sys.argv[1]
+
+    if not spec.load_from_path(path):
+        sys.exit(1)
+
+    pc32deps = set()
+    pcdeps = set()
+    ndeps = set()
+
+    idb = InstallDB()
+    pdb = PackageDB()
+
+    console_ui.emit_info("BuildDep", "Checking build-deps for {}-{}-{}".
+                         format(spec.pkg_name, spec.pkg_version,
+                                spec.pkg_release))
+
+    for dep in spec.pkg_builddeps:
+        em32 = pkgconfig32_dep.match(dep)
+        if em32:
+            pc32deps.add(em32.group(1))
+            continue
+        em = pkgconfig_dep.match(dep)
+        if em:
+            pcdeps.add(em.group(1))
+            continue
+        if not idb.has_package(dep):
+            ndeps.add(dep)
+
+    for i in pc32deps:
+        local = False
+        pkg = pdb.get_package_by_pkgconfig32(i)
+        if not pkg:
+            pkg = pdb.get_package_by_pkgconfig(i)
+        if not pkg:
+            pkg = idb.get_package_by_pkgconfig32(i)
+        if not pkg:
+            pkg = idb.get_package_by_pkgconfig(i)
+        if local:
+            console_ui.emit_warning("pkgconfig32:{}".format(i),
+                                    "This dependency is not in any repo")
+        if not pkg:
+            console_ui.emit_error("BuildDep", "pkgconfig32({}) build dep"
+                                  " does not exist in the repository.")
+            sys.exit(1)
+        if not idb.has_package(pkg.name):
+            ndeps.add(pkg.name)
+
+    for i in pcdeps:
+        local = False
+        pkg = pdb.get_package_by_pkgconfig(i)
+        if not pkg:
+            pkg = idb.get_package_by_pkgconfig(i)
+            local = True
+        if local:
+            console_ui.emit_warning("pkgconfig:{}".format(i),
+                                    "This dependency is not in any repo")
+        if not pkg:
+            console_ui.emit_error("BuildDep", "pkgconfig({}) build dep"
+                                  " does not exist in the repository.")
+            sys.exit(1)
+        if not idb.has_package(pkg.name):
+            ndeps.add(pkg.name)
+
+    if len(ndeps) < 1:
+        console_ui.emit_success("BuildDep", "All build deps satisfied")
+        sys.exit(0)
+
+    if os.geteuid() != 0:
+        cmd = "sudo eopkg install {}".format(" ".join(ndeps))
+    else:
+        cmd = "eopkg install {}".format(" ".join(ndeps))
+
+    console_ui.emit_info("BuildDep", "Requesting installation of: {}".
+                         format(", ".join(ndeps)))
+    try:
+        subprocess.check_call(cmd, shell=True)
+    except Exception as e:
+        console_ui.emit_error("BuildDep", "Failed to install build deps")
+        sys.exit(1)
+
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
