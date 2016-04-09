@@ -16,18 +16,44 @@ from ypkg2.ypkgspec import YpkgSpec
 from pisi.db.installdb import InstallDB
 from pisi.db.packagedb import PackageDB
 from ypkg2 import pkgconfig_dep, pkgconfig32_dep
+from ypkg2.main import show_version
 
 import sys
 import os
 import subprocess
+import argparse
 
 
 def main():
     spec = YpkgSpec()
 
-    path = sys.argv[1]
+    parser = argparse.ArgumentParser(description="Ypkg Build Dep Installer")
+    parser.add_argument("-n", "--no-colors", help="Disable color output",
+                        action="store_true")
+    parser.add_argument("-v", "--version", action="store_true",
+                        help="Show version information and exit")
+    parser.add_argument("-f", "--force", help="Force install dependencies, "
+                        "i.e. no prompt", action="store_true")
 
-    if not spec.load_from_path(path):
+    # Main file
+    parser.add_argument("filename", help="Path to the ypkg YAML file")
+
+    args = parser.parse_args()
+    # Kill colors
+    if args.no_colors:
+        console_ui.allow_colors = False
+    # Show version
+    if args.version:
+        show_version()
+
+    # Grab filename
+    if not args.filename:
+        console_ui.emit_error("Error", "Please provide a filename")
+        print("")
+        parser.print_help()
+        sys.exit(1)
+
+    if not spec.load_from_path(args.filename):
         sys.exit(1)
 
     pc32deps = set()
@@ -97,6 +123,9 @@ def main():
         cmd = "sudo eopkg install {}".format(" ".join(ndeps))
     else:
         cmd = "eopkg install {}".format(" ".join(ndeps))
+
+    if args.force:
+        cmd += " --yes-all"
 
     console_ui.emit_info("BuildDep", "Requesting installation of: {}".
                          format(", ".join(ndeps)))
