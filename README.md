@@ -8,12 +8,6 @@ ypkg evolved from a simple set of ideas within the Solus Project, that packaging
 should be simple. Given rules should be obeyed globally, and where appropriate
 the packager should be able to tweak the results to how they desire.
 
-This grew.. organically. As it stands, much of the code is actually very nasty,
-and could be more efficient. Secondly, we formulate a fake pspec/actions combo
-to relay back to eopkg itself, relying on what we **understand** about the package,
-to eopkg's legacy concept of file accounting, which differs wildly from our own
-rules.
-
 **How Rules Work:**
 
 Everything in ypkg can be traced to a *pattern*. We use these to define what part
@@ -60,10 +54,6 @@ The solution, therefore, is to do the following:
         /usr/lib64/libpoppler-qt5*.so
         /usr/lib64/pkgconfig/poppler-qt5.pc
 
-However, we see that the pattern for both main and devel will capture files that
-have been destined for qt5 and qt5-devel subpackages. There is no simple way to
-express this when passing by proxy to a package builder, therefore **ypkg2 will
-have to build the packages itself**.
 
 License
 -------
