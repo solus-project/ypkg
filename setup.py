@@ -15,4 +15,5 @@ setup(
     classifiers=[
         "License :: OSI Approved :: GPL License",
     ],
+    package_data={'ypkg2': ['rc.yml']},
 )
