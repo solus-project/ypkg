@@ -214,10 +214,10 @@ def handle_dependencies(context, gene, metadata, package, files):
                 idb = InstallDB()
             pkg = idb.get_package(dependency)
             newDep.package = dependency
-            newDep.releaseFrom = pkg.release
+            newDep.releaseFrom = str(pkg.release)
         else:
             newDep.package = dependency
-            newDep.release = release
+            newDep.release = str(release)
 
         metadata.package.packageDependencies.append(newDep)
 
@@ -229,7 +229,7 @@ def handle_dependencies(context, gene, metadata, package, files):
             continue
         dep = pisi.dependency.Dependency()
         if depname in all_names:
-            dep.releaseFrom = context.spec.pkg_release
+            dep.releaseFrom = str(context.spec.pkg_release)
         dep.package = str(depname)
         metadata.package.packageDependencies.append(dep)
 
