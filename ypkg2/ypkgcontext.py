@@ -204,7 +204,10 @@ class YpkgContext:
         self.build.cflags = list(conf.values.build.cflags.split(" "))
         self.build.cxxflags = list(conf.values.build.cxxflags.split(" "))
         self.build.ldflags = list(conf.values.build.ldflags.split(" "))
-        self.build.ccache = "ccache" in conf.values.build.buildhelper
+        if conf.values.build.buildhelper:
+            self.build.ccache = "ccache" in conf.values.build.buildhelper
+        else:
+            self.build.ccache = None
 
         self.can_dbginfo = conf.values.build.generatedebug
         self.pconfig = conf
