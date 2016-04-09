@@ -36,6 +36,8 @@ class DependencyResolver:
     pkgconfig_cache = dict()
     pkgconfig32_cache = dict()
 
+    files_cache = dict()
+
     def search_file(self, fname):
         if fname[0] == '/':
             fname = fname[1:]
@@ -83,9 +85,14 @@ class DependencyResolver:
         pkg = None
         for path in paths:
             fpath = os.path.join(path, symbol)
-            pkg = self.search_file(fpath)
-            if pkg:
-                lpkg = pkg[0][0]
+            lpkg = None
+            if fpath in self.files_cache:
+                lpkg = self.files_cache[fpath]
+            else:
+                pkg = self.search_file(fpath)
+                if pkg:
+                    lpkg = pkg[0][0]
+            if lpkg:
                 if info.emul32:
                     self.bindeps_emul32[symbol] = lpkg
                 else:
@@ -93,6 +100,12 @@ class DependencyResolver:
                 console_ui.emit_info("Dependency",
                                      "{} adds dependency on {} from {}".
                                      format(info.pretty, symbol, lpkg))
+
+                # Populate a global files cache, basically there is a high
+                # chance that each package depends on multiple things in a
+                # single package.
+                for file in self.idb.get_files(lpkg).list:
+                    self.files_cache["/" + file.path] = lpkg
                 return lpkg
         return None
 
@@ -135,7 +148,6 @@ class DependencyResolver:
             self.pkgconfig32_cache[name] = pkg.name
         else:
             self.pkgconfig_cache[name] = pkg.name
-
         return pkg.name
 
     def handle_binary_deps(self, packageName, info):
