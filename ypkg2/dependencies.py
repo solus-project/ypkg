@@ -155,16 +155,23 @@ class DependencyResolver:
             pkgName = self.ctx.spec.get_package_name(packageName)
 
             prov = self.get_pkgconfig_provider(info, item)
-            if prov:
-                print("internal: {}/{} depends on {}.pc from {}".
-                      format(pkgName, info.pretty, item, prov))
-                continue
-            prov = self.get_pkgconfig_external(info, item)
             if not prov:
-                print("Fatal: Unknown pc: {}".format(item))
-            print("External pc dep: {}, {}".
-                  format(pkgName, prov))
-            print(prov)
+                prov = self.get_pkgconfig_external(info, item)
+
+            if not prov:
+                console_ui.emit_warning("PKGCONFIG", "Not adding unknown"
+                                        " dependency {} to {}".
+                                        format(item, pkgName))
+                continue
+            tgtPkg = self.gene.packages[packageName]
+
+            # Yes, it's a set, but i  dont want the ui emission spam
+            if prov in tgtPkg.depend_packages:
+                continue
+            tgtPkg.depend_packages.add(prov)
+
+            console_ui.emit_info("PKGCONFIG", "{} adds depend on {}".
+                                 format(pkgName, prov))
 
     def handle_pkgconfig_provides(self, packageName, info):
         adder = None
