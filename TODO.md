@@ -76,7 +76,7 @@ The TODO:
  * [x] Add the string-based path globbing algo
  * [x] Add necessary logic to dynamically emit the `YpkgPackage` objects
  * [x] Emit our first native `.eopkg`
- * [ ] Fold in our dynamic dependency scanning from `eopkg` into `ypkg`
+ * [x] Fold in our dynamic dependency scanning from `eopkg` into `ypkg`
  * [x] Add stripping
  * [x] Add enhanced `debuginfo` packages
  * [ ] Release "ypkg2"
