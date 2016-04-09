@@ -111,6 +111,9 @@ class FileReport:
 
         pcname = os.path.basename(file).split(".pc")[0]
         self.pkgconfig_name = pcname
+
+        if not share_ctx.spec.pkg_autodep:
+            return
         for cmd in cmds:
             try:
                 out = subprocess.check_output(cmd.format(sub, file),
