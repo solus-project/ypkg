@@ -318,7 +318,7 @@ def build_package(filename):
             console_ui.emit_info("Package", "Skipping empty package: {}".
                                  format(package))
             continue
-        metadata.create_eopkg(ctx, pkg)
+        metadata.create_eopkg(ctx, gene, pkg)
 
     for pkg in spec.patterns:
         if pkg in gene.packages:

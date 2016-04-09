@@ -147,6 +147,7 @@ class DependencyResolver:
                 if not r:
                     print("Fatal: Unknown symbol: {}".format(sym))
                     continue
+            self.gene.packages[packageName].depend_packages.add(r)
 
     def handle_pkgconfig_deps(self, packageName, info):
         """ Handle pkgconfig dependencies """
@@ -174,6 +175,24 @@ class DependencyResolver:
         # TODO: Add versioning in examine.py .. ?
         self.gene.packages[packageName].provided_symbols.add(adder)
         pass
+
+    def handle_soname_links(self, packageName, info):
+        """ Add dependencies between packages due to a .so splitting """
+        ourName = self.ctx.spec.get_package_name(packageName)
+
+        for link in info.soname_links:
+            fi = self.gene.get_file_owner(link)
+            if not fi:
+                console_ui.emit_warning("SOLINK", "{} depends on non existing"
+                                        "soname link: {}".
+                                        format(packageName, link))
+                continue
+            pkgName = self.ctx.spec.get_package_name(fi.name)
+            if pkgName == ourName:
+                continue
+            self.gene.packages[packageName].depend_packages.add(pkgName)
+            console_ui.emit_info("SOLINK", "{} depends on {} through .so link".
+                                 format(ourName, pkgName))
 
     def compute_for_packages(self, context, gene, packageSet):
         """ packageSet is a dict mapping here. """
@@ -207,4 +226,6 @@ class DependencyResolver:
                 if info.pkgconfig_name:
                     self.handle_pkgconfig_provides(packageName, info)
 
+                if info.soname_links:
+                    self.handle_soname_links(packageName, info)
         return True

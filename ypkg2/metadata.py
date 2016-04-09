@@ -17,6 +17,7 @@ import pisi.util
 import pisi.metadata
 import pisi.specfile
 import pisi.package
+from pisi.db.installdb import InstallDB
 import stat
 import subprocess
 from collections import OrderedDict
@@ -167,9 +168,15 @@ def construct_package_name(context, package):
               config.values.general.architecture]
     return "{}.{}".format("-".join(parts), extension)
 
+global idb
 
-def handle_dependencies(context, metadata, package, files):
+idb = None
+
+
+def handle_dependencies(context, gene, metadata, package, files):
     """ Insert providers and dependencies into the spec """
+    global idb
+
     if len(package.provided_symbols) > 0:
         for sym in package.provided_symbols:
             spc = None
@@ -185,8 +192,39 @@ def handle_dependencies(context, metadata, package, files):
                 spc.om = g.group(1)
                 metadata.package.providesPkgConfig.append(spc)
 
+    all_names = set()
+    for i in gene.packages:
+        all_names.add(context.spec.get_package_name(i))
 
-def create_meta_xml(context, package, files):
+    dependencies = set(package.depend_packages)
+
+    if not package.depend_packages:
+        return
+    for dependency in package.depend_packages:
+        release = context.spec.pkg_release
+
+        newDep = pisi.dependency.Dependency()
+
+        local_fullname = context.spec.get_package_name(package.name)
+
+        if dependency == local_fullname:
+            print("Avoiding self dependency")
+            continue
+        if dependency not in all_names:
+            # External dependency
+            if not idb:
+                idb = InstallDB()
+            pkg = idb.get_package(dependency)
+            newDep.package = dependency
+            newDep.releaseFrom = pkg.release
+        else:
+            newDep.package = dependency
+            newDep.release
+
+        metadata.package.packageDependencies.append(newDep)
+
+
+def create_meta_xml(context, gene, package, files):
     """ Create the main metadata.xml file """
     meta = metadata_from_package(context, package, files)
     config = context.pconfig
@@ -202,7 +240,7 @@ def create_meta_xml(context, package, files):
     meta.package.architecture = config.values.general.architecture
     meta.package.packageFormat = pisi.package.Package.default_format
 
-    handle_dependencies(context, meta, package, files)
+    handle_dependencies(context, gene, meta, package, files)
 
     mpath = os.path.join(context.get_packaging_dir(), "metadata.xml")
     meta.write(mpath)
@@ -211,7 +249,7 @@ def create_meta_xml(context, package, files):
     return meta
 
 
-def create_eopkg(context, package):
+def create_eopkg(context, gene, package):
     """ Do the hard work and write the package out """
     name = construct_package_name(context, package)
 
@@ -221,7 +259,7 @@ def create_eopkg(context, package):
     pdir = context.get_packaging_dir()
     files = create_files_xml(context, package)
     # Grab Meta XML
-    meta = create_meta_xml(context, package, files)
+    meta = create_meta_xml(context, gene, package, files)
     # Start creating a package.
     pkg = pisi.package.Package(name, "w",
                                format=pisi.package.Package.default_format,
