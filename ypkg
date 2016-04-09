@@ -12,14 +12,39 @@
 #
 
 from ypkg2 import console_ui
+from ypkg2.main import show_version
 import subprocess
 import sys
 import os
+import argparse
 
 
 def main():
-    if len(sys.argv) < 2:
-        console_ui.emit_error("ypkg", "Please provide path to package.yml")
+    parser = argparse.ArgumentParser(description="Ypkg")
+    parser.add_argument("-n", "--no-colors", help="Disable color output",
+                        action="store_true")
+    parser.add_argument("-v", "--version", action="store_true",
+                        help="Show version information and exit")
+    parser.add_argument("-f", "--force", help="Force install dependencies, "
+                        "i.e. no prompt", action="store_true")
+
+    # Main file
+    parser.add_argument("filename", help="Path to the ypkg YAML file",
+                        nargs='?')
+
+    args = parser.parse_args()
+    # Kill colors
+    if args.no_colors:
+        console_ui.allow_colors = False
+    # Show version
+    if args.version:
+        show_version()
+
+    # Grab filename
+    if not args.filename:
+        console_ui.emit_error("Error", "Please provide a filename")
+        print("")
+        parser.print_help()
         sys.exit(1)
 
     needFakeroot = True
@@ -28,13 +53,15 @@ def main():
             needFakeroot = False
 
     args = " ".join(sys.argv[1:])
+    vargs = sys.argv[1:]
+    cargs = " ".join(filter(lambda x: x != "-f" and x != "--force", vargs))
     try:
         subprocess.check_call("ypkg-install-deps {}".format(args), shell=True)
         if needFakeroot:
             sub = "fakeroot "
         else:
             sub = ""
-        subprocess.check_call("{}ypkg-build {}".format(sub, args), shell=True)
+        subprocess.check_call("{}ypkg-build {}".format(sub, cargs), shell=True)
     except Exception as e:
         print(e)
         sys.exit(1)
