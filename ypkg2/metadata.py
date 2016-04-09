@@ -10,7 +10,7 @@
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 
-from . import console_ui
+from . import console_ui, pkgconfig_dep, pkgconfig32_dep
 
 import os
 import pisi.util
@@ -168,6 +168,24 @@ def construct_package_name(context, package):
     return "{}.{}".format("-".join(parts), extension)
 
 
+def handle_dependencies(context, metadata, package, files):
+    """ Insert providers and dependencies into the spec """
+    if len(package.provided_symbols) > 0:
+        for sym in package.provided_symbols:
+            spc = None
+            name = None
+            g = pkgconfig32_dep.match(sym)
+            if g:
+                spc = pisi.specfile.PkgConfig32Provide()
+                spc.om = g.group(1)
+                metadata.package.providesPkgConfig32.append(spc)
+            g = pkgconfig_dep.match(sym)
+            if g:
+                spc = pisi.specfile.PkgConfigProvide()
+                spc.om = g.group(1)
+                metadata.package.providesPkgConfig.append(spc)
+
+
 def create_meta_xml(context, package, files):
     """ Create the main metadata.xml file """
     meta = metadata_from_package(context, package, files)
@@ -183,6 +201,8 @@ def create_meta_xml(context, package, files):
         config.values.general.distribution_release
     meta.package.architecture = config.values.general.architecture
     meta.package.packageFormat = pisi.package.Package.default_format
+
+    handle_dependencies(context, meta, package, files)
 
     mpath = os.path.join(context.get_packaging_dir(), "metadata.xml")
     meta.write(mpath)

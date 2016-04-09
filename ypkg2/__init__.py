@@ -13,6 +13,9 @@
 
 from .ui import YpkgUI
 
+import re
+
+
 global console_ui
 
 console_ui = YpkgUI()
@@ -24,3 +27,6 @@ def remove_prefix(fpath, prefix):
     if fpath[0] != '/':
         fpath = "/" + fpath
     return fpath
+
+pkgconfig32_dep = re.compile("^pkgconfig32\((.*)\)$")
+pkgconfig_dep = re.compile("^pkgconfig\((.*)\)$")

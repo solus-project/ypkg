@@ -166,6 +166,13 @@ class DependencyResolver:
             print(prov)
 
     def handle_pkgconfig_provides(self, packageName, info):
+        adder = None
+        if info.emul32:
+            adder = "pkgconfig32({})".format(info.pkgconfig_name)
+        else:
+            adder = "pkgconfig({})".format(info.pkgconfig_name)
+        # TODO: Add versioning in examine.py .. ?
+        self.gene.packages[packageName].provided_symbols.add(adder)
         pass
 
     def compute_for_packages(self, context, gene, packageSet):
@@ -200,4 +207,4 @@ class DependencyResolver:
                 if info.pkgconfig_name:
                     self.handle_pkgconfig_provides(packageName, info)
 
-        return False
+        return True
