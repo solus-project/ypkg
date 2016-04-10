@@ -273,7 +273,10 @@ class YpkgSpec:
                 print(e)
                 return False
 
-        return self.load_from_data(yaml_data)
+        b = self.load_from_data(yaml_data)
+        if not b:
+            return b
+        return self.load_component()
 
     def load_from_data(self, yaml_data):
         # Grab the main root elements (k->v mapping)
@@ -350,6 +353,30 @@ class YpkgSpec:
             console_ui.emit_error("HISTORY", "Could not load history file")
             print(e)
             return False
+        return True
+
+    def load_component(self):
+        if "main" in self.components:
+            return True
+
+        p = os.path.dirname(self.path)
+
+        for i in ["component.xml", "../component.xml"]:
+            fpath = os.path.join(p, i)
+            if not os.path.exists(fpath):
+                continue
+            comp = pisi.component.CompatComponent()
+            try:
+                comp.read(fpath)
+                console_ui.emit_warning("Component",
+                                        "Using legacy component.xml: {}".
+                                        format(fpath))
+                print("  Please switch to using the 'component' key")
+                self.add_component("main", comp.name)
+            except Exception as e:
+                console_ui.emit_error("Component", "Error in legacy file")
+                print(e)
+                return False
         return True
 
     def get_package_name(self, name):
