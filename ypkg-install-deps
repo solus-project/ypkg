@@ -131,6 +131,12 @@ def main():
     if args.no_colors:
         cmd += " -N"
 
+    invalid = [x for x in ndeps if not pdb.has_package(x)]
+    if len(invalid) > 0:
+        console_ui.emit_error("BuildDep", "Unknown build deps: {}".
+                              format(" ".join(invalid)))
+        sys.exit(1)
+
     console_ui.emit_info("BuildDep", "Requesting installation of: {}".
                          format(", ".join(ndeps)))
     try:
