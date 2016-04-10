@@ -464,6 +464,9 @@ def write_spec(context, gene, outputDir):
     for pkg in packages:
         package = accum_packages[pkg]
 
+        if pkg == "dbginfo" or pkg == "32bit-dbginfo":
+            continue
+
         specPkg = pisi.specfile.Package()
         copies = ["name", "summary", "description", "partOf",
                   "replaces", "conflicts"]
