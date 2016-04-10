@@ -12,12 +12,14 @@
 #
 
 from ypkg2.ypkgspec import YpkgSpec, PackageHistory
+from ypkg2.main import show_version
 
 import subprocess
 import sys
 import os
 import pisi.specfile
 import re
+import argparse
 
 from yaml import load as yaml_load
 try:
@@ -105,11 +107,40 @@ def get_commiter_infos(wdir, tag):
 
 
 def main():
-    if len(sys.argv) < 2:
+    parser = argparse.ArgumentParser(description="Ypkg History Generator")
+    parser.add_argument("-v", "--version", action="store_true",
+                        help="Show version information and exit")
+    parser.add_argument("-D", "--output-dir", type=str,
+                        help="Set the output directory for resulting files")
+    # Main file
+    parser.add_argument("filename", help="Path to the ypkg YAML file",
+                        nargs='?')
+
+    args = parser.parse_args()
+    if args.version:
+        show_version()
+
+    if not args.filename:
+        print("Fatal: No filename provided")
         sys.exit(1)
 
-    yml = os.path.abspath(sys.argv[1])
+    yml = os.path.abspath(args.filename)
     wdir = os.path.dirname(yml)
+
+    # check git exists
+    fp = os.path.join(wdir, ".git")
+    if not os.path.exists(fp):
+        print("Debug: Skipping non git tree: {}".format(wdir))
+        sys.exit(0)
+
+    outputDir = wdir
+    if args.output_dir:
+        od = args.output_dir
+        if not os.path.exists(args.output_dir):
+            print("{} does not exist".format(od))
+            sys.exit(1)
+        outputDir = od
+    outputDir = os.path.abspath(outputDir)
 
     tags = get_git_tags(wdir)
 
@@ -126,7 +157,7 @@ def main():
 
     history = sorted(history, key=lambda x: x[0].pkg_release, reverse=True)
 
-    hist = os.path.join(wdir, "history.xml")
+    hist = os.path.join(outputDir, "history.xml")
 
     hist_obj = PackageHistory()
     for i in history:
