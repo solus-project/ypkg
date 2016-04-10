@@ -111,7 +111,8 @@ def main():
                                     "This dependency is not in any repo")
         if not pkg:
             console_ui.emit_error("BuildDep", "pkgconfig({}) build dep"
-                                  " does not exist in the repository.")
+                                  " does not exist in the repository.".
+                                  format(i))
             sys.exit(1)
         if not idb.has_package(pkg.name):
             ndeps.add(pkg.name)
