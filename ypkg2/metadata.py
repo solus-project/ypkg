@@ -190,7 +190,7 @@ def metadata_from_package(context, package, files):
             update = topup
             packager.name = topup.name
             packager.email = topup.email
-        meta.package.history = context.spec.history.history
+            meta.package.history = context.spec.history.history
 
     if not update:
         update = pisi.specfile.Update()
