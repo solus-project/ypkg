@@ -108,6 +108,8 @@ def clean_build_dirs(context):
 
 def execute_step(context, step, step_n, work_dir):
     script = ScriptGenerator(context, context.spec, work_dir)
+    if context.emul32:
+        script.define_export("EMUL32BUILD", "1")
 
     exports = script.emit_exports()
 
