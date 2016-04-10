@@ -246,6 +246,20 @@ def handle_dependencies(context, gene, metadata, package, files):
     """ Insert providers and dependencies into the spec """
     global idb
 
+    # Insert the simple guys first, replaces/conflicts, as these don't map
+    # to internal names at all and are completely from the user
+    if package.name in context.spec.replaces:
+        for item in sorted(set(context.spec.replaces[package.name])):
+            repl = pisi.replace.Replace()
+            repl.package = str(item)
+            metadata.package.replaces.append(repl)
+    # conflicts
+    if package.name in context.spec.conflicts:
+        for item in sorted(set(context.spec.conflicts[package.name])):
+            conf = pisi.conflict.Conflict()
+            conf.package = str(item)
+            metadata.package.conflicts.append(conf)
+
     if len(package.provided_symbols) > 0:
         for sym in package.provided_symbols:
             spc = None
@@ -451,8 +465,11 @@ def write_spec(context, gene, outputDir):
         package = accum_packages[pkg]
 
         specPkg = pisi.specfile.Package()
-        copies = ["name", "summary", "description", "partOf"]
+        copies = ["name", "summary", "description", "partOf",
+                  "replaces", "conflicts"]
         for item in copies:
+            if not hasattr(package.package, item):
+                continue
             setattr(specPkg, item, getattr(package.package, item))
 
         # Now the fun bit.

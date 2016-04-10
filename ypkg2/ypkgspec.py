@@ -102,10 +102,15 @@ class YpkgSpec:
     step_check = None
     step_profile = None
 
+    # More meta
     summaries = None
     descriptions = None
     rundeps = None
     components = None
+
+    # Multimap: replaces/conflicts
+    replaces = None
+    conflicts = None
 
     # Path to filename
     path = None
@@ -142,6 +147,26 @@ class YpkgSpec:
             console_ui.emit_warning("YAML", "Duplicate pattern: {}".format(pt))
         self.patterns[key].append(pt)
 
+    def add_replace(self, key, val):
+        """ Add a 'replaces:' to the package """
+        if key not in self.replaces:
+            self.replaces[key] = list()
+        if val in self.replaces:
+            console_ui.emit_warning("YAML",
+                                    "Duplicate replace: {}".format(val))
+            return
+        self.replaces[key].append(val)
+
+    def add_conflict(self, key, val):
+        """ Add a 'conflicts:' to the package """
+        if key not in self.conflicts:
+            self.conflicts[key] = list()
+        if val in self.conflicts:
+            console_ui.emit_warning("YAML",
+                                    "Duplicate conflict: {}".format(val))
+            return
+        self.conflicts[key].append(val)
+
     def __init__(self):
         # These tokens *must* exist
         self.mandatory_tokens = OrderedDict([
@@ -167,6 +192,8 @@ class YpkgSpec:
             ("builddeps", OneOrMoreString),
             ("rundeps", MultimapFormat(self, self.add_rundep, "main")),
             ("component", MultimapFormat(self, self.add_component, "main")),
+            ("conflicts", MultimapFormat(self, self.add_conflict, "main")),
+            ("replaces", MultimapFormat(self, self.add_replace, "main")),
             ("optimize", unicode),
         ])
         # Build steps are handled separately
@@ -182,6 +209,8 @@ class YpkgSpec:
         self.rundeps = dict()
         self.components = dict()
         self.patterns = OrderedDict()
+        self.replaces = dict()
+        self.conflicts = dict()
 
     def init_defaults(self):
         # Add some sane defaults
