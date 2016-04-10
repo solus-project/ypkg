@@ -190,6 +190,6 @@ The TODO:
  * [x] Support history.xml file (evobuild will generate this.)
  * [x] Emit legacy `pspec_$ARCH.xml` for sake of consistency/accounting
  * [x] Add a secondary collider loop in for the patterns in pspec
- * [ ] Add notion of output directory for all ops (-D)
+ * [x] Add notion of output directory for all ops (-D)
  * [ ] Release "ypkg2"
  * [ ] Add support for reproducible builds
