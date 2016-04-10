@@ -191,5 +191,5 @@ The TODO:
  * [x] Emit legacy `pspec_$ARCH.xml` for sake of consistency/accounting
  * [x] Add a secondary collider loop in for the patterns in pspec
  * [x] Add notion of output directory for all ops (-D)
- * [ ] Release "ypkg2"
+ * [x] Release "ypkg2"
  * [ ] Add support for reproducible builds
