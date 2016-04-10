@@ -31,6 +31,7 @@ FileTypes = OrderedDict([
     ("/usr/lib/pkgconfig", "data"),
     ("/usr/lib64/pkgconfig", "data"),
     ("/usr/lib32/pkgconfig", "data"),
+    ("/usr/libexec", "executable"),
     ("/usr/lib", "library"),
     ("/usr/share/info", "info"),
     ("/usr/share/man", "man"),
