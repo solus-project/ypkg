@@ -132,6 +132,9 @@ class PackageGenerator:
         self.packages = dict()
 
         self.add_pattern("/usr/bin", "main")
+        self.add_pattern("/usr/sbin", "main")
+        self.add_pattern("/sbin", "main")
+        self.add_pattern("/bin", "main")
         self.add_pattern("/usr/share/info", "main")
         self.add_pattern("/usr/lib64/lib*.so.*", "main")
         self.add_pattern("/usr/lib/lib*.so.*", "main")
