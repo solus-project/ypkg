@@ -137,6 +137,7 @@ class PackageGenerator:
         self.add_pattern("/usr/lib/lib*.so.*", "main")
         self.add_pattern("/usr/lib32/lib*.so.*", "32bit")
         self.add_pattern("/usr/share/locale", "main")
+        self.add_pattern("/usr/share/doc", "main")
         self.add_pattern("/usr/share/{}".format(spec.pkg_name), "main")
 
         # TODO: Make this come from a config file!
