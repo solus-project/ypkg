@@ -143,10 +143,16 @@ class PackageGenerator:
         self.add_pattern("/usr/share/doc", "main")
         self.add_pattern("/usr/share/{}".format(spec.pkg_name), "main")
 
-        # TODO: Make this come from a config file!
-        self.add_pattern("/usr/lib64/lib*.so", "devel")
+        if spec.pkg_libsplit:
+            self.add_pattern("/usr/lib64/lib*.so", "devel")
+            self.add_pattern("/usr/lib/lib*.so", "devel")
+            self.add_pattern("/usr/lib32/lib*.so", "32bit-devel")
+        else:
+            self.add_pattern("/usr/lib64/lib*.so", "main")
+            self.add_pattern("/usr/lib/lib*.so", "main")
+            self.add_pattern("/usr/lib32/lib*.so", "32bit")
+
         self.add_pattern("/usr/lib64/lib*.a", "devel")
-        self.add_pattern("/usr/lib/lib*.so", "devel")
         self.add_pattern("/usr/lib/lib*.a", "devel")
         self.add_pattern("/usr/lib/pkgconfig/*.pc", "devel")
         self.add_pattern("/usr/lib64/pkgconfig/*.pc", "devel")
@@ -157,7 +163,6 @@ class PackageGenerator:
         self.add_pattern("/usr/share/aclocal/*.m4", "devel")
         self.add_pattern("/usr/share/aclocal/*.ac", "devel")
 
-        self.add_pattern("/usr/lib32/lib*.so", "32bit-devel")
         self.add_pattern("/usr/lib32/lib*.a", "32bit-devel")
         self.add_pattern("/usr/lib32/pkgconfig/*.pc", "32bit-devel")
         self.add_pattern("/usr/lib32/lib*.so.*", "32bit")

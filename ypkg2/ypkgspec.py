@@ -87,6 +87,7 @@ class YpkgSpec:
     pkg_autodep = True
     pkg_extract = True
     pkg_optimize = None
+    pkg_libsplit = True
 
     # Dependencies
     pkg_builddeps = None
@@ -188,6 +189,7 @@ class YpkgSpec:
             ("emul32", bool),
             ("autodep", bool),
             ("extract", bool),
+            ("libsplit", bool),
             ("patterns", MultimapFormat(self, self.add_pattern, "main")),
             ("builddeps", OneOrMoreString),
             ("rundeps", MultimapFormat(self, self.add_rundep, "main")),
