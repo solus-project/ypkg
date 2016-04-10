@@ -446,6 +446,7 @@ def write_spec(context, gene, outputDir):
     spec.source.name = context.spec.pkg_name
     spec.source.summary['en'] = context.spec.get_summary("main")
     spec.source.description['en'] = context.spec.get_description("main")
+    spec.source.homepage = context.spec.pkg_homepage
     spec.source.packager = pkg_main.source.packager
     spec.source.license = pkg_main.package.license
     spec.source.partOf = pkg_main.package.partOf
