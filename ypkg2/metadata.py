@@ -293,6 +293,12 @@ def handle_dependencies(context, gene, metadata, package, files):
     elif package.name == "devel":
         if "main" in gene.packages:
             dependencies.add(context.spec.get_package_name("main"))
+    elif package.name == "dbginfo":
+        if "main" in gene.packages:
+            dependencies.add(context.spec.get_package_name("main"))
+    elif package.name == "32bit-dbginfo":
+        if "32bit" in gene.packages:
+            dependencies.add(context.spec.get_package_name("32bit"))
 
     for dependency in dependencies:
         release = context.spec.pkg_release
