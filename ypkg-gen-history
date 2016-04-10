@@ -139,8 +139,6 @@ def main():
     outputDir = os.path.abspath(outputDir)
 
     tags = get_git_tags(wdir)
-    if len(tags) > MAX_HISTORY_LEN:
-        tags = tags[:MAX_HISTORY_LEN]
 
     history = list()
 
@@ -157,6 +155,9 @@ def main():
         history.append((spec, info))
 
     history = sorted(history, key=lambda x: x[0].pkg_release, reverse=True)
+
+    if len(history) > MAX_HISTORY_LEN:
+        history = history[0:MAX_HISTORY_LEN]
 
     hist = os.path.join(outputDir, "history.xml")
 
