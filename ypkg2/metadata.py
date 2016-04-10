@@ -342,13 +342,17 @@ def create_meta_xml(context, gene, package, files):
     return meta
 
 
-def create_eopkg(context, gene, package):
+def create_eopkg(context, gene, package, outputDir):
     """ Do the hard work and write the package out """
     global history_timestamp
 
     name = construct_package_name(context, package)
+    fpath = os.path.join(outputDir, name)
 
-    console_ui.emit_info("Package", "Creating {} ...".format(name))
+    if os.path.abspath(os.path.dirname(fpath)) == os.path.abspath(os.getcwd()):
+        console_ui.emit_info("Package", "Creating {} ...".format(name))
+    else:
+        console_ui.emit_info("Package", "Creating {} ...".format(fpath))
 
     # Grab Files XML
     pdir = context.get_packaging_dir()
@@ -358,7 +362,7 @@ def create_eopkg(context, gene, package):
     # Start creating a package.
 
     try:
-        pkg = pisi.package.Package(name, "w",
+        pkg = pisi.package.Package(fpath, "w",
                                    format=pisi.package.Package.default_format,
                                    tmp_dir=pdir)
     except Exception as e:
@@ -404,7 +408,7 @@ def create_eopkg(context, gene, package):
         sys.exit(1)
 
 
-def write_spec(context, gene):
+def write_spec(context, gene, outputDir):
     """ Write out a compatibility pspec_$ARCH.xml """
     global accum_packages
 
@@ -464,4 +468,5 @@ def write_spec(context, gene):
 
         spec.packages.append(specPkg)
 
-    spec.write("pspec_{}.xml".format(context.build.arch))
+    opath = os.path.join(outputDir, "pspec_{}".format(context.build.arch))
+    spec.write(opath)

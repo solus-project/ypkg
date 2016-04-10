@@ -50,9 +50,13 @@ def main():
                         action="store_true")
     parser.add_argument("-v", "--version", action="store_true",
                         help="Show version information and exit")
+    parser.add_argument("-D", "--output-dir", type=str,
+                        help="Set the output directory for resulting files")
     # Main file
     parser.add_argument("filename", help="Path to the ypkg YAML file to build",
                         nargs='?')
+
+    outputDir = "."
 
     args = parser.parse_args()
     # Kill colors
@@ -61,6 +65,14 @@ def main():
     # Show version
     if args.version:
         show_version()
+
+    if args.output_dir:
+        od = args.output_dir
+        if not os.path.exists(args.output_dir):
+            console_ui.emit_error("Opt", "{} does not exist".format(od))
+            sys.exit(1)
+        outputDir = od
+    outputDir = os.path.abspath(outputDir)
 
     # Grab filename
     if not args.filename:
@@ -80,7 +92,7 @@ def main():
                               "or as the root user (not recommended)")
         sys.exit(1)
 
-    build_package(args.filename)
+    build_package(args.filename, outputDir)
 
 
 def clean_build_dirs(context):
@@ -125,7 +137,7 @@ def execute_step(context, step, step_n, work_dir):
     return True
 
 
-def build_package(filename):
+def build_package(filename, outputDir):
     """ Will in future be moved to a separate part of the module """
     spec = YpkgSpec()
     if not spec.load_from_path(filename):
@@ -362,10 +374,10 @@ def build_package(filename):
             console_ui.emit_info("Package", "Skipping empty package: {}".
                                  format(package))
             continue
-        metadata.create_eopkg(ctx, gene, pkg)
+        metadata.create_eopkg(ctx, gene, pkg, outputDir)
 
     # Write out the final pspec
-    metadata.write_spec(ctx, gene)
+    metadata.write_spec(ctx, gene, outputDir)
 
     for pkg in spec.patterns:
         if pkg in gene.packages:
