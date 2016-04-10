@@ -227,10 +227,13 @@ class SourceManager:
         build_dir = context.get_build_dir()
 
         source0 = self.sources[0].filename
-        items = os.listdir(build_dir)
-        if len(items) == 1:
-            return os.path.join(build_dir, items[0])
-        for item in items:
-            if source0.startswith(item):
-                return os.path.join(build_dir, item)
-        return build_dir
+        if os.path.exists(build_dir):
+            items = os.listdir(build_dir)
+            if len(items) == 1:
+                return os.path.join(build_dir, items[0])
+            for item in items:
+                if source0.startswith(item):
+                    return os.path.join(build_dir, item)
+            return build_dir
+        else:
+            return build_dir

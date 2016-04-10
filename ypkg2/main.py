@@ -288,6 +288,14 @@ def build_package(filename, outputDir):
                         sys.exit(1)
 
             work_dir = manager.get_working_dir(context)
+            if not os.path.exists(work_dir):
+                try:
+                    os.makedirs(work_dir, mode=00755)
+                except Exception as e:
+                    console_ui.emit_error("Source", "Error creating directory")
+                    print(e)
+                    sys.exit(1)
+
             r_step = steps[step]
             if not r_step:
                 continue
