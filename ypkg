@@ -27,7 +27,8 @@ def main():
                         help="Show version information and exit")
     parser.add_argument("-f", "--force", help="Force install dependencies, "
                         "i.e. no prompt", action="store_true")
-
+    parser.add_argument("-D", "--output-dir", type=str,
+                        help="Set the output directory for resulting files")
     # Main file
     parser.add_argument("filename", help="Path to the ypkg YAML file",
                         nargs='?')
