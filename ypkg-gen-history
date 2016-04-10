@@ -44,7 +44,7 @@ class CommiterInfo:
 def get_git_tags(wdir):
     cmd = "git -C \"{}\" tag --sort=-refname".format(wdir)
 
-    ret = list()
+    ret = set()
 
     try:
         out = subprocess.check_output(cmd, shell=True)
@@ -53,8 +53,8 @@ def get_git_tags(wdir):
 
     for i in out.split("\n"):
         i = i.strip()
-        ret.append(i)
-    return sorted(ret)
+        ret.add(i)
+    return sorted(list(ret))
 
 
 def get_yml_at_tag(wdir, tag):
@@ -145,6 +145,9 @@ def main():
     history = list()
 
     for tag in tags:
+        tag = tag.strip()
+        if tag == "":
+            continue
         spec = get_yml_at_tag(wdir, tag)
         if not spec:
             continue
