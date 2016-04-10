@@ -26,6 +26,43 @@ actions:
             fi
             %patch -p1 -i $pkgfiles/$pname
         done < $pkgfiles/series
+    # Inspired by the RPM guys :]
+    - perl_privlib: |
+        $(eval `perl -V:installprivlib`; echo $installprivlib)
+    # Make life easier with Perl
+    - perl_setup: |
+        function perl_setup() {
+            if [[ -e Build.PL ]]; then
+                perl Build.PL installdirs=vendor create_packlist=0 $* || exit 1
+            else
+                perl Makefile.PL PREFIX=/usr INSTALLDIRS=vendor DESTDIR="%installroot%" $* || exit 
+            fi
+        }
+        perl_setup
+    - perl_build: |
+        function perl_build() {
+            if [[ -e Build.PL ]]; then
+                perl Build installdirs=vendor create_packlist=0 $* || exit 1
+            else
+                %make $* || exit 1
+            fi
+        }
+        perl_build
+    # We need to nuke use of privlib because its always a perllocal.pod situation,
+    # and these macros explicitly use vendor libs
+    - perl_install: |
+        function perl_install() {
+            if [[ -e Build.PL ]]; then
+                perl Build destdir="%installroot%" install $* || exit 1
+            else
+                %make_install $* || exit 1
+            fi
+            priv_lib="%perl_privlib"
+            if [[ -e "$installdir/$priv_lib" ]]; then
+                rm -rfv "$installdir/$priv_lib"
+            fi
+        }
+        perl_install
 defines:
     - CONFOPTS: |
         --prefix=%PREFIX% --build=%HOST% --libdir=%libdir% --mandir=/usr/share/man \
