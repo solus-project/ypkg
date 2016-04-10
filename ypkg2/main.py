@@ -333,7 +333,7 @@ def build_package(filename, outputDir):
 
     exa = PackageExaminer()
     exaResults = exa.examine_packages(ctx, gene.packages.values())
-    if not exaResults:
+    if exaResults is None:
         console_ui.emit_error("Package", "Failed to correctly examine all "
                               "packages.")
         sys.exit(1)
@@ -364,6 +364,7 @@ def build_package(filename, outputDir):
         wk = "https://wiki.solus-project.com/Packaging"
         print("Ensure your files end up in $installdir. Did you mean to "
               "use %make_install?\n\nPlease see the wiki: {}".format(wk))
+        sys.exit(1)
 
     gene.emit_packages()
     # TODO: Ensure main is always first
