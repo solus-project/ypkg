@@ -51,12 +51,8 @@ def get_git_tags(wdir):
     except Exception as e:
         return None
 
-    counter = 0
     for i in out.split("\n"):
-        if counter >= MAX_HISTORY_LEN:
-            break
         i = i.strip()
-        counter += 1
         ret.append(i)
     return sorted(ret)
 
@@ -143,6 +139,8 @@ def main():
     outputDir = os.path.abspath(outputDir)
 
     tags = get_git_tags(wdir)
+    if len(tags) > MAX_HISTORY_LEN:
+        tags = tags[:MAX_HISTORY_LEN]
 
     history = list()
 
