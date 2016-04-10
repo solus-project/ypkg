@@ -200,7 +200,7 @@ class YpkgContext:
 
         # For now follow the eopkg.conf..
         self.build.host = conf.values.build.host
-        self.build.arch = conf.values.build.arch
+        self.build.arch = conf.values.general.architecture
         self.build.cflags = list(conf.values.build.cflags.split(" "))
         self.build.cxxflags = list(conf.values.build.cxxflags.split(" "))
         self.build.ldflags = list(conf.values.build.ldflags.split(" "))

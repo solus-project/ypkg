@@ -49,6 +49,8 @@ history_timestamp = None
 history_date = None
 fallback_timestamp = None
 
+accum_packages = dict()
+
 
 def unix_seconds_for_date(date):
     tp = datetime.datetime.timetuple(date)
@@ -153,6 +155,7 @@ def metadata_from_package(context, package, files):
     global history_date
     global history_timestamp
     global fallback_timestamp
+    global accum_packages
 
     meta = pisi.metadata.MetaData()
     spec = context.spec
@@ -215,6 +218,7 @@ def metadata_from_package(context, package, files):
     meta.package.version = spec.pkg_version
     meta.package.release = spec.pkg_release
 
+    accum_packages[package.name] = meta
     return meta
 
 
@@ -398,3 +402,66 @@ def create_eopkg(context, gene, package):
         console_ui.emit_error("Build", "Failed to emit package: {}".
                               format(e))
         sys.exit(1)
+
+
+def write_spec(context, gene):
+    """ Write out a compatibility pspec_$ARCH.xml """
+    global accum_packages
+
+    packages = list()
+    if "main" in gene.packages:
+        packages.append("main")
+        packages.extend(sorted([x for x in gene.packages if x != "main"]))
+    else:
+        packages = list(sorted(gene.packages.keys()))
+
+    spec = pisi.specfile.SpecFile()
+
+    legacy_sha1 = "79eb0752a961b8e0d15c77d298c97498fbc89c5a"
+    legacy_url = "https://solus-project.com/sources/README.Solus"
+
+    history = None
+    pkg_main = accum_packages[packages[0]]
+    spec.history = pkg_main.package.history
+    spec.source = pisi.specfile.Source()
+    spec.source.name = context.spec.pkg_name
+    spec.source.summary['en'] = context.spec.get_summary("main")
+    spec.source.description['en'] = context.spec.get_description("main")
+    spec.source.packager = pkg_main.source.packager
+    spec.source.license = pkg_main.package.license
+    spec.source.partOf = pkg_main.package.partOf
+    spec.source.buildDependencies = list()
+
+    # Avoid unnecessary diffs
+    archive = pisi.specfile.Archive()
+    archive.sha1sum = legacy_sha1
+    archive.uri = legacy_url
+    archive.type = "binary"
+    spec.source.archive.append(archive)
+
+    all_names = set()
+    for i in gene.packages:
+        all_names.add(context.spec.get_package_name(i))
+
+    for pkg in packages:
+        package = accum_packages[pkg]
+
+        specPkg = pisi.specfile.Package()
+        copies = ["name", "summary", "description", "partOf"]
+        for item in copies:
+            setattr(specPkg, item, getattr(package.package, item))
+
+        # Now the fun bit.
+        for f in sorted(gene.packages[pkg].emit_files_by_pattern()):
+            fc = pisi.specfile.Path()
+            fc.path = f
+            fc.fileType = get_file_type(f)
+            specPkg.files.append(fc)
+        for dep in package.package.packageDependencies:
+            if dep.package not in all_names:
+                continue
+            specPkg.packageDependencies.append(dep)
+
+        spec.packages.append(specPkg)
+
+    spec.write("pspec_{}.xml".format(context.build.arch))

@@ -127,9 +127,17 @@ class PackageGenerator:
     patterns = None
     packages = None
 
-    def __init__(self):
+    def __init__(self, spec):
         self.patterns = dict()
         self.packages = dict()
+
+        self.add_pattern("/usr/bin", "main")
+        self.add_pattern("/usr/share/info", "main")
+        self.add_pattern("/usr/lib64/lib*.so.*", "main")
+        self.add_pattern("/usr/lib/lib*.so.*", "main")
+        self.add_pattern("/usr/lib32/lib*.so.*", "32bit")
+        self.add_pattern("/usr/share/locale", "main")
+        self.add_pattern("/usr/share/{}".format(spec.pkg_name), "main")
 
         # TODO: Make this come from a config file!
         self.add_pattern("/usr/lib64/lib*.so", "devel")
@@ -139,7 +147,9 @@ class PackageGenerator:
         self.add_pattern("/usr/lib/pkgconfig/*.pc", "devel")
         self.add_pattern("/usr/lib64/pkgconfig/*.pc", "devel")
         self.add_pattern("/usr/include/", "devel")
-        self.add_pattern("/usr/share/man3/", "devel")
+        self.add_pattern("/usr/share/man3/", "devel",
+                         priority=PRIORITY_USER+1)
+        self.add_pattern("/usr/share/man", "main")
         self.add_pattern("/usr/share/aclocal/*.m4", "devel")
         self.add_pattern("/usr/share/aclocal/*.ac", "devel")
 
@@ -230,8 +240,6 @@ class PackageGenerator:
                     continue
                 for file in self.packages[comparison].emit_files():
                     self.packages[package].exclude_file(file)
-
-        return []
 
     def get_file_owner(self, file):
         """ Return the owning package for the specified file """

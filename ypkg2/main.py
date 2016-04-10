@@ -289,7 +289,7 @@ def build_package(filename):
 
     # Add user patterns - each consecutive package has higher priority than the
     # package before it, ensuring correct levels of control
-    gene = PackageGenerator()
+    gene = PackageGenerator(spec)
     count = 0
     for pkg in spec.patterns:
         for pt in spec.patterns[pkg]:
@@ -353,6 +353,7 @@ def build_package(filename):
         print("Ensure your files end up in $installdir. Did you mean to "
               "use %make_install?\n\nPlease see the wiki: {}".format(wk))
 
+    gene.emit_packages()
     # TODO: Ensure main is always first
     for package in sorted(gene.packages):
         pkg = gene.packages[package]
@@ -362,6 +363,9 @@ def build_package(filename):
                                  format(package))
             continue
         metadata.create_eopkg(ctx, gene, pkg)
+
+    # Write out the final pspec
+    metadata.write_spec(ctx, gene)
 
     for pkg in spec.patterns:
         if pkg in gene.packages:
