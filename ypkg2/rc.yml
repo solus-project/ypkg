@@ -17,15 +17,24 @@ actions:
         -DCMAKE_BUILD_TYPE=RelWithDebInfo
     - patch: |
         patch -t -E --no-backup-if-mismatch -f
-    # Only works if the user has a series file.
+    # Only works if the user has a series file. They can provide the name to
+    # override 'series' if needed
     - apply_patches: |
-        test -e "$pkgfiles/series" || exit 1
-        while read -r pname ; do
-            if [[ "$pname" == "" ]]; then
-                continue
+        function apply_patches() {
+            if [[ ! -z "$1" ]]; then
+                srs="$pkgfiles/$1"
+            else
+                srs="$pkgfiles/series"
             fi
-            %patch -p1 -i $pkgfiles/$pname
-        done < $pkgfiles/series
+            test -e "$srs" || exit 1
+            while read -r pname ; do
+                if [[ "$pname" == "" ]]; then
+                    continue
+                fi
+                %patch -p1 -i $pkgfiles/$pname
+            done < $srs
+        }
+        apply_patches
     # Inspired by the RPM guys :]
     - perl_privlib: |
         $(eval `perl -V:installprivlib`; echo $installprivlib)
