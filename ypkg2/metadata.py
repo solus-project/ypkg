@@ -468,5 +468,5 @@ def write_spec(context, gene, outputDir):
 
         spec.packages.append(specPkg)
 
-    opath = os.path.join(outputDir, "pspec_{}".format(context.build.arch))
+    opath = os.path.join(outputDir, "pspec_{}.xml".format(context.build.arch))
     spec.write(opath)
