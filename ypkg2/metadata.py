@@ -490,4 +490,9 @@ def write_spec(context, gene, outputDir):
         spec.packages.append(specPkg)
 
     opath = os.path.join(outputDir, "pspec_{}.xml".format(context.build.arch))
-    spec.write(opath)
+    try:
+        spec.write(opath)
+    except Exception as e:
+        console_ui.emit_error("Build", "Cannot write pspec file")
+        print(e)
+        sys.exit(1)
