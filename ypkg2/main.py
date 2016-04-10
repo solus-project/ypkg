@@ -39,7 +39,7 @@ def show_version():
     print("\nCopyright (C) 2015-2016 Ikey Doherty\n")
     print("This program is free software; you are free to redistribute it\n"
           "and/or modify it under the terms of the GNU General Public License"
-          "\nas published by the Free Software foundation; either version 2 of"
+          "\nas published by the Free Software foundation; either version 3 of"
           "\nthe License, or (at your option) any later version.")
     sys.exit(0)
 
