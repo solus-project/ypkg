@@ -245,6 +245,8 @@ class YpkgSpec:
         if "32bit-dbginfo" not in self.summaries:
             self.add_summary("32bit-dbginfo", "32-bit debug symbols for {}"
                              .format(name))
+        if "docs" not in self.summaries:
+            self.add_summary("docs", "Documentation for {}".format(name))
 
     def load_from_path(self, path):
         self.path = path
