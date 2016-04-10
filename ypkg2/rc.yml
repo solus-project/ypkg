@@ -35,9 +35,6 @@ actions:
             done < $srs
         }
         apply_patches
-    # Inspired by the RPM guys :]
-    - perl_privlib: |
-        $(eval `perl -V:installprivlib`; echo $installprivlib)
     # Make life easier with Perl
     - perl_setup: |
         function perl_setup() {
@@ -66,7 +63,7 @@ actions:
             else
                 %make_install $* || exit 1
             fi
-            priv_lib="%perl_privlib"
+            priv_lib="%perl_privlib%"
             if [[ -e "$installdir/$priv_lib" ]]; then
                 rm -rfv "$installdir/$priv_lib"
             fi
@@ -77,3 +74,6 @@ defines:
         --prefix=%PREFIX% --build=%HOST% --libdir=%libdir% --mandir=/usr/share/man \
         --infodir=/usr/share/info --datadir=/usr/share --sysconfdir=/etc \
         --localstatedir=/var --libexecdir=%libdir%/%PKGNAME%
+    # Inspired by the RPM guys :]
+    - perl_privlib: |
+        $(eval `perl -V:installprivlib`; echo $installprivlib)
