@@ -18,6 +18,26 @@ from pisi.db.filesdb import FilesDB
 import os
 
 
+# On Solus, these are provided only by links. Ensure that it only ever
+# depends on mesalib, and *not* the resolved nvidia, etc, possibilities
+ExceptionRules = [
+    "libEGL.so",
+    "libEGL.so.1",
+    "libEGL.so.1.0.0",
+    "libGLESv1_CM.so",
+    "libGLESv1_CM.so.1",
+    "libGLESv1_CM.so.1.1.0",
+    "libGLESv2.so",
+    "libGLESv2.so.2",
+    "libGLESv2.so.2.0.0",
+    "libGL.so",
+    "libGL.so.1",
+    "libGL.so.1.2.0",
+    "libglx.so",
+    "libglx.so.1",
+]
+
+
 class DependencyResolver:
 
     idb = None
@@ -73,6 +93,12 @@ class DependencyResolver:
         else:
             if symbol in self.bindeps_cache:
                 return self.bindeps_cache[symbol]
+
+        if symbol in ExceptionRules:
+            if info.emul32:
+                return "mesalib-32bit"
+            else:
+                return "mesalib"
 
         if not paths:
             paths = ["/usr/lib64", "/usr/lib"]
