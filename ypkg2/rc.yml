@@ -14,7 +14,7 @@ actions:
     - cmake: |
         cmake -DCMAKE_CFLAGS="%CFLAGS%" -DCMAKE_CXX_FLAGS="%CXXFLAGS%" \
         -DCMAKE_LD_FLAGS="%LDFLAGS%" -DCMAKE_LIB_SUFFIX="%LIBSUFFIX%" \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/usr
     - patch: |
         patch -t -E --no-backup-if-mismatch -f
     # Only works if the user has a series file. They can provide the name to
