@@ -12,7 +12,7 @@
 #
 
 from . import console_ui
-from .metadata import readlink
+from . import readlink
 from . import remove_prefix
 import magic
 import re
@@ -20,7 +20,8 @@ import os
 import subprocess
 import shutil
 import multiprocessing
-
+import xattr
+import base64
 global share_ctx
 
 
@@ -32,6 +33,8 @@ r_path = re.compile(r".*Library rpath: \[(.*)\].*")
 r_soname = re.compile(r".*Library soname: \[(.*)\].*")
 
 EMUL32PC = "/usr/lib32/pkgconfig:/usr/share/pkgconfig:/usr/lib/pkgconfig"
+
+global_xattrs = None
 
 
 def is_pkgconfig_file(pretty, mgs):
@@ -66,6 +69,8 @@ class FileReport:
     rpaths = None
 
     soname_links = None
+
+    xattrs = None
 
     def scan_binary(self, file, check_soname=False):
         cmd = "LC_ALL=C /usr/bin/readelf -d \"{}\"".format(file)
@@ -242,6 +247,20 @@ def get_debug_path(context, file, magic_string):
     return None
 
 
+def get_xattrs(context, pretty, file):
+    attributes = {}
+
+    try:
+        xt = xattr.xattr(file)
+        if xt:
+            for key in xt:
+                attributes[str(key)] = base64.b64encode(xt[key])
+    except Exception as ex:
+        console_ui.emit_warning("XAttr", "Failed to determine xattr")
+        print(ex)
+    return attributes
+
+
 def examine_file(*args):
     global share_ctx
     package = args[0]
@@ -251,11 +270,14 @@ def examine_file(*args):
 
     context = share_ctx
 
+    xattrs = None
     if v_dyn.match(mgs):
         # Get soname, direct deps and strip
         store_debug(context, pretty, file, mgs)
         strip_file(context, pretty, file, mgs, mode="shared")
     elif v_bin.match(mgs):
+        # Preserve xattr *before* stripping the file.
+        xattrs = get_xattrs(context, pretty, file)
         # Get direct deps, and strip
         store_debug(context, pretty, file, mgs)
         strip_file(context, pretty, file, mgs, mode="executable")
@@ -269,6 +291,8 @@ def examine_file(*args):
         strip_file(context, pretty, file, mgs, mode="ar")
 
     freport = FileReport(pretty, file, mgs)
+    if xattrs and len(xattrs) > 0:
+        freport.xattrs = xattrs
     return freport
 
 
@@ -342,6 +366,7 @@ class PackageExaminer:
         install_dir = context.get_install_dir()
 
         global share_ctx
+        global global_xattrs
 
         share_ctx = context
 
@@ -385,6 +410,12 @@ class PackageExaminer:
         pool.join()
 
         infos = [x.get() for x in results]
+        for info in infos:
+            if not info.xattrs:
+                continue
+            if not global_xattrs:
+                global_xattrs = dict()
+            global_xattrs[info.pretty] = info.xattrs
 
         for r in removed:
             package.remove_file(r)
