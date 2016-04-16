@@ -11,8 +11,7 @@
 #  (at your option) any later version.
 
 from . import console_ui, pkgconfig_dep, pkgconfig32_dep
-from . import packager_name, packager_email, readlink
-from . import examine
+from . import packager_name, packager_email
 
 import os
 import pisi.util
@@ -26,8 +25,6 @@ from collections import OrderedDict
 import datetime
 import calendar
 import sys
-import xattr
-import base64
 
 
 FileTypes = OrderedDict([
@@ -98,6 +95,10 @@ def get_file_type(t):
     return "data"
 
 
+def readlink(path):
+    return os.path.normpath(os.readlink(path))
+
+
 def create_files_xml(context, package):
     """ Create an XML representation of our files """
     files = pisi.files.Files()
@@ -134,17 +135,6 @@ def create_files_xml(context, package):
                                         hash=hash, uid=str(st.st_uid),
                                         gid=str(st.st_gid),
                                         mode=oct(stat.S_IMODE(st.st_mode)))
-
-        if "/" + path in examine.global_xattrs:
-            info = examine.global_xattrs["/" + path]
-            for attr in info:
-                val = info[attr]
-                console_ui.emit_warning("XAttr", "File {} has xattr set: {}".
-                                        format("/" + path, attr))
-                ftmp = pisi.files.ExtendedAttribute(label=attr,
-                                                    value=val)
-                file_info.extendedAttributes.append(ftmp)
-
         files.append(file_info)
 
     fpath = os.path.join(context.get_packaging_dir(), "files.xml")

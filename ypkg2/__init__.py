@@ -14,7 +14,6 @@
 from .ui import YpkgUI
 
 import re
-import os
 
 
 global console_ui
@@ -28,11 +27,6 @@ def remove_prefix(fpath, prefix):
     if fpath[0] != '/':
         fpath = "/" + fpath
     return fpath
-
-
-def readlink(path):
-    return os.path.normpath(os.readlink(path))
-
 
 pkgconfig32_dep = re.compile("^pkgconfig32\((.*)\)$")
 pkgconfig_dep = re.compile("^pkgconfig\((.*)\)$")
