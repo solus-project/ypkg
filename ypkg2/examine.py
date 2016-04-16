@@ -348,7 +348,7 @@ class PackageExaminer:
         # Right now we actually only care about magic matching
         removed = set()
 
-        pool = multiprocessing.Pool()
+        # pool = multiprocessing.Pool()
         results = list()
 
         for file in package.emit_files():
@@ -377,18 +377,19 @@ class PackageExaminer:
             if not self.file_is_of_interest("/" + file, fpath, mgs):
                 continue
             # Handle this asynchronously
-            results.append(pool.apply_async(examine_file, [
-                           package, "/" + file, fpath, mgs],
-                           callback=None))
+            results.append(examine_file(package, "/" + file, fpath, mgs))
+            # results.append(pool.apply_async(examine_file, [
+            #               package, "/" + file, fpath, mgs],
+            #               callback=None))
 
-        pool.close()
-        pool.join()
+        # pool.close()
+        # pool.join()
 
-        infos = [x.get() for x in results]
+        # infos = [x.get() for x in results]
 
         for r in removed:
             package.remove_file(r)
-        return infos
+        return results
 
     def examine_packages(self, context, packages):
         """ Examine all packages, in order to update dependencies, etc """
