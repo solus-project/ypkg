@@ -325,6 +325,8 @@ class PackageExaminer:
             return True
         if pretty == "/usr/share/info/dir":
             return True
+        if pretty.startswith("/emul32"):
+            return True
         return False
 
     def file_is_of_interest(self, pretty, file, mgs):
