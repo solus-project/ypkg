@@ -288,8 +288,8 @@ def handle_dependencies(context, gene, metadata, package, files):
     elif package.name == "32bit-devel":
         if "32bit" in gene.packages:
             dependencies.add(context.spec.get_package_name("32bit"))
-        if "main" in gene.packages:
-            dependencies.add(context.spec.get_package_name("main"))
+        if "devel" in gene.packages:
+            dependencies.add(context.spec.get_package_name("devel"))
     elif package.name == "devel":
         if "main" in gene.packages:
             dependencies.add(context.spec.get_package_name("main"))
