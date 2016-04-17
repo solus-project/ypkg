@@ -23,6 +23,7 @@ SPEED_FLAGS = "-flto -ffunction-sections -fno-semantic-interposition -O3"
 SIZE_FLAGS = "-Os -ffunction-sections"
 PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\""
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
+BIND_NOW_FLAGS = ["-Wl,-z,now"]
 
 
 class Flags:
@@ -61,6 +62,8 @@ class Flags:
             newflags.extend(SPEED_FLAGS.split(" "))
         elif opt_type == "size":
             newflags.extend(SIZE_FLAGS.split(" "))
+        elif opt_type == "no-bind-now":
+            newflags = Flags.filter_flags(f, BIND_NOW_FLAGS)
         else:
             console_ui.emit_warning("Flags", "Uknown optimization: {}".
                                     format(opt_type))
@@ -222,6 +225,10 @@ class YpkgContext:
         if self.spec.pkg_optimize is not None:
             self.build.cflags = Flags.optimize_flags(self.build.cflags,
                                                      self.spec.pkg_optimize)
+            self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
+                                                       self.spec.pkg_optimize)
+            self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
+                                                      self.spec.pkg_optimize)
 
         if self.emul32:
             ncflags = list()
