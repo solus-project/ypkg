@@ -14,6 +14,7 @@
 from . import console_ui
 from .metadata import readlink
 from . import remove_prefix
+from . import EMUL32PC
 import magic
 import re
 import os
@@ -30,8 +31,6 @@ v_rel = re.compile(r"ELF (64|32)\-bit LSB relocatable,")
 shared_lib = re.compile(r".*Shared library: \[(.*)\].*")
 r_path = re.compile(r".*Library rpath: \[(.*)\].*")
 r_soname = re.compile(r".*Library soname: \[(.*)\].*")
-
-EMUL32PC = "/usr/lib32/pkgconfig:/usr/share/pkgconfig:/usr/lib/pkgconfig"
 
 
 def is_pkgconfig_file(pretty, mgs):

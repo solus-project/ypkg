@@ -22,6 +22,7 @@ from .examine import PackageExaminer
 from . import metadata
 from .dependencies import DependencyResolver
 from . import packager_name, packager_email
+from . import EMUL32PC
 
 import ypkg2
 
@@ -110,6 +111,7 @@ def execute_step(context, step, step_n, work_dir):
     script = ScriptGenerator(context, context.spec, work_dir)
     if context.emul32:
         script.define_export("EMUL32BUILD", "1")
+        script.define_export("PKG_CONFIG_PATH", EMUL32PC)
 
     exports = script.emit_exports()
 

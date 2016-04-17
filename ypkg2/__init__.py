@@ -38,3 +38,5 @@ global packager_email
 
 packager_name = "Automated Package Build"
 packager_email = "no.email.set.in.config"
+
+EMUL32PC = "/usr/lib32/pkgconfig:/usr/share/pkgconfig:/usr/lib/pkgconfig"
