@@ -227,6 +227,7 @@ class YpkgContext:
                                                      self.spec.pkg_optimize)
             self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
                                                        self.spec.pkg_optimize)
+        if self.spec.pkg_optimize in ["no-bind-now"]:
             self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
                                                       self.spec.pkg_optimize)
 
