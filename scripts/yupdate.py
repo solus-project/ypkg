@@ -12,17 +12,17 @@
 #
 
 import sys
-import yaml
+import ruamel.yaml
 import os
-import commands
+import subprocess
 import pisi.version
 
 
 def usage(msg=None, ex=1):
     if msg:
-        print msg
+        print(msg)
     else:
-        print "Usage: %s" % sys.argv[0]
+        print("Usage: %s" % sys.argv[0])
     sys.exit(ex)
 
 if __name__ == "__main__":
@@ -48,59 +48,31 @@ if __name__ == "__main__":
     try:
         r = os.system("wget \"%s\"" % url)
     except:
-        print "Failed to download file"
+        print("Failed to download file")
         sys.exit(1)
     if r != 0:
-        print "Failed to download file"
+        print("Failed to download file")
         sys.exit(1)
 
-    sha256 = commands.getoutput("sha256sum %s" % file).split()[0].strip()
+    sha256 = subprocess.check_output(["sha256sum",  file]).split()[0].strip()
 
-    bufTop = list()
-    bufEnd = list()
-
-    hitSources = False
     with open(ymlfile, "r") as infile:
-        for line in infile.readlines():
-            buf = bufEnd if hitSources else bufTop
-            line = line.replace("\n", "").replace("\r", "")
-            if ":" in line:
-                spl = line.split(":")
-                if len(spl) != 2:
-                    if not inSources:
-                        buf.append(line)
-                    continue
-                name = spl[0].strip()
-                if name == "source":
-                    hitSources = True
-                    inSources = True
-                    continue
-                elif name == "version":
-                    buf.append("%s: %s" % (spl[0], newversion))
-                elif name == "release":
-                    val = int(spl[1].strip()) + 1
-                    buf.append("%s: %s" % (spl[0], val))
-                elif name.startswith("-") and inSources:
-                    continue
-                else:
-                    inSources = False
-                    buf.append(line)
-            else:
-                buf.append(line)
-
-    buf = list()
-    buf.extend(bufTop)
-    buf.append("source     :")
-    buf.append("    - %s : %s" % (url, sha256))
-    buf.extend(bufEnd)
+        data = ruamel.yaml.round_trip_load(infile)
+    sources = data['source']
+    if sources is None:
+        data['source'] = sources = []
+    sources.append({url: sha256})
+    data['release'] += 1
+    data['version'] = newversion
 
     os.unlink(file)
 
     try:
-        f = open(ymlfile, "w")
-        f.writelines(["%s\n" % x for x in buf])
-        f.close()
+        with open(ymlfile, 'w') as fp:
+            ruamel.yaml.round_trip_dump(
+                data, fp, indent=4, block_seq_indent=4, width=200,
+                top_level_colon_align=True, prefix_colon=' ')
     except Exception as e:
-        print "Error writing file, may need to reset it."
-        print e
+        print("Error writing file, may need to reset it.")
+        print(e)
         sys.exit(1)

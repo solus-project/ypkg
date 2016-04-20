@@ -11,49 +11,29 @@
 #  (at your option) any later version.
 #
 import sys
-import yaml
-import os
+import ruamel.yaml
 
 
 def usage(msg=None, ex=1):
     if msg:
-        print msg
+        print(msg)
     else:
-        print "Usage: %s" % sys.argv[0]
+        print("Usage: %s file.yml" % sys.argv[0])
     sys.exit(ex)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         usage()
 
-    ymlfile = sys.argv[1]
-    if not os.path.exists(ymlfile):
-        usage("Specified file does not exist")
-    if not ymlfile.endswith(".yml"):
-        usage("%s does not look like a valid package.yml file")
-
-    buf = list()
-    with open(ymlfile, "r") as infile:
-        for line in infile.readlines():
-            line = line.replace("\n", "").replace("\r", "")
-            if ":" in line:
-                spl = line.split(":")
-                if len(spl) != 2:
-                    buf.append(line)
-                    continue
-                name = spl[0].strip()
-                if name == "release":
-                    val = int(spl[1].strip()) + 1
-                    buf.append("%s: %s" % (spl[0], val))
-                else:
-                    buf.append(line)
-            else:
-                buf.append(line)
+    with open(sys.argv[1]) as fp:
+        data = ruamel.yaml.round_trip_load(fp)
+    data['release'] += 1
     try:
-        f = open(ymlfile, "w")
-        f.writelines(["%s\n" % x for x in buf])
-        f.close()
+        with open(sys.argv[1], 'w') as fp:
+            ruamel.yaml.round_trip_dump(
+                data, fp, indent=4, block_seq_indent=4,
+                top_level_colon_align=True, prefix_colon=' ')
     except Exception as e:
-        print "Error writing file, may need to reset it."
-        print e
+        print("Error writing file, may need to reset it.")
+        print(e)
         sys.exit(1)
