@@ -19,7 +19,8 @@ import shutil
 
 # These flag sets are courtesy of autospec in
 # Clear Linux Project For Intel Architecture
-SPEED_FLAGS = "-flto -ffunction-sections -fno-semantic-interposition -O3"
+SPEED_FLAGS = "-flto -ffunction-sections -fno-semantic-interposition -O3 " \
+              "-falign-functions=32"
 SIZE_FLAGS = "-Os -ffunction-sections"
 PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\""
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
