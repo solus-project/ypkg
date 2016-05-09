@@ -332,8 +332,11 @@ def build_package(filename, outputDir):
                                     format(remove_prefix(root, idir)))
             gene.add_file(remove_prefix(root, idir))
 
+        # Handle symlinks to directories.
         for d in dirs:
             fpath = os.path.join(root, d)
+            if os.path.islink(fpath):
+                gene.add_file(remove_prefix(fpath, idir))
 
     if not os.path.exists(ctx.get_packaging_dir()):
         try:
