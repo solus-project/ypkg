@@ -73,6 +73,8 @@ class FileReport:
         except Exception as e:
             console_ui.emit_warning("File", "Failed to scan binary deps for"
                                     " path: {}".format(file))
+            return
+
         for line in output.split("\n"):
             line = line.strip()
 
@@ -374,6 +376,7 @@ class PackageExaminer:
                 console_ui.emit_info("Clean", "Removed unwanted file: {}".
                                      format("/" + file))
                 removed.add("/" + file)
+                continue
 
             if not self.file_is_of_interest("/" + file, fpath, mgs):
                 continue

@@ -321,6 +321,10 @@ def build_package(filename, outputDir):
         count += 1
 
     idir = ctx.get_install_dir()
+    bad_dir = os.path.join(idir, "emul32")
+    if os.path.exists(bad_dir):
+        shutil.rmtree(bad_dir)
+
     for root, dirs, files in os.walk(idir):
         for f in files:
             fpath = os.path.join(root, f)
