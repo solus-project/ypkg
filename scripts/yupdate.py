@@ -58,9 +58,7 @@ if __name__ == "__main__":
 
     with open(ymlfile, "r") as infile:
         data = ruamel.yaml.round_trip_load(infile)
-    sources = data['source']
-    if sources is None:
-        data['source'] = sources = []
+    data['source'] = sources = []
     sources.append({url: sha256})
     data['release'] += 1
     data['version'] = newversion
