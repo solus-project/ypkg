@@ -276,7 +276,7 @@ def build_package(filename, outputDir):
             # existing build directories for the current context and then
             # re-extracting sources
             if step == "setup":
-                if not clean_build_dirs(ctx):
+                if not clean_build_dirs(context):
                     sys.exit(1)
 
                 # Only ever extract the primary source ourselves
