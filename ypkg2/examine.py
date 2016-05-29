@@ -37,7 +37,7 @@ def is_pkgconfig_file(pretty, mgs):
     """ Simple as it sounds, work out if this is a pkgconfig file """
     if pretty.endswith(".pc"):
         pname = os.path.basename(os.path.dirname(pretty))
-        if pname == "pkgconfig" and "ASCII" in mgs:
+        if pname == "pkgconfig":
             return True
     return False
 
