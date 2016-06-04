@@ -69,6 +69,14 @@ actions:
             fi
         }
         perl_install
+    - python_setup: |
+        python2.7 setup.py build
+    - python_install: |
+        python2.7 setup.py install --root="%installroot%"
+    - python3_setup: |
+        python3 setup.py build
+    - python3_install: |
+        python3 setup.py install --root="%installroot%"
 defines:
     - CONFOPTS: |
         --prefix=%PREFIX% --build=%HOST% --libdir=%libdir% --mandir=/usr/share/man \
