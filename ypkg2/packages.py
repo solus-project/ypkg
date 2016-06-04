@@ -258,8 +258,11 @@ class PackageGenerator:
 
     def get_file_owner(self, file):
         """ Return the owning package for the specified file """
+        rname = os.path.realpath(file)
         for pkg in self.packages:
             package = self.packages[pkg]
             if file in package.files:
+                return package
+            elif rname in package.files:
                 return package
         return None

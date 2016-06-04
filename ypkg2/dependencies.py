@@ -228,7 +228,7 @@ class DependencyResolver:
         for link in info.soname_links:
             fi = self.gene.get_file_owner(link)
             if not fi:
-                console_ui.emit_warning("SOLINK", "{} depends on non existing"
+                console_ui.emit_warning("SOLINK", "{} depends on non existing "
                                         "soname link: {}".
                                         format(packageName, link))
                 continue
