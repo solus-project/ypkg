@@ -36,6 +36,7 @@ FileTypes = OrderedDict([
     ("/usr/share/info", "info"),
     ("/usr/share/man", "man"),
     ("/usr/share/doc", "doc"),
+    ("/usr/share/help", "doc"),
     ("/usr/share/gtk-doc", "doc"),
     ("/usr/share/locale", "localedata"),
     ("/usr/include", "header"),
