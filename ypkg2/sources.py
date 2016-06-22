@@ -17,6 +17,7 @@ import os
 import hashlib
 import subprocess
 import fnmatch
+import shutil
 
 KnownSourceTypes = {
     'tar': [
@@ -53,6 +54,121 @@ class YpkgSource:
     def cached(self, context):
         """ Report on whether this source is cached """
         return False
+
+
+class GitSource(YpkgSource):
+    """ Provides git source support to ypkg """
+
+    # Source URI
+    uri = None
+
+    # Tag or branch to check out
+    tag = None
+
+    def __init__(self, uri, tag):
+        YpkgSource.__init__(self)
+        self.uri = uri
+        self.tag = tag
+        self.filename = self.get_target_name()
+
+    def __str__(self):
+        return "{} ({})".format(self.uri, self.tag)
+
+    def is_dumb_transport(self):
+        """ Http depth cloning = no go """
+        if self.uri.startswith("http:") or self.uri.startswith("https:"):
+            return True
+        return False
+
+    def get_target_name(self):
+        """ Get the target directory base name after its fetched """
+        uri = str(self.uri)
+        if uri.endswith(".git"):
+            uri = uri[:-4]
+        return os.path.basename(uri) + ".git"
+
+    def get_full_path(self, context):
+        """ Fully qualified target path """
+        return os.path.join(context.get_sources_directory(),
+                            self.get_target_name())
+
+    def fetch(self, context):
+        """ Clone the actual git repo, favouring efficiency... """
+        source_dir = context.get_sources_directory()
+
+        # Ensure source dir exists
+        if not os.path.exists(source_dir):
+            try:
+                os.makedirs(source_dir, mode=00755)
+            except Exception as e:
+                console_ui.emit_error("Source", "Cannot create sources "
+                                      "directory: {}".format(e))
+                return False
+
+        cmd = "git -C \"{}\" clone -b \"{}\" --single-branch \"{}\" {}".format(
+            source_dir, self.tag, self.uri, self.get_target_name())
+
+        if not self.is_dumb_transport():
+            cmd += " --depth 1"
+
+        console_ui.emit_info("Git", "Fetching: {}".format(self.uri))
+        try:
+            r = subprocess.check_call(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_error("Git", "Failed to fetch {}".format(
+                                  self.uri))
+            print("Error follows: {}".format(e))
+            return False
+
+        return True
+
+    def verify(self, context):
+        """ Verify source = good. """
+        bpath = self.get_full_path(context)
+
+        status_cmd = "git -C {} diff --exit-code"
+        try:
+            subprocess.check_call(status_cmd.format(bpath), shell=True)
+        except Exception:
+            console_ui.emit_error("Git", "Unexpected diff in source")
+            return False
+        return True
+
+    def extract(self, context):
+        """ Extract ~= copy source into build area. Nasty but original source
+            should not be tainted between runs.
+        """
+
+        source = self.get_full_path(context)
+        target = os.path.join(context.get_build_dir(),
+                              self.get_target_name())
+
+        if os.path.exists(target):
+            try:
+                shutil.rmtree(target)
+            except Exception as e:
+                console_ui.emit_error("Git", "Cannot remove stagnant tree")
+                print(e)
+                return False
+
+        if not os.path.exists(context.get_build_dir()):
+            try:
+                os.makedirs(context.get_build_dir(), mode=00755)
+            except Exception as e:
+                console_ui.emit_error("Source", "Cannot create sources "
+                                      "directory: {}".format(e))
+                return False
+        try:
+            shutil.copytree(source, target)
+        except Exception as e:
+            console_ui.emit_error("Git", "Failed to copy source to build")
+            print(e)
+            return False
+        return True
+
+    def cached(self, context):
+        bpath = self.get_full_path(context)
+        return os.path.exists(bpath)
 
 
 class TarSource(YpkgSource):
@@ -217,7 +333,14 @@ class SourceManager:
 
             uri = source.keys()[0]
             hash = source[uri]
-            # TODO: Validate the URI, support more schemes..
+            # Check if its a namespaced support type
+            if "|" in uri:
+                brk = uri.split("|")
+                # It's a git| prefix
+                if brk[0] == 'git':
+                    uri = "|".join(brk[1:])
+                    self.sources.append(GitSource(uri, hash))
+                    continue
             self.sources.append(TarSource(uri, hash))
 
         return True
