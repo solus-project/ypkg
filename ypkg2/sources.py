@@ -345,7 +345,7 @@ class SourceManager:
 
         return True
 
-    def get_working_dir(self, context):
+    def _get_working_dir(self, context):
         """ Need to make this.. better. It's very tar-type now"""
         build_dir = context.get_build_dir()
 
@@ -360,3 +360,9 @@ class SourceManager:
             return build_dir
         else:
             return build_dir
+
+    def get_working_dir(self, context):
+        potential = self._get_working_dir(context)
+        if not os.path.exists(potential) or not os.path.isdir(potential):
+            return context.get_build_dir()
+        return potential
