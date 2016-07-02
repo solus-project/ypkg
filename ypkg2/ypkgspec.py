@@ -265,6 +265,8 @@ class YpkgSpec:
         except:
             pass
         for x in extras:
+            if not self.pkg_builddeps:
+                self.pkg_builddeps = list()
             if x not in self.pkg_builddeps:
                 self.pkg_builddeps.append(x)
 
