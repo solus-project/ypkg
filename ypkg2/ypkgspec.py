@@ -15,6 +15,7 @@ from . import console_ui
 from . import yamlhelper
 
 from .yamlhelper import OneOrMoreString, MultimapFormat
+from .sources import SourceManager, GitSource
 
 import os
 from collections import OrderedDict
@@ -249,6 +250,23 @@ class YpkgSpec:
                              .format(name))
         if "docs" not in self.summaries:
             self.add_summary("docs", "Documentation for {}".format(name))
+
+        extras = []
+        if self.pkg_emul32:
+            extras.extend(["glibc-32bit-devel", "libgcc-32bit",
+                           "libstdc++-32bit"])
+        man = SourceManager()
+        try:
+            man.identify_sources(self)
+            for x in man.sources:
+                if isinstance(x, GitSource):
+                    extras.append("git")
+                    break
+        except:
+            pass
+        for x in extras:
+            if x not in self.pkg_builddeps:
+                self.pkg_builddeps.append(x)
 
     def load_from_path(self, path):
         self.path = path
