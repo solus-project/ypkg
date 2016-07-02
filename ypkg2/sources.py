@@ -105,12 +105,8 @@ class GitSource(YpkgSource):
                                       "directory: {}".format(e))
                 return False
 
-        cmd = "git -C \"{}\" clone --recursive -b \"{}\" --single-branch " \
-              "\"{}\" {}".format(source_dir, self.tag, self.uri,
-                                 self.get_target_name())
-
-        if not self.is_dumb_transport():
-            cmd += " --depth 1"
+        cmd = "git -C \"{}\" clone --recursive \"{}\" {}".format(
+            source_dir, self.uri, self.get_target_name())
 
         console_ui.emit_info("Git", "Fetching: {}".format(self.uri))
         try:
@@ -121,6 +117,16 @@ class GitSource(YpkgSource):
             print("Error follows: {}".format(e))
             return False
 
+        console_ui.emit_info("Git", "Checking out: {}".format(self.tag))
+        cmd = "git -C \"{}\" checkout \"{}\"".format(
+            os.path.join(source_dir, self.get_target_name()),
+            self.tag)
+        try:
+            r = subprocess.check_call(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_error("Git", "Failed to checkout {}".format(
+                                  self.tag))
+            return False
         return True
 
     def verify(self, context):
