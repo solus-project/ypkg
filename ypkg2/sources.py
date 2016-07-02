@@ -105,8 +105,9 @@ class GitSource(YpkgSource):
                                       "directory: {}".format(e))
                 return False
 
-        cmd = "git -C \"{}\" clone -b \"{}\" --single-branch \"{}\" {}".format(
-            source_dir, self.tag, self.uri, self.get_target_name())
+        cmd = "git -C \"{}\" clone --recursive -b \"{}\" --single-branch " \
+              "\"{}\" {}".format(source_dir, self.tag, self.uri,
+                                 self.get_target_name())
 
         if not self.is_dumb_transport():
             cmd += " --depth 1"
