@@ -43,7 +43,7 @@ class PackageSanity:
                                   "Package names cannot contain whitespace")
             return False
         illegal = set()
-        permitted = ['-', '_', '+']
+        permitted = ['-', '_', '+', '.']
         for char in name[0:]:
             if char in permitted:
                 continue
