@@ -184,7 +184,7 @@ class ScriptGenerator:
         return ret
 
     def is_valid_macro_char(self, char):
-        if char.isalpha():
+        if char.isalpha() or char.isdigit():
             return True
         if char == "_":
             return True
