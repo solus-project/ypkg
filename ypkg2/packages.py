@@ -137,6 +137,7 @@ class PackageGenerator:
         self.add_pattern("/bin", "main")
         self.add_pattern("/usr/share/info", "main")
         self.add_pattern("/usr/lib64/lib*.so.*", "main")
+        self.add_pattern("/usr/lib64/avx2/*.so*", "main")
         self.add_pattern("/usr/lib/lib*.so.*", "main")
         self.add_pattern("/usr/lib32/", "32bit")
         self.add_pattern("/usr/lib32/lib*.so.*", "32bit",

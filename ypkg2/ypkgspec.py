@@ -85,6 +85,7 @@ class YpkgSpec:
     pkg_strip = True
     pkg_ccache = True
     pkg_emul32 = False
+    pkg_avx2 = False
     pkg_autodep = True
     pkg_extract = True
     pkg_optimize = None
@@ -188,6 +189,7 @@ class YpkgSpec:
             ("strip", bool),
             ("ccache", bool),
             ("emul32", bool),
+            ("avx2", bool),
             ("autodep", bool),
             ("extract", bool),
             ("libsplit", bool),

@@ -328,6 +328,13 @@ class PackageExaminer:
             return True
         if pretty.startswith("/emul32"):
             return True
+        # Nuke AVX2 dir .a files with no remorse
+        if pretty.startswith("/usr/lib64/avx2/"):
+            if ".so" not in pretty:
+                return True
+            # Don't want .so links, they're useless.
+            if pretty.endswith(".so") and os.path.islink(file):
+                return True
         return False
 
     def file_is_of_interest(self, pretty, file, mgs):

@@ -112,6 +112,8 @@ def execute_step(context, step, step_n, work_dir):
     if context.emul32:
         script.define_export("EMUL32BUILD", "1")
         script.define_export("PKG_CONFIG_PATH", EMUL32PC)
+    if context.avx2:
+        script.define_export("AVX2BUILD", "1")
 
     exports = script.emit_exports()
 
@@ -237,37 +239,46 @@ def build_package(filename, outputDir):
     if not ctx.clean_pkg():
         console_ui.emit_error("Build", "Failed to clean pkg directory")
 
-    possible_sets = [False]
+    possible_sets = []
+    # Emul32 is *always* first
     if spec.pkg_emul32:
-        possible_sets.append(True)
-        possible_sets.reverse()  # Always build emul32 first
+        possible_sets.append((True, False))
 
-    for emul32 in possible_sets:
+    # Build AVX2 before native, but after emul32
+    if spec.pkg_avx2:
+        possible_sets.append((False, True))
+
+    # Main step, always last
+    possible_sets.append((False, False))
+
+    for emul32, avx2 in possible_sets:
         r_steps = list()
-        c = YpkgContext(spec, emul32=emul32)
+        c = YpkgContext(spec, emul32=emul32, avx2=avx2)
         if spec.step_profile is not None:
-            c = YpkgContext(spec, emul32=emul32)
+            c = YpkgContext(spec, emul32=emul32, avx2=avx2)
             c.enable_pgo_generate()
             r_steps.append(['setup', c])
             r_steps.append(['build', c])
             r_steps.append(['profile', c])
-            c = YpkgContext(spec, emul32=emul32)
+            c = YpkgContext(spec, emul32=emul32, avx2=avx2)
             c.enable_pgo_use()
             r_steps.append(['setup', c])
             r_steps.append(['build', c])
             r_steps.append(['install', c])
             r_steps.append(['check', c])
         else:
-            c = YpkgContext(spec, emul32=emul32)
+            c = YpkgContext(spec, emul32=emul32, avx2=avx2)
             r_steps.append(['setup', c])
             r_steps.append(['build', c])
             r_steps.append(['install', c])
             r_steps.append(['check', c])
-        r_runs.append((emul32, r_steps))
+        r_runs.append((emul32, avx2, r_steps))
 
-    for emul32, run in r_runs:
+    for emul32, avx2, run in r_runs:
         if emul32:
             console_ui.emit_info("Build", "Building for emul32")
+        elif avx2:
+            console_ui.emit_info("Build", "Building for AVX2 optimisations")
         else:
             console_ui.emit_info("Build", "Building native package")
 

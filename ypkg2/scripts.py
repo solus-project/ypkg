@@ -109,7 +109,11 @@ class ScriptGenerator:
             self.define_macro("LIBSUFFIX", "32")
             self.define_macro("PREFIX", "/emul32")
         else:
-            self.define_macro("libdir", "/usr/lib64")
+            # 64-bit AVX2 build in subdirectory
+            if self.context.avx2:
+                self.define_macro("libdir", "/usr/lib64/avx2")
+            else:
+                self.define_macro("libdir", "/usr/lib64")
             self.define_macro("LIBSUFFIX", "64")
             self.define_macro("PREFIX", "/usr")
 
