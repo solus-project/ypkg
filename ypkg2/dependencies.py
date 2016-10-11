@@ -111,6 +111,8 @@ class DependencyResolver:
         pkg = None
         for path in paths:
             fpath = os.path.join(path, symbol)
+            if not os.path.exists(fpath):
+                continue
             lpkg = None
             if fpath in self.files_cache:
                 lpkg = self.files_cache[fpath]
