@@ -83,7 +83,7 @@ class FileReport:
             if r:
                 if self.rpaths is None:
                     self.rpaths = set()
-                self.rpaths.add(r.group(1))
+                self.rpaths.update(r.group(1).split(":"))
                 continue
 
             # Match direct needed dependency
