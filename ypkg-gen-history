@@ -175,8 +175,10 @@ def main():
         if com.body:
             comment += "\n" + com.body
         update.comment = comment
-        if cve_hit.match(comment):
-            update.type = "security"
+        for word in comment.split():
+            if cve_hit.match(word):
+                update.type = "security"
+                break
         hist_obj.history.append(update)
 
     hist_obj.write(hist)
