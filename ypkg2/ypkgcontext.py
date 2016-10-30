@@ -27,8 +27,7 @@ PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
 BIND_NOW_FLAGS = ["-Wl,-z,now"]
 
 # AVX2/Haswell optimisations
-AVX2_ARCH = "haswell"
-AVX2_TUNE = "haswell"
+AVX2_FLAGS = "-msse3 -mssse3 -msse4 -msse4.1 -msse4.2 -mavx -mavx2"
 
 
 class Flags:
@@ -186,7 +185,10 @@ class YpkgContext:
         """ Get the build directory for the given package """
         buildSuffix = "build"
         if self.avx2:
-            buildSuffix = "build-avx2"
+            if self.emul32:
+                buildSuffix = "build-32-avx2"
+            else:
+                buildSuffix = "build-avx2"
         elif self.emul32:
             buildSuffix = "build-32"
 
@@ -199,7 +201,10 @@ class YpkgContext:
         """ Get the PGO data directory for the given package """
         pgoSuffix = "pgo"
         if self.avx2:
-            pgoSuffix = "pgo-avx2"
+            if self.emul32:
+                pgoSuffix = "pgo-32-avx2"
+            else:
+                pgoSuffix = "pgo-avx2"
         elif self.emul32:
             pgoSuffix = "pgo-32"
 
@@ -207,17 +212,6 @@ class YpkgContext:
                                 self.get_build_prefix(),
                                 self.spec.pkg_name,
                                 pgoSuffix))
-
-    def repl_flags_avx2(self, flags):
-        """ Adjust flags to compensate for avx2 build """
-        ncflags = list()
-        for flag in flags:
-            if flag.startswith("-march="):
-                flag = "-march={}".format(AVX2_ARCH)
-            elif flag.startswith("-mtune="):
-                flag = "-mtune={}".format(AVX2_TUNE)
-            ncflags.append(flag)
-        return ncflags
 
     def init_config(self):
         """ Initialise our configuration prior to building """
@@ -278,10 +272,10 @@ class YpkgContext:
                 self.build.cc = "gcc -m32"
                 self.build.cxx = "g++ -m32"
 
-        # Adjust flags for AVX2 build (currently Haswell+ specific)
+        # Adjust flags for AVX2 builds
         if self.avx2:
-            self.build.cflags = self.repl_flags_avx2(self.build.cflags)
-            self.build.cxxflags = self.repl_flags_avx2(self.build.cxxflags)
+            self.build.cflags.extend(AVX2_FLAGS.split(" "))
+            self.build.cxxflags.extend(AVX2_FLAGS.split(" "))
 
         # Set the $pkgfiles up properly
         spec_dir = os.path.dirname(os.path.abspath(self.spec.path))
@@ -314,7 +308,7 @@ class YpkgContext:
         self.build.cxxflags = Flags.pgo_use_flags(self.build.cxxflags, pgo_dir)
 
     def clean_pgo(self):
-        suffixes = ["pgo", "pgo-avx2", "pgo-32"]
+        suffixes = ["pgo", "pgo-avx2", "pgo-32", "pgo-32-avx2"]
         pgo_dirs = [os.path.abspath("{}/root/{}/{}".format(
                     self.get_build_prefix(),
                     self.spec.pkg_name, x)) for x in suffixes]

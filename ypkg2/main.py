@@ -241,7 +241,12 @@ def build_package(filename, outputDir):
 
     possible_sets = []
     # Emul32 is *always* first
+    # AVX2 emul32 comes first too so "normal" emul32 can override it
     if spec.pkg_emul32:
+        if spec.pkg_avx2:
+            # Emul32, avx2 build
+            possible_sets.append((True, True))
+        # Normal, no-avx2, emul32 build
         possible_sets.append((True, False))
 
     # Build AVX2 before native, but after emul32
@@ -277,10 +282,10 @@ def build_package(filename, outputDir):
     for emul32, avx2, run in r_runs:
         if emul32:
             console_ui.emit_info("Build", "Building for emul32")
-        elif avx2:
-            console_ui.emit_info("Build", "Building for AVX2 optimisations")
         else:
             console_ui.emit_info("Build", "Building native package")
+        if avx2:
+            console_ui.emit_info("Build", "Building for AVX2 optimisations")
 
         for step, context in run:
             # When doing setup, always do pre-work by blasting away any

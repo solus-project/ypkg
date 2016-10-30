@@ -142,6 +142,8 @@ class PackageGenerator:
         self.add_pattern("/usr/lib32/", "32bit")
         self.add_pattern("/usr/lib32/lib*.so.*", "32bit",
                          priority=PRIORITY_DEFAULT+1)
+        self.add_pattern("/usr/lib32/avx2/*.so*", "32bit",
+                         priority=PRIORITY_DEFAULT+1)
 
         self.add_pattern("/usr/share/locale", "main")
         self.add_pattern("/usr/share/doc", "main")
