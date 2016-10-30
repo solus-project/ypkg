@@ -26,8 +26,8 @@ PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\""
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
 BIND_NOW_FLAGS = ["-Wl,-z,now"]
 
-# AVX2/Haswell optimisations
-AVX2_FLAGS = "-msse3 -mssse3 -msse4 -msse4.1 -msse4.2 -mavx -mavx2"
+# AVX2
+AVX2_FLAGS = "-msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2"
 
 
 class Flags:
