@@ -105,7 +105,7 @@ class GitSource(YpkgSource):
                                       "directory: {}".format(e))
                 return False
 
-        cmd = "git -C \"{}\" clone --recursive \"{}\" {}".format(
+        cmd = "git -C \"{}\" clone \"{}\" {}".format(
             source_dir, self.uri, self.get_target_name())
 
         console_ui.emit_info("Git", "Fetching: {}".format(self.uri))
@@ -126,6 +126,21 @@ class GitSource(YpkgSource):
         except Exception as e:
             console_ui.emit_error("Git", "Failed to checkout {}".format(
                                   self.tag))
+            return False
+
+        ddir = os.path.join(source_dir, self.get_target_name())
+        if not os.path.exists(os.path.join(ddir, ".gitmodules")):
+            return True
+
+        cmd1 = "git -C \"{}\" submodule init".format(ddir)
+        cmd2 = "git -C \"{}\" submodule update".format(ddir)
+
+        try:
+            r = subprocess.check_call(cmd1, shell=True)
+            r = subprocess.check_call(cmd2, shell=True)
+        except Exception as e:
+            console_ui.emit_error("Git", "Failed to submodule init {}".format(
+                                  e))
             return False
         return True
 
