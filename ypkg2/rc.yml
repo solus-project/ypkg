@@ -17,7 +17,7 @@ actions:
         -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=%PREFIX%
     # Example: %meson_configure ..
     - meson_configure: |
-        CFLAGS="%CFLAGS%" CXXFLAGS="%CXXFLAGS%" LDFLAGS="%LDFLAGS%" meson --prefix %PREFIX% --buildtype=plain
+        CFLAGS="%CFLAGS%" CXXFLAGS="%CXXFLAGS%" LDFLAGS="%LDFLAGS%" meson --prefix %PREFIX% --buildtype=plain --libdir=%libdir% --libexecdir=%libdir%/%PKGNAME%
     - meson_build: |
         ninja -v %JOBS%
     - meson_install: |
