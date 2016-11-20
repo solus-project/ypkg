@@ -19,7 +19,7 @@ actions:
     - meson_configure: |
         CFLAGS="%CFLAGS%" CXXFLAGS="%CXXFLAGS%" LDFLAGS="%LDFLAGS%" meson --prefix %PREFIX% --buildtype=plain --libdir="lib%LIBSUFFIX%" --libexecdir="lib%LIBSUFFIX%%PKGNAME%"
     - meson_build: |
-        ninja -v %JOBS%
+        ninja %JOBS%
     - meson_install: |
         DESTDIR="%installroot%" ninja install %JOBS%
     - patch: |
