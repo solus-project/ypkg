@@ -22,6 +22,8 @@ actions:
         ninja %JOBS%
     - meson_install: |
         DESTDIR="%installroot%" ninja install %JOBS%
+    - qmake: |
+        qmake QMAKE_CFLAGS_RELEASE="%CFLAGS%" QMAKE_CXXFLAGS_RELEASE="%CXXFLAGS%" QMAKE_LFLAGS="%LDFLAGS%"
     - patch: |
         patch -t -E --no-backup-if-mismatch -f
     # Only works if the user has a series file. They can provide the name to
