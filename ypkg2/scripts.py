@@ -123,6 +123,7 @@ class ScriptGenerator:
         self.define_macro("installroot", self.context.get_install_dir())
         self.define_macro("workdir", self.work_dir)
         self.define_macro("JOBS", "-j{}".format(self.context.build.jobcount))
+        self.define_macro("YPKG_NJOBS", "{}".format(self.context.build.jobcount))
 
         # Consider moving this somewhere else
         self.define_macro("CFLAGS", " ".join(self.context.build.cflags))
