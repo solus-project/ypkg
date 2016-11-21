@@ -89,9 +89,9 @@ actions:
     - waf_configure: |
         ./waf configure --prefix=%PREFIX%
     - waf_build: |
-        ./waf build --jobs="%YPKG_NJOBS%"
+        ./waf build --jobs="%YJOBS%"
     - waf_install: |
-        ./waf install --jobs="%YPKG_NJOBS%" --destdir="%installroot%"
+        ./waf install --jobs="%YJOBS%" --destdir="%installroot%"
 defines:
     - CONFOPTS: |
         --prefix=%PREFIX% --build=%HOST% --libdir=%libdir% --mandir=/usr/share/man \
