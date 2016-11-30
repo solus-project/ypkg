@@ -392,11 +392,11 @@ class YpkgSpec:
             comp = pisi.component.CompatComponent()
             try:
                 comp.read(fpath)
-                console_ui.emit_warning("Component",
-                                        "Using legacy component.xml: {}".
-                                        format(fpath))
+                console_ui.emit_error("Component",
+                                      "Using legacy component.xml: {}".
+                                      format(fpath))
                 print("  Please switch to using the 'component' key")
-                self.add_component("main", comp.name)
+                return False
             except Exception as e:
                 console_ui.emit_error("Component", "Error in legacy file")
                 print(e)
