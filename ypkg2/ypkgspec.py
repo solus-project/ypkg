@@ -256,7 +256,7 @@ class YpkgSpec:
         extras = []
         if self.pkg_emul32:
             extras.extend(["glibc-32bit-devel", "libgcc-32bit",
-                           "libstdc++-32bit"])
+                           "libstdc++-32bit", "fakeroot-32bit"])
         man = SourceManager()
         try:
             man.identify_sources(self)
