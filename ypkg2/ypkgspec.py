@@ -91,6 +91,9 @@ class YpkgSpec:
     pkg_optimize = None
     pkg_libsplit = True
 
+    # Only used by solbuild
+    pkg_networking = False
+
     # Dependencies
     pkg_builddeps = None
 
@@ -189,6 +192,7 @@ class YpkgSpec:
             ("strip", bool),
             ("ccache", bool),
             ("emul32", bool),
+            ("networking", bool),
             ("avx2", bool),
             ("autodep", bool),
             ("extract", bool),
