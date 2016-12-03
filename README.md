@@ -86,18 +86,18 @@ As such, this makes `pkgconfig()` build dependencies very powerful, as using `pk
 `emul32` packages
 -----------------
 
-For emul32 packages, you will invariably need *some* extra packages to start building. These aren't in the `system.devel` component to avoid unnecessary bloat. Therefore, for C projects you will need:
+To build a package in a multilib fashion, simply set the `emul32` key to `yes`. This will cause the build steps to double up, the first run will build as a 32-bit build, and the second set will be the native 64-bit set.
+
+Build dependencies for 32-bit packages can expressly be 32-bit pkgconfig dependencies, i.e:
+
+    pkgconfig32(zlib)
+
+`ypkg` will automatically add the following build dependencies for `emul32` builds, to save the developer extra effort:
+
 
     - glibc-32bit-devel
     - libgcc-32bit
-
-For C++ projects you will also need `libstdc++-32bit`. As such, a package that wishes to build both 64-bit and 32-bit libraries requires only the following modifications, assuming our build dependency is `zlib-devel`:
-
-    builddeps :
-        - pkgconfig32(zlib)
-        - glibc-32bit-devel
-        - libgcc-32bit
-    emul32    : yes
+    - libstdc++-32bit
 
 Note that 32-bit builds are done *first*, in a separate build root to the native 64-bit package. However they will both install to the same tree. Note that for `emul32` packages, we use `--prefix=/emul32 --libdir=/usr/lib32`. This avoids collisions of binaries and assets, but you may need to tweak to your requirements.
 
