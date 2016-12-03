@@ -1,9 +1,18 @@
 ypkg2
 -----
 
+**Modern, declarative, structured build format**
+
+
 ypkg is the build tool of choice for Solus. Simply put, it is a tool to convert a build process into a packaging operation.
 
-ypkg evolved from a simple set of ideas within the Solus Project, that packaging should be simple. Given rules should be obeyed globally, and where appropriate the packager should be able to tweak the results to how they desire.
+ypkg evolved from a basic set of ideas within the Solus project, that packaging should be simple. Given rules should be obeyed globally, and where appropriate the packager should be able to tweak the results to how they desire.
+
+As a result, `ypkg` provides a highly intuitive, simple, yet incredibly powerful package building system, which follows the Solus philosophy of sane defaults, and hidden power under the surface. `ypkg` is capable of many build types, multilib, automatic & intelligent package splitting, choice compiler optimisations, standardised `GDB`-compatible `debuginfo` packages, automatic dependency resolution, and much more.
+
+`ypkg` is a [Solus project](https://solus-project.com/).
+
+![logo](https://build.solus-project.com/logo.png)
 
 **How Rules Work:**
 
