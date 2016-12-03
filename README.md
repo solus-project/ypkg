@@ -1,7 +1,7 @@
 ypkg2
 -----
 
-ypkg is the build tool of choice for the Solus Operating System. Simply put, it
+ypkg is the build tool of choice for Solus. Simply put, it
 is a tool to convert a build process into a packaging operation.
 
 ypkg evolved from a simple set of ideas within the Solus Project, that packaging
