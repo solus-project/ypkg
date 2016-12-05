@@ -61,7 +61,9 @@ class DependencyResolver:
     def search_file(self, fname):
         if fname[0] == '/':
             fname = fname[1:]
-        return self.fdb.search_file(fname)
+        if not self.fdb.has_file(fname):
+            return None
+        return self.fdb.get_file(fname)
 
     def __init__(self):
         """ Allows us to do look ups on all packages """
@@ -119,7 +121,7 @@ class DependencyResolver:
             else:
                 pkg = self.search_file(fpath)
                 if pkg:
-                    lpkg = pkg[0][0]
+                    lpkg = pkg[0]
             if lpkg:
                 if info.emul32:
                     self.bindeps_emul32[symbol] = lpkg
