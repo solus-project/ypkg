@@ -101,11 +101,11 @@ def main():
             local = True
             nom = fdb.get_pkgconfig32_provider(i)
             if nom:
-                pkg = idb.get_package_by_pkgconfig32(nom)
+                pkg = idb.get_package_by_pkgconfig32(nom[0])
         if not pkg:
             nom = fdb.get_pkgconfig_provider(i)
             if nom:
-                pkg = idb.get_package_by_pkgconfig(nom)
+                pkg = idb.get_package_by_pkgconfig(nom[0])
 
         if local:
             console_ui.emit_warning("pkgconfig32:{}".format(i),
@@ -125,7 +125,7 @@ def main():
         if not pkg:
             nom = fdb.get_pkgconfig_provider(i)
             if nom:
-                pkg = idb.get_package_by_pkgconfig(nom)
+                pkg = idb.get_package_by_pkgconfig(nom[0])
             local = True
         if local:
             console_ui.emit_warning("pkgconfig:{}".format(i),
