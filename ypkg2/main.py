@@ -51,6 +51,8 @@ def main():
                         action="store_true")
     parser.add_argument("-v", "--version", action="store_true",
                         help="Show version information and exit")
+    parser.add_argument("-t", "--timestamp", help="Unix timestamp for build",
+                        type=int, default=-1)
     parser.add_argument("-D", "--output-dir", type=str,
                         help="Set the output directory for resulting files")
     # Main file
@@ -66,6 +68,8 @@ def main():
     # Show version
     if args.version:
         show_version()
+    if args.timestamp > 0:
+        metadata.history_timestamp = args.timestamp
 
     if args.output_dir:
         od = args.output_dir
