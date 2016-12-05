@@ -142,7 +142,6 @@ def main():
         console_ui.emit_success("BuildDep", "All build deps satisfied")
         sys.exit(0)
 
-    sys.exit(1)
     if os.geteuid() != 0:
         cmd = "sudo eopkg install {}".format(" ".join(ndeps))
     else:
