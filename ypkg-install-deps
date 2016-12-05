@@ -13,6 +13,7 @@
 
 from ypkg2 import console_ui
 from ypkg2.ypkgspec import YpkgSpec
+from pisi.db.filesdb import FilesDB
 from pisi.db.installdb import InstallDB
 from pisi.db.packagedb import PackageDB
 from ypkg2 import pkgconfig_dep, pkgconfig32_dep
@@ -63,6 +64,7 @@ def main():
 
     idb = InstallDB()
     pdb = PackageDB()
+    fdb = FilesDB()
 
     console_ui.emit_info("BuildDep", "Checking build-deps for {}-{}-{}".
                          format(spec.pkg_name, spec.pkg_version,
@@ -81,15 +83,30 @@ def main():
             if not idb.has_package(dep):
                 ndeps.add(dep)
 
+    # Get the global known pkgconfig providers
+    pkgConfigs, pkgConfigs32 = pdb.get_pkgconfig_providers()
+
     for i in pc32deps:
         local = False
-        pkg = pdb.get_package_by_pkgconfig32(i)
+        pkg = None
+
+        # Try global pkgconfig names first.
+        if i in pkgConfigs32:
+            pkg = pdb.get_package(pkgConfigs32[i])
+        elif i in pkgConfigs:
+            pkg = pdb.get_package(pkgConfigs[i])
+
+        # Try the filesdb
         if not pkg:
-            pkg = pdb.get_package_by_pkgconfig(i)
+            local = True
+            nom = fdb.get_pkgconfig32_provider(i)
+            if nom:
+                pkg = idb.get_package_by_pkgconfig32(nom)
         if not pkg:
-            pkg = idb.get_package_by_pkgconfig32(i)
-        if not pkg:
-            pkg = idb.get_package_by_pkgconfig(i)
+            nom = fdb.get_pkgconfig_provider(i)
+            if nom:
+                pkg = idb.get_package_by_pkgconfig(nom)
+
         if local:
             console_ui.emit_warning("pkgconfig32:{}".format(i),
                                     "This dependency is not in any repo")
@@ -102,9 +119,13 @@ def main():
 
     for i in pcdeps:
         local = False
-        pkg = pdb.get_package_by_pkgconfig(i)
+        pkg = None
+        if i in pkgConfigs:
+            pkg = pdb.get_package(pkgConfigs[i])
         if not pkg:
-            pkg = idb.get_package_by_pkgconfig(i)
+            nom = fdb.get_pkgconfig_provider(i)
+            if nom:
+                pkg = idb.get_package_by_pkgconfig(nom)
             local = True
         if local:
             console_ui.emit_warning("pkgconfig:{}".format(i),
@@ -121,6 +142,7 @@ def main():
         console_ui.emit_success("BuildDep", "All build deps satisfied")
         sys.exit(0)
 
+    sys.exit(1)
     if os.geteuid() != 0:
         cmd = "sudo eopkg install {}".format(" ".join(ndeps))
     else:
