@@ -58,6 +58,10 @@ class DependencyResolver:
 
     files_cache = dict()
 
+    # Cached from packagedb
+    pkgConfigs = None
+    pkgConfigs32 = None
+
     def search_file(self, fname):
         if fname[0] == '/':
             fname = fname[1:]
@@ -70,6 +74,9 @@ class DependencyResolver:
         self.idb = InstallDB()
         self.pdb = PackageDB()
         self.fdb = FilesDB()
+
+        # Cache the pkgconfigs known in the pdb
+        self.pkgConfigs, self.pkgConfigs32 = self.pdb.get_pkgconfig_providers()
 
     def get_symbol_provider(self, symbol):
         """ Grab the symbol from the local packages """
@@ -160,17 +167,29 @@ class DependencyResolver:
             return self.pkgconfig_cache[name]
 
         if info.emul32:
-            pkg = self.idb.get_package_by_pkgconfig32(name)
+            # InstallDB set
+            nom = self.idb.get_pkgconfig32_provider(name)
+            if nom:
+                pkg = self.idb.get_package(nom[0])
             if not pkg:
-                pkg = self.idb.get_package_by_pkgconfig(name)
+                nom = self.idb.get_pkgconfig_provider(name)
+                if nom:
+                    pkg = self.idb.get_package(nom[0])
+
+            # PackageDB set
             if not pkg:
-                pkg = self.pdb.get_package_by_pkgconfig32(name)
+                if name in self.pkgConfigs32:
+                    pkg = self.pdb.get_package(self.pkgConfigs32[name])
             if not pkg:
-                pkg = self.pdb.get_package_by_pkgconfig(name)
+                if name in self.pkgConfigs:
+                    pkg = self.pdb.get_package(self.pkgConfigs[name])
         else:
-            pkg = self.idb.get_package_by_pkgconfig(name)
+            nom = self.fdb.get_pkgconfig_provider(name)
+            if nom:
+                pkg = self.idb.get_package(nom[0])
             if not pkg:
-                pkg = self.pdb.get_package_by_pkgconfig(name)
+                if name in self.pkgConfigs:
+                    pkg = self.pdb.get_package(self.pkgConfigs[name])
 
         if not pkg:
             return None
