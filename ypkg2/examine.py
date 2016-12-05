@@ -287,14 +287,15 @@ def store_debug(context, pretty, file, magic_string):
 
     did_full = os.path.join(context.get_install_dir(), did[1:])
 
+    # Account for race condition in directory creation
     dirs = os.path.dirname(did_full)
+    try:
+        os.makedirs(dirs, mode=00755)
+    except Exception as e:
+        pass
     if not os.path.exists(dirs):
-        try:
-            os.makedirs(dirs, mode=00755)
-        except Exception as e:
-            console_ui.emit_error("Debug", "Failed to make directory")
-            print e
-            return
+        console_ui.emit_error("Debug", "Failed to make directory")
+        return
 
     cmd = "objcopy --only-keep-debug \"{}\" \"{}\"".format(file, did_full)
     try:
@@ -359,7 +360,7 @@ class PackageExaminer:
         # Right now we actually only care about magic matching
         removed = set()
 
-        # pool = multiprocessing.Pool()
+        pool = multiprocessing.Pool()
         results = list()
 
         for file in package.emit_files():
@@ -389,19 +390,18 @@ class PackageExaminer:
             if not self.file_is_of_interest("/" + file, fpath, mgs):
                 continue
             # Handle this asynchronously
-            results.append(examine_file(package, "/" + file, fpath, mgs))
-            # results.append(pool.apply_async(examine_file, [
-            #               package, "/" + file, fpath, mgs],
-            #               callback=None))
+            results.append(pool.apply_async(examine_file, [
+                           package, "/" + file, fpath, mgs],
+                           callback=None))
 
-        # pool.close()
-        # pool.join()
+        pool.close()
+        pool.join()
 
-        # infos = [x.get() for x in results]
+        infos = [x.get() for x in results]
 
         for r in removed:
             package.remove_file(r)
-        return results
+        return infos
 
     def examine_packages(self, context, packages):
         """ Examine all packages, in order to update dependencies, etc """
