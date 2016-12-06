@@ -50,7 +50,25 @@ of YAML with very specific extensions and types.
 
         * https://spdx.org/licenses/
 
+* `source` [dict(s)]
+
+    This key expects a list of key:value mappings, to declare the sources that
+    this package will use. A "simple source" could be a tarball, where the key
+    is the upstream URL, and the value must be a valid `sha256sum(1)` for that
+    tarball.
+
+    You can list multiple sources and they will all be fetched for the build
+    process, but only the first will be extracted. You can locate these other
+    sources during your build with the `$sources` variable.
+
+    `git(1)` sources are also supported, and can be identified by prefixing the
+    URI with `git|`. The expected value should be a commit, sha reference, or a
+    tag.
+
+
 ## EXAMPLE
+
+    # Complete package
 
     name       : nano
     version    : 2.7.1
@@ -73,6 +91,9 @@ of YAML with very specific extensions and types.
     install    : |
         %make_install
 
+    # Git sources
+    source     :
+        - git|https://github.com/solus-project/ypkg.git : v17.0
 
 ## COPYRIGHT
 
