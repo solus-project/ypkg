@@ -260,10 +260,11 @@ Valid keys are restricted to:
 .IP "" 0
 .
 .SH "EXAMPLE"
+\fBA Complete package\fR
+.
+.IP "" 4
 .
 .nf
-
-# Complete package
 
 name       : nano
 version    : 2\.7\.1
@@ -285,12 +286,32 @@ build      : |
     %make
 install    : |
     %make_install
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\fBGit sources\fR
+.
+.IP "" 4
+.
+.nf
 
-# Git sources
 source     :
     \- git|https://github\.com/solus\-project/ypkg\.git : v17\.0
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\fBMultimap examples\fR
+.
+.IP "" 4
+.
+.nf
 
-# Multimap, deciphered
 # Set the component for the main package to `system\.base`
 component: system\.base
 
@@ -315,6 +336,17 @@ rundeps:
     \- devel:
         \- somepkg
         \- somepkg2
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\fBBuild dependencies examples\fR
+.
+.IP "" 4
+.
+.nf
 
 # Build dependencies, in various flavours:
 builddeps:
@@ -323,6 +355,8 @@ builddeps:
     \- pkgconfig32(zlib)
 .
 .fi
+.
+.IP "" 0
 .
 .SH "COPYRIGHT"
 .

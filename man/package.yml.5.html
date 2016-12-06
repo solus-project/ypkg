@@ -313,9 +313,9 @@ additional functionality.</p>
 
 <h2 id="EXAMPLE">EXAMPLE</h2>
 
-<pre><code># Complete package
+<p><code>A Complete package</code></p>
 
-name       : nano
+<pre><code>name       : nano
 version    : 2.7.1
 release    : 63
 source     :
@@ -335,13 +335,17 @@ build      : |
     %make
 install    : |
     %make_install
+</code></pre>
 
-# Git sources
-source     :
+<p><code>Git sources</code></p>
+
+<pre><code>source     :
     - git|https://github.com/solus-project/ypkg.git : v17.0
+</code></pre>
 
-# Multimap, deciphered
-# Set the component for the main package to `system.base`
+<p><code>Multimap examples</code></p>
+
+<pre><code># Set the component for the main package to `system.base`
 component: system.base
 
 # Also setting the main component to `system.base`
@@ -365,8 +369,11 @@ rundeps:
     - devel:
         - somepkg
         - somepkg2
+</code></pre>
 
-# Build dependencies, in various flavours:
+<p><code>Build dependencies examples</code></p>
+
+<pre><code># Build dependencies, in various flavours:
 builddeps:
     - glibc-32bit-devel
     - pkgconfig(gtk+-3.0)

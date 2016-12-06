@@ -246,7 +246,8 @@ additional functionality.
 
 ## EXAMPLE
 
-    # Complete package
+
+`A Complete package`
 
     name       : nano
     version    : 2.7.1
@@ -269,11 +270,13 @@ additional functionality.
     install    : |
         %make_install
 
-    # Git sources
+`Git sources`
+
     source     :
         - git|https://github.com/solus-project/ypkg.git : v17.0
 
-    # Multimap, deciphered
+`Multimap examples`
+
     # Set the component for the main package to `system.base`
     component: system.base
 
@@ -298,6 +301,8 @@ additional functionality.
         - devel:
             - somepkg
             - somepkg2
+
+`Build dependencies examples`
 
     # Build dependencies, in various flavours:
     builddeps:
