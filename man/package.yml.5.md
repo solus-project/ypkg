@@ -83,6 +83,7 @@ of YAML with very specific extensions and types.
 
 `solbuild(1)`, `ypkg(1)` `ypkg-build(1)`, `ypkg-install-deps(1)`
 
+ * https://wiki.solus-project.com/Package.yml
  * https://github.com/solus-project/ypkg
  * https://wiki.solus-project.com/Packaging
  * https://spdx.org/licenses/
