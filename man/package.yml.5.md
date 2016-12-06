@@ -21,6 +21,35 @@ refered to here as "subpackages".
 `ypkg-build(1)` uses the YAML file format. However, this is a very specialised flavour
 of YAML with very specific extensions and types.
 
+`Types`
+
+Some of the specialised types expected by `package.yml(5)` are explained below.
+
+* `dict(s)`
+
+    This is a set of one or more `key`:`value` mappings. These are always in
+    a list format.
+
+* `multimap`
+
+    This is a `key`:`value` mapping where the `key` is IMPLICIT. That is to
+    say, it is acceptable to omit the key. A single value passed as the `value`
+    will set the implicit key's component.
+
+    In all instances the implicit key is the `main package`. The `multimap`
+    format can accept a list instead of a string as a value, and each item
+    in that list also follows the implicit key policy.
+
+    For each item in the list, if the `key` is EXPLICIT, by using `dict` style
+    `key`:`value` mapping, then the key specified will be used.
+
+    Within `ypkg(1)`, that key is always a package name. This name should be
+    the shortform name, not the fully qualified name, i.e the subpackage name
+    without the `name` prefix.
+
+    This allows a general key to accept sane defaults, but also allows the key
+    to be extended to override attributes of a subpackage.
+
 `Keys`
 
 * `name` [string]

@@ -24,6 +24,38 @@ The primary format of package builds in Solus, \fBpackage\.yml(5)\fR provides a 
 \fBypkg\-build(1)\fR uses the YAML file format\. However, this is a very specialised flavour of YAML with very specific extensions and types\.
 .
 .P
+\fBTypes\fR
+.
+.P
+Some of the specialised types expected by \fBpackage\.yml(5)\fR are explained below\.
+.
+.IP "\(bu" 4
+\fBdict(s)\fR
+.
+.IP
+This is a set of one or more \fBkey\fR:\fBvalue\fR mappings\. These are always in a list format\.
+.
+.IP "\(bu" 4
+\fBmultimap\fR
+.
+.IP
+This is a \fBkey\fR:\fBvalue\fR mapping where the \fBkey\fR is IMPLICIT\. That is to say, it is acceptable to omit the key\. A single value passed as the \fBvalue\fR will set the implicit key\'s component\.
+.
+.IP
+In all instances the implicit key is the \fBmain package\fR\. The \fBmultimap\fR format can accept a list instead of a string as a value, and each item in that list also follows the implicit key policy\.
+.
+.IP
+For each item in the list, if the \fBkey\fR is EXPLICIT, by using \fBdict\fR style \fBkey\fR:\fBvalue\fR mapping, then the key specified will be used\.
+.
+.IP
+Within \fBypkg(1)\fR, that key is always a package name\. This name should be the shortform name, not the fully qualified name, i\.e the subpackage name without the \fBname\fR prefix\.
+.
+.IP
+This allows a general key to accept sane defaults, but also allows the key to be extended to override attributes of a subpackage\.
+.
+.IP "" 0
+.
+.P
 \fBKeys\fR
 .
 .IP "\(bu" 4
