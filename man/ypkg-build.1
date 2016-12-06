@@ -1,0 +1,85 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "YPKG\-BUILD" "1" "December 2016" "" ""
+.
+.SH "NAME"
+\fBypkg\-build\fR \- Build Solus ypkg files
+.
+.SH "SYNOPSIS"
+\fBypkg\-build <flags> [package\.yml]\fR
+.
+.SH "DESCRIPTION"
+\fBypkg\-build\fR is the main component of the \fBypkg(1)\fR package\. Given a \fBpackage\.yml(5)\fR file, it will attempt to build the package according to the rules, patterns and steps set in the file\.
+.
+.P
+For details on the package format itself, please refer to the \fBpackage\.yml(5)\fR manpage, or the Solus wiki\.
+.
+.P
+Note that you should not use \fBypkg\-build(1)\fR directly unless completely unavoidable\. Instead, you should be using \fBsolbuild(1)\fR for isolated build environments\.
+.
+.SH "OPTIONS"
+The following options are applicable to \fBypkg\-build(1)\fR\.
+.
+.IP "\(bu" 4
+\fB\-h\fR, \fB\-\-help\fR
+.
+.IP
+Print the command line options for \fBypkg(1)\fR and exit\.
+.
+.IP "\(bu" 4
+\fB\-v\fR, \fB\-\-version\fR
+.
+.IP
+Print the \fBypkg(1)\fR version and exit\.
+.
+.IP "\(bu" 4
+\fB\-n\fR, \fB\-\-no\-colors\fR
+.
+.IP
+Disable text colourisation in the output from \fBypkg\fR and all child processes\.
+.
+.IP "\(bu" 4
+\fB\-t\fR, \fB\-\-timestamp\fR
+.
+.IP
+This argument should be a UNIX timestamp, and will be used to set the file timestamps inside the final \fB\.eopkg\fR archive, as well as the container files within that archive\.
+.
+.IP
+Using this option helps achieve a level of reproducability in builds, and this option is passed by \fBsolbuild(1)\fR automatically for ypkg builds\. It will examine the git history and use the UTC UNIX timestamp for the last tag, ensuring the package can be built by any machine using \fBsolbuild(1)\fR and result in an identical package, byte for byte\.
+.
+.IP "\(bu" 4
+\fB\-D\fR, \fB\-\-output\-dir\fR
+.
+.IP
+Set the output directory for \fBypkg\-build(1)\fR
+.
+.IP "" 0
+.
+.SH "EXIT STATUS"
+On success, 0 is returned\. A non\-zero return code signals a failure\.
+.
+.SH "COPYRIGHT"
+.
+.IP "\(bu" 4
+Copyright © 2016 Ikey Doherty, License: CC\-BY\-SA\-3\.0
+.
+.IP "" 0
+.
+.SH "SEE ALSO"
+\fBsolbuild(1)\fR, \fBypkg\-install\-deps(1)\fR, \fBypkg(1)\fR, \fBpackage\.yml(5)\fR
+.
+.P
+https://wiki\.solus\-project\.com/Packaging
+.
+.P
+https://github\.com/solus\-project/ypkg
+.
+.SH "NOTES"
+Creative Commons Attribution\-ShareAlike 3\.0 Unported
+.
+.IP "\(bu" 4
+http://creativecommons\.org/licenses/by\-sa/3\.0/
+.
+.IP "" 0
+
