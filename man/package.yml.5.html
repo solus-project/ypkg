@@ -218,6 +218,18 @@ additional functionality.</p>
   <code>$CC</code> and <code>clang++</code> as the <code>$CXX</code> variables.</p>
 
 <p>  By default this key is set to <code>no</code>.</p></li>
+<li><p><code>ccache</code> [boolean]</p>
+
+<p>  If configured correctly, <code>ypkg-build(1)</code> will automatically use <code>ccache(1)</code>.
+  When using <code>solbuild(1)</code> this is almost always the case. However, there
+  may be some cases when ccache can break the build, or is ill advised.</p>
+
+<p>  Whilst the default value of this key is <code>yes</code>, you can force disable the
+  use of ccache by setting it to <code>no</code>.</p></li>
+<li><p><code>devel</code> [boolean]</p>
+
+<p>  Force all built packages to belong to the <code>system.devel</code> component. This
+  will become deprecated in future, and currently defaults to <code>no</code>.</p></li>
 <li><p><code>extract</code> [boolean]</p>
 
 <p>  By default, <code>ypkg-build(1)</code> will extract all sources listed in the file.
@@ -289,33 +301,47 @@ additional functionality.</p>
   and that the last specified pattern, if matching, ALWAYS wins. It is
   even possible to supress generation of the main package, by pattern
   globbing <code>/*</code> to a subpackage. This will not cause any breakage.</p></li>
+<li><p><code>strip</code> [boolean]</p>
+
+<p>  By default, this key is enabled, and as a result <code>ypkg-build(1)</code> will
+  automatically strip files after the build has done, including <code>ELF</code>
+  libraries &amp; binaries.</p>
+
+<p>  In most cases, stripping should remain enabled. However, there are known
+  cases when stripping should be avoided, such as when complying with a
+  distribution policy of binary only software, or when dealing with
+  files that only appear to be standard ELF files.</p>
+
+<p>  The Go programming language generates <code>*.a</code> archive files that under
+  no circumstance should be stripped, and there are likely other cases.
+  This key, when set to <code>no</code>, will disable any and all stripping.</p></li>
 <li><p><code>avx2</code> [boolean]</p>
 
-<p> If set, the package will be rebuilt again specifically to enable libraries
- to be optimised to use <strong>Advanced Vector Extensions</strong>.</p>
+<p>  If set, the package will be rebuilt again specifically to enable libraries
+  to be optimised to use <strong>Advanced Vector Extensions</strong>.</p>
 
-<p> The build will be configured with a library directory suffix of <code>avx2</code>,
- i.e. <code>/usr/lib64/avx2</code> or <code>/usr/lib32/avx2</code>. These libraries will be
- automatically loaded on the Solus installation if the hardware support
- is present.</p></li>
+<p>  The build will be configured with a library directory suffix of <code>avx2</code>,
+  i.e. <code>/usr/lib64/avx2</code> or <code>/usr/lib32/avx2</code>. These libraries will be
+  automatically loaded on the Solus installation if the hardware support
+  is present.</p></li>
 <li><p><code>optimize</code> [string]</p>
 
-<p> Valid keys are restricted to:</p>
+<p>  Valid keys are restricted to:</p>
 
 <ul>
-<li><code>speed</code>: Optimise this package for speed performance</li>
-<li><code>size</code>: Optimize the package build solely for size.</li>
-<li><code>no-bind-now</code>: Configure the package to disable certain flags, where RELRO is unsupported.</li>
+<li> <code>speed</code>: Optimise this package for speed performance</li>
+<li> <code>size</code>: Optimize the package build solely for size.</li>
+<li> <code>no-bind-now</code>: Configure the package to disable certain flags, where RELRO is unsupported.</li>
 </ul>
 </li>
 <li><p><code>networking</code> [boolean]</p>
 
-<p> When built using <code>solbuild(1)</code>, access to the network is removed. A new
- loopback device will be provided within the container. This ensures that
- packages do not accidently download unverifiable content during build.</p>
+<p>  When built using <code>solbuild(1)</code>, access to the network is removed. A new
+  loopback device will be provided within the container. This ensures that
+  packages do not accidently download unverifiable content during build.</p>
 
-<p> If for any reason, networking is still required, you can set this key to <code>yes</code>.
- However, always evalaute whether it is avoidable first.</p></li>
+<p>  If for any reason, networking is still required, you can set this key to <code>yes</code>.
+  However, always evalaute whether it is avoidable first.</p></li>
 </ul>
 
 

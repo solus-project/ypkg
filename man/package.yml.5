@@ -162,6 +162,21 @@ Set this key to \fByes\fR to force building this package with the \fBclang\fR co
 By default this key is set to \fBno\fR\.
 .
 .IP "\(bu" 4
+\fBccache\fR [boolean]
+.
+.IP
+If configured correctly, \fBypkg\-build(1)\fR will automatically use \fBccache(1)\fR\. When using \fBsolbuild(1)\fR this is almost always the case\. However, there may be some cases when ccache can break the build, or is ill advised\.
+.
+.IP
+Whilst the default value of this key is \fByes\fR, you can force disable the use of ccache by setting it to \fBno\fR\.
+.
+.IP "\(bu" 4
+\fBdevel\fR [boolean]
+.
+.IP
+Force all built packages to belong to the \fBsystem\.devel\fR component\. This will become deprecated in future, and currently defaults to \fBno\fR\.
+.
+.IP "\(bu" 4
 \fBextract\fR [boolean]
 .
 .IP
@@ -229,6 +244,18 @@ All files captured by this expression will then end up in that subpackage\. Each
 .
 .IP
 \fBypkg\-build(1)\fR ensures that a file cannot belong to multiple packages, and that the last specified pattern, if matching, ALWAYS wins\. It is even possible to supress generation of the main package, by pattern globbing \fB/*\fR to a subpackage\. This will not cause any breakage\.
+.
+.IP "\(bu" 4
+\fBstrip\fR [boolean]
+.
+.IP
+By default, this key is enabled, and as a result \fBypkg\-build(1)\fR will automatically strip files after the build has done, including \fBELF\fR libraries & binaries\.
+.
+.IP
+In most cases, stripping should remain enabled\. However, there are known cases when stripping should be avoided, such as when complying with a distribution policy of binary only software, or when dealing with files that only appear to be standard ELF files\.
+.
+.IP
+The Go programming language generates \fB*\.a\fR archive files that under no circumstance should be stripped, and there are likely other cases\. This key, when set to \fBno\fR, will disable any and all stripping\.
 .
 .IP "\(bu" 4
 \fBavx2\fR [boolean]

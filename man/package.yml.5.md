@@ -147,6 +147,20 @@ additional functionality.
 
     By default this key is set to `no`.
 
+* `ccache` [boolean]
+
+    If configured correctly, `ypkg-build(1)` will automatically use `ccache(1)`.
+    When using `solbuild(1)` this is almost always the case. However, there
+    may be some cases when ccache can break the build, or is ill advised.
+
+    Whilst the default value of this key is `yes`, you can force disable the
+    use of ccache by setting it to `no`.
+
+* `devel` [boolean]
+
+    Force all built packages to belong to the `system.devel` component. This
+    will become deprecated in future, and currently defaults to `no`.
+
 * `extract` [boolean]
 
     By default, `ypkg-build(1)` will extract all sources listed in the file.
@@ -225,7 +239,22 @@ additional functionality.
     even possible to supress generation of the main package, by pattern
     globbing `/*` to a subpackage. This will not cause any breakage.
 
- * `avx2` [boolean]
+* `strip` [boolean]
+
+    By default, this key is enabled, and as a result `ypkg-build(1)` will
+    automatically strip files after the build has done, including `ELF`
+    libraries & binaries.
+
+    In most cases, stripping should remain enabled. However, there are known
+    cases when stripping should be avoided, such as when complying with a
+    distribution policy of binary only software, or when dealing with
+    files that only appear to be standard ELF files.
+
+    The Go programming language generates `*.a` archive files that under
+    no circumstance should be stripped, and there are likely other cases.
+    This key, when set to `no`, will disable any and all stripping.
+
+* `avx2` [boolean]
 
     If set, the package will be rebuilt again specifically to enable libraries
     to be optimised to use **Advanced Vector Extensions**.
@@ -235,7 +264,7 @@ additional functionality.
     automatically loaded on the Solus installation if the hardware support
     is present.
 
- * `optimize` [string]
+* `optimize` [string]
 
     Valid keys are restricted to:
 
@@ -243,7 +272,7 @@ additional functionality.
      * `size`: Optimize the package build solely for size.
      * `no-bind-now`: Configure the package to disable certain flags, where RELRO is unsupported.
 
- * `networking` [boolean]
+* `networking` [boolean]
 
     When built using `solbuild(1)`, access to the network is removed. A new
     loopback device will be provided within the container. This ensures that
