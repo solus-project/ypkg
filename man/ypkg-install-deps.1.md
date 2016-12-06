@@ -32,7 +32,9 @@ The following options are applicable to `ypkg-install-deps(1)`.
 
  * `-D`, `--output-dir`
 
-   Set the output directory for `ypkg-build(1)`
+   This option is ignored by `ypkg-install-deps(1)`. It is provided simply
+   for compatibility in scripting to allow `ypkg(1)` to pass arguments forward
+   for the duration of the session.
 
  * `-f`, `--force`
 
