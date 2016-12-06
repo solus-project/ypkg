@@ -65,6 +65,16 @@ of YAML with very specific extensions and types.
     URI with `git|`. The expected value should be a commit, sha reference, or a
     tag.
 
+* `component` [multimap]
+
+    This key sets the package component, that is to say, the logical unit of
+    organisation that it belongs to. Check `eopkg lc` for existing component
+    names.
+
+    `component` is a multimap key, therefore if passed a single string value
+    it will set the component for the main package. However, you may instead
+    pass a list of the subpackage names, and set their component individually
+    using the map **value**.
 
 ## EXAMPLE
 
@@ -94,6 +104,20 @@ of YAML with very specific extensions and types.
     # Git sources
     source     :
         - git|https://github.com/solus-project/ypkg.git : v17.0
+
+    # Multimap, deciphered
+    # Set the component for the main package to `system.base`
+    component: system.base
+
+    # Also setting the main component to `system.base`
+    component:
+        - system.base
+
+    # Set the component of the main package to system.base, but set the
+    # component for subpackage `devel` to `programming.devel`
+    component:
+        - system.base
+        - devel: programming.devel
 
 ## COPYRIGHT
 

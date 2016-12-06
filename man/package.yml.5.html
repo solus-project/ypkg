@@ -135,6 +135,16 @@ of YAML with very specific extensions and types.</p>
 <p>  <code>git(1)</code> sources are also supported, and can be identified by prefixing the
   URI with <code>git|</code>. The expected value should be a commit, sha reference, or a
   tag.</p></li>
+<li><p><code>component</code> [multimap]</p>
+
+<p>  This key sets the package component, that is to say, the logical unit of
+  organisation that it belongs to. Check <code>eopkg lc</code> for existing component
+  names.</p>
+
+<p>  <code>component</code> is a multimap key, therefore if passed a single string value
+  it will set the component for the main package. However, you may instead
+  pass a list of the subpackage names, and set their component individually
+  using the map <strong>value</strong>.</p></li>
 </ul>
 
 
@@ -166,6 +176,20 @@ install    : |
 # Git sources
 source     :
     - git|https://github.com/solus-project/ypkg.git : v17.0
+
+# Multimap, deciphered
+# Set the component for the main package to `system.base`
+component: system.base
+
+# Also setting the main component to `system.base`
+component:
+    - system.base
+
+# Set the component of the main package to system.base, but set the
+# component for subpackage `devel` to `programming.devel`
+component:
+    - system.base
+    - devel: programming.devel
 </code></pre>
 
 <h2 id="COPYRIGHT">COPYRIGHT</h2>
