@@ -1,0 +1,73 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "YPKG\-INSTALL\-DEPS" "1" "December 2016" "" ""
+.
+.SH "NAME"
+\fBypkg\-install\-deps\fR \- Install build dependencies
+.
+.SH "SYNOPSIS"
+\fBypkg\-install\-deps <flags> [package\.yml]\fR
+.
+.SH "DESCRIPTION"
+\fBypkg\-install\-deps\fR will install all of the build dependencies listed in the given \fBpackage\.yml(5)\fR file\. Note that resolution of \fBpkgconfig\fR and \fBpkgconfig32\fR dependencies is handled automatically\.
+.
+.SH "OPTIONS"
+The following options are applicable to \fBypkg\-install\-deps(1)\fR\.
+.
+.IP "\(bu" 4
+\fB\-h\fR, \fB\-\-help\fR
+.
+.IP
+Print the command line options for \fBypkg(1)\fR and exit\.
+.
+.IP "\(bu" 4
+\fB\-v\fR, \fB\-\-version\fR
+.
+.IP
+Print the \fBypkg(1)\fR version and exit\.
+.
+.IP "\(bu" 4
+\fB\-n\fR, \fB\-\-no\-colors\fR
+.
+.IP
+Disable text colourisation in the output from \fBypkg\fR and all child processes\.
+.
+.IP "\(bu" 4
+\fB\-D\fR, \fB\-\-output\-dir\fR
+.
+.IP
+Set the output directory for \fBypkg\-build(1)\fR
+.
+.IP "\(bu" 4
+\fB\-f\fR, \fB\-\-force\fR
+.
+.IP
+Force the installation of package dependencies, which will bypass any prompting by ypkg\. The default behaviour is to prompt before installing packages\.
+.
+.IP "" 0
+.
+.SH "EXIT STATUS"
+On success, 0 is returned\. A non\-zero return code signals a failure\.
+.
+.SH "COPYRIGHT"
+.
+.IP "\(bu" 4
+Copyright © 2016 Ikey Doherty, License: CC\-BY\-SA\-3\.0
+.
+.IP "" 0
+.
+.SH "SEE ALSO"
+\fBsolbuild(1)\fR, \fBypkg(1)\fR \fBypkg\-build(1)\fR, \fBpackage\.yml(5)\fR
+.
+.P
+https://github\.com/solus\-project/ypkg
+.
+.SH "NOTES"
+Creative Commons Attribution\-ShareAlike 3\.0 Unported
+.
+.IP "\(bu" 4
+http://creativecommons\.org/licenses/by\-sa/3\.0/
+.
+.IP "" 0
+
