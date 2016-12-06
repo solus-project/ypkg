@@ -281,6 +281,76 @@ additional functionality.
     If for any reason, networking is still required, you can set this key to `yes`.
     However, always evalaute whether it is avoidable first.
 
+`Build Steps`
+
+The build steps are text-only data values. `ypkg-build(1)` will interpret special
+"macro" values in these steps, and evaluate them in a new environment via the
+`bash(1)` shell.
+
+* `setup`
+
+    Performed immediately after source preparation and extraction. This is where
+    you should look to patch your package if necessary, and perform any configuration
+    routines (i.e. `%configure`)
+
+* `build`
+
+    The main build step. This is where you compile code and do long running code.
+    An example would be running `%make`
+
+* `install`
+
+    The install step will install of the built files into the final installation
+    directory, to be converted into a native `.eopkg` file. This is where your
+    `%make_install` would happen, for example.
+
+    Remember, this is to install inside the `package`. This doesn't impact the
+    package installation on another users computer. There is no "postinstall"
+    concept currently supported by ypkg.
+
+* `check`
+
+    Run any test suites in this step. This is the final step in the chain, and
+    allows you to verify what you just built. This is a good place to run
+    `%make check`
+
+* `profile`
+
+    If this step is present, then each build set that is enabled (native, `emul32`),
+    will gain a series of new steps. The build will be configured for profile
+    guided optimisation, and this step will be used to execute the PGO workload.
+
+    In essence the workflow looks like this:
+
+        - `setup` as PGO
+        - `build` as PGO
+        - `profile` as PGO
+        - Clean happens here.
+        - `setup` to use PGO data
+        - `build` to use PGO data
+        - `install`
+        - `check`
+
+    The compiler flags will be modifed automatically during each step to make
+    PGO integration seamless. For an real world case on how this helps, check
+    out:
+
+     * https://clearlinux.org/blogs/profile-guided-optimization-mariadb-benchmarks
+
+`Macros`
+
+ypkg supports a wide range of macros for easier package building. They evolve
+often and quickly, so you should always refer to the main `package.yml`
+documentation:
+
+ * https://wiki.solus-project.com/Package.yml#Actionable_Macros
+ * https://wiki.solus-project.com/Package.yml#Variable_Macros
+
+It may also be beneficial to study the `rc.yml` file defining the build macros:
+
+ * https://github.com/solus-project/ypkg/blob/master/ypkg2/rc.yml
+
+
 ## EXAMPLES
 
 
@@ -361,6 +431,7 @@ additional functionality.
  * https://wiki.solus-project.com/Packaging
  * https://spdx.org/licenses/
  * https://en.wikipedia.org/wiki/Advanced_Vector_Extensions
+ * https://en.wikipedia.org/wiki/Profile-guided_optimization
 
 ## NOTES
 

@@ -295,6 +295,98 @@ If for any reason, networking is still required, you can set this key to \fByes\
 .
 .IP "" 0
 .
+.P
+\fBBuild Steps\fR
+.
+.P
+The build steps are text\-only data values\. \fBypkg\-build(1)\fR will interpret special "macro" values in these steps, and evaluate them in a new environment via the \fBbash(1)\fR shell\.
+.
+.IP "\(bu" 4
+\fBsetup\fR
+.
+.IP
+Performed immediately after source preparation and extraction\. This is where you should look to patch your package if necessary, and perform any configuration routines (i\.e\. \fB%configure\fR)
+.
+.IP "\(bu" 4
+\fBbuild\fR
+.
+.IP
+The main build step\. This is where you compile code and do long running code\. An example would be running \fB%make\fR
+.
+.IP "\(bu" 4
+\fBinstall\fR
+.
+.IP
+The install step will install of the built files into the final installation directory, to be converted into a native \fB\.eopkg\fR file\. This is where your \fB%make_install\fR would happen, for example\.
+.
+.IP
+Remember, this is to install inside the \fBpackage\fR\. This doesn\'t impact the package installation on another users computer\. There is no "postinstall" concept currently supported by ypkg\.
+.
+.IP "\(bu" 4
+\fBcheck\fR
+.
+.IP
+Run any test suites in this step\. This is the final step in the chain, and allows you to verify what you just built\. This is a good place to run \fB%make check\fR
+.
+.IP "\(bu" 4
+\fBprofile\fR
+.
+.IP
+If this step is present, then each build set that is enabled (native, \fBemul32\fR), will gain a series of new steps\. The build will be configured for profile guided optimisation, and this step will be used to execute the PGO workload\.
+.
+.IP
+In essence the workflow looks like this:
+.
+.IP "" 4
+.
+.nf
+
+  \- `setup` as PGO
+  \- `build` as PGO
+  \- `profile` as PGO
+  \- Clean happens here\.
+  \- `setup` to use PGO data
+  \- `build` to use PGO data
+  \- `install`
+  \- `check`
+.
+.fi
+.
+.IP "" 0
+.
+.IP
+The compiler flags will be modifed automatically during each step to make PGO integration seamless\. For an real world case on how this helps, check out:
+.
+.IP "\(bu" 4
+https://clearlinux\.org/blogs/profile\-guided\-optimization\-mariadb\-benchmarks
+.
+.IP "" 0
+
+.
+.IP "" 0
+.
+.P
+\fBMacros\fR
+.
+.P
+ypkg supports a wide range of macros for easier package building\. They evolve often and quickly, so you should always refer to the main \fBpackage\.yml\fR documentation:
+.
+.IP "\(bu" 4
+https://wiki\.solus\-project\.com/Package\.yml#Actionable_Macros
+.
+.IP "\(bu" 4
+https://wiki\.solus\-project\.com/Package\.yml#Variable_Macros
+.
+.IP "" 0
+.
+.P
+It may also be beneficial to study the \fBrc\.yml\fR file defining the build macros:
+.
+.IP "\(bu" 4
+https://github\.com/solus\-project/ypkg/blob/master/ypkg2/rc\.yml
+.
+.IP "" 0
+.
 .SH "EXAMPLES"
 \fBA Complete package\fR
 .
@@ -418,6 +510,9 @@ https://spdx\.org/licenses/
 .
 .IP "\(bu" 4
 https://en\.wikipedia\.org/wiki/Advanced_Vector_Extensions
+.
+.IP "\(bu" 4
+https://en\.wikipedia\.org/wiki/Profile\-guided_optimization
 .
 .IP "" 0
 .
