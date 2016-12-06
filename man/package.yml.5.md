@@ -241,7 +241,7 @@ additional functionality.
 
      * `speed`: Optimise this package for speed performance
      * `size`: Optimize the package build solely for size.
-     * `no-relro`: Configure the package to disable certain flags, where RELRO is unsupported.
+     * `no-bind-now`: Configure the package to disable certain flags, where RELRO is unsupported.
     
 
 ## EXAMPLES
