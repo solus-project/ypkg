@@ -242,7 +242,15 @@ additional functionality.
      * `speed`: Optimise this package for speed performance
      * `size`: Optimize the package build solely for size.
      * `no-bind-now`: Configure the package to disable certain flags, where RELRO is unsupported.
-    
+
+ * `networking` [boolean]
+
+    When built using `solbuild(1)`, access to the network is removed. A new
+    loopback device will be provided within the container. This ensures that
+    packages do not accidently download unverifiable content during build.
+
+    If for any reason, networking is still required, you can set this key to `yes`.
+    However, always evalaute whether it is avoidable first.
 
 ## EXAMPLES
 

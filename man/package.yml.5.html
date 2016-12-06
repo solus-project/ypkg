@@ -308,6 +308,14 @@ additional functionality.</p>
 <li><code>no-bind-now</code>: Configure the package to disable certain flags, where RELRO is unsupported.</li>
 </ul>
 </li>
+<li><p><code>networking</code> [boolean]</p>
+
+<p> When built using <code>solbuild(1)</code>, access to the network is removed. A new
+ loopback device will be provided within the container. This ensures that
+ packages do not accidently download unverifiable content during build.</p>
+
+<p> If for any reason, networking is still required, you can set this key to <code>yes</code>.
+ However, always evalaute whether it is avoidable first.</p></li>
 </ul>
 
 

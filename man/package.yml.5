@@ -257,6 +257,15 @@ Valid keys are restricted to:
 .IP "" 0
 
 .
+.IP "\(bu" 4
+\fBnetworking\fR [boolean]
+.
+.IP
+When built using \fBsolbuild(1)\fR, access to the network is removed\. A new loopback device will be provided within the container\. This ensures that packages do not accidently download unverifiable content during build\.
+.
+.IP
+If for any reason, networking is still required, you can set this key to \fByes\fR\. However, always evalaute whether it is avoidable first\.
+.
 .IP "" 0
 .
 .SH "EXAMPLES"
