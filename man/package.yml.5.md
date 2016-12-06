@@ -50,7 +50,7 @@ Some of the specialised types expected by `package.yml(5)` are explained below.
     This allows a general key to accept sane defaults, but also allows the key
     to be extended to override attributes of a subpackage.
 
-`Keys`
+`Mandatory Keys`
 
 * `name` [string]
 
@@ -104,6 +104,20 @@ Some of the specialised types expected by `package.yml(5)` are explained below.
     it will set the component for the main package. However, you may instead
     pass a list of the subpackage names, and set their component individually
     using the map **value**.
+
+* `summary` [multimap]
+
+    Set the "short" description of a package, i.e. a one line explanation of
+    what an item is. Use the subpackage names in the explicit key for this
+    multimap to override subpackage summaries.
+
+* `description` [multimap]
+
+    Set the full description of a package, i.e. a more in depth explanation
+    of the software/package's functionality. This is the large description
+    that will be displayed in `eopkg` and the `solus-sc`.
+    Use the subpackage names in the explicit key for this multimap to override
+    subpackage descriptions.
 
 ## EXAMPLE
 

@@ -125,7 +125,7 @@ of YAML with very specific extensions and types.</p>
 </ul>
 
 
-<p><code>Keys</code></p>
+<p><code>Mandatory Keys</code></p>
 
 <ul>
 <li><p><code>name</code> [string]</p>
@@ -176,6 +176,18 @@ of YAML with very specific extensions and types.</p>
   it will set the component for the main package. However, you may instead
   pass a list of the subpackage names, and set their component individually
   using the map <strong>value</strong>.</p></li>
+<li><p><code>summary</code> [multimap]</p>
+
+<p>  Set the "short" description of a package, i.e. a one line explanation of
+  what an item is. Use the subpackage names in the explicit key for this
+  multimap to override subpackage summaries.</p></li>
+<li><p><code>description</code> [multimap]</p>
+
+<p>  Set the full description of a package, i.e. a more in depth explanation
+  of the software/package's functionality. This is the large description
+  that will be displayed in <code>eopkg</code> and the <code>solus-sc</code>.
+  Use the subpackage names in the explicit key for this multimap to override
+  subpackage descriptions.</p></li>
 </ul>
 
 
