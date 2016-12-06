@@ -18,7 +18,7 @@ Instead, you should be using `solbuild(1)` for isolated build environments.
 
 ## OPTIONS
 
-These options apply to all subcommands within `solbuild(1)`.
+The following options are applicable to `ypkg(1)`.
 
  * `-h`, `--help`
 
