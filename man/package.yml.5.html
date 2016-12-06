@@ -123,14 +123,14 @@ of YAML with very specific extensions and types.</p>
 </code></pre></li>
 <li><p><code>source</code> [dict(s)]</p>
 
-<p>  This key expects a list of key:value mappings, to declare the sources that
+<p>  This key expects a list of <code>key</code>:<code>value</code> mappings, to declare the sources that
   this package will use. A "simple source" could be a tarball, where the key
   is the upstream URL, and the value must be a valid <code>sha256sum(1)</code> for that
   tarball.</p>
 
 <p>  You can list multiple sources and they will all be fetched for the build
   process, but only the first will be extracted. You can locate these other
-  sources during your build with the variable <code>$sources</code></p>
+  sources during your build with the <code>$sources</code> variable.</p>
 
 <p>  <code>git(1)</code> sources are also supported, and can be identified by prefixing the
   URI with <code>git|</code>. The expected value should be a commit, sha reference, or a

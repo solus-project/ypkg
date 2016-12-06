@@ -52,7 +52,7 @@ of YAML with very specific extensions and types.
 
 * `source` [dict(s)]
 
-    This key expects a list of key:value mappings, to declare the sources that
+    This key expects a list of `key`:`value` mappings, to declare the sources that
     this package will use. A "simple source" could be a tarball, where the key
     is the upstream URL, and the value must be a valid `sha256sum(1)` for that
     tarball.

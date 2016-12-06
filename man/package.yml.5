@@ -68,10 +68,10 @@ One or more strings that identify the software license of this package\. This sh
 \fBsource\fR [dict(s)]
 .
 .IP
-This key expects a list of key:value mappings, to declare the sources that this package will use\. A "simple source" could be a tarball, where the key is the upstream URL, and the value must be a valid \fBsha256sum(1)\fR for that tarball\.
+This key expects a list of \fBkey\fR:\fBvalue\fR mappings, to declare the sources that this package will use\. A "simple source" could be a tarball, where the key is the upstream URL, and the value must be a valid \fBsha256sum(1)\fR for that tarball\.
 .
 .IP
-You can list multiple sources and they will all be fetched for the build process, but only the first will be extracted\. You can locate these other sources during your build with the variable \fB$sources\fR
+You can list multiple sources and they will all be fetched for the build process, but only the first will be extracted\. You can locate these other sources during your build with the \fB$sources\fR variable\.
 .
 .IP
 \fBgit(1)\fR sources are also supported, and can be identified by prefixing the URI with \fBgit|\fR\. The expected value should be a commit, sha reference, or a tag\.
