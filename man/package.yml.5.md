@@ -244,7 +244,7 @@ additional functionality.
      * `no-relro`: Configure the package to disable certain flags, where RELRO is unsupported.
     
 
-## EXAMPLE
+## EXAMPLES
 
 
 `A Complete package`
