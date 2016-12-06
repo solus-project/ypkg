@@ -5,7 +5,6 @@ package.yml(5) -- Solus package build format
 
     The Solus package build format, with YAML syntax.
 
-
 ## DESCRIPTION
 
 The primary format of package builds in Solus, `package.yml(5)` provides a modern,
