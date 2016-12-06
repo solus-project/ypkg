@@ -191,6 +191,127 @@ of YAML with very specific extensions and types.</p>
 </ul>
 
 
+<p><code>Optional Keys</code></p>
+
+<p>These keys are not mandatory to a <code>package.yml</code> file, but may be used to configure
+additional functionality.</p>
+
+<ul>
+<li><p><code>builddeps</code> [list]</p>
+
+<p>  Specifies the build dependencies required to actually make this package
+  build in an isolated environment (<code>solbuild(1)</code>).</p>
+
+<p>  You may use full package names here, though it is preferable to use the
+  <code>pkg-config(1)</code> names.</p>
+
+<p>  <code>ypkg-build(1)</code> understands pkgconfig dependencies denoted inside either
+  the <code>pkgconfig($name)</code> identifier, or <code>pkgconfig32($name)</code> for emul32
+  build dependencies.</p>
+
+<p>  It is not required to list any package here that exists in the <code>system.base</code>
+  or <code>system.devel</code> component.</p></li>
+<li><p><code>clang</code> [boolean]</p>
+
+<p>  Set this key to <code>yes</code> to force building this package with the <code>clang</code>
+  compiler. The build environment will be configured to use <code>clang</code> as the
+  <code>$CC</code> and <code>clang++</code> as the <code>$CXX</code> variables.</p>
+
+<p>  By default this key is set to <code>no</code>.</p></li>
+<li><p><code>extract</code> [boolean]</p>
+
+<p>  By default, <code>ypkg-build(1)</code> will extract all sources listed in the file.
+  If this is undesirable, set this key to <code>no</code> to disable this automatic
+  extraction.</p></li>
+<li><p><code>autodep</code> [boolean]</p>
+
+<p>  After a build has finished, <code>ypkg-build(1)</code> will automatically scan the
+  package files to determine dependencies between the package and any of
+  it's subpackages, and to external packages in the build environment.</p>
+
+<p>  This is essential in most cases, as it allows packages to benefit from
+  automatic dependencies and ensures the user always gets all of the packages
+  needed to run this software when installing it.</p>
+
+<p>  If for any reason you need to disable this functionality, i.e. for bootstrapping
+  or sideloading, set this key to <code>no</code>.</p></li>
+<li><p><code>emul32</code> [boolean]</p>
+
+<p>  <code>ypkg-build(1)</code> can optionally build your package in a multilib configuration.
+  If this key is set to <code>yes</code>, the buildset will double, and the first build
+  configuration will be set up for a <code>32-bit</code> ("emul32") build. ypkg will
+  automatically split off <code>-32bit</code> and <code>-32bit-devel</code> subpackages in this
+  instance, using the <code>/usr/lib32</code> library directory. It will also add
+  additional build dependencies automatically for 32-bit builds.</p>
+
+<p>  By default, this key is set to <code>no</code>.</p></li>
+<li><p><code>libsplit</code> [boolean]</p>
+
+<p>  The default patterns include logic to split subpackages according to the
+  library files in library directory. It is standard practice for ypkg to
+  split <code>*.so</code> symlinks into the automatic <code>devel</code> subpackage, along with
+  other development assets such as <code>pkgconfig</code> and <code>*.h</code> files.</p>
+
+<p>  Some software packages provide <code>*.so</code> files in the libdir that are not
+  symlinks, or are required for "main" operation. In this instance you can
+  set this key to <code>no</code> to disable this pattern.</p>
+
+<p>  By default, this key is set to <code>yes</code>, and should only be disabled if truly
+  required.</p></li>
+<li><p><code>rundeps</code> [multimap]</p>
+
+<p>  Provide a list of additional runtime dependencies for the main package.
+  These names should be fully qualified package names in the list, even
+  for subpackages.</p>
+
+<p>  If the EXPLICIT multimap key is set, then the runtime dependencies will
+  be added to the subpackage instead. Note that you can pass a list or a
+  single string value to the EXPLICIT rundep.</p></li>
+<li><p><code>replaces</code> [multimap]</p>
+
+<p>  When exported in the package index, this will indicate to the package manager
+  that THIS package now replaces the name in the value.</p>
+
+<p>  You may also set <code>replaces</code> on subpackages using the multimap notation.
+  Only one value per subpackage is allowed.</p></li>
+<li><p><code>patterns</code> [multimap]</p>
+
+<p>  Control package splitting and dynamically generate subpackages. The EXPLICIT
+  key is used to specify the new (or existing!) subpackage name. The "pattern"
+  is a shell compatible <code>glob(3)</code> expression.</p>
+
+<p>  All files captured by this expression will then end up in that subpackage.
+  Each successive pattern takes priority over the one listed before it, so
+  if your first pattern unavoidably captures files you need in ANOTHER
+  subpackage, simply list that pattern later.</p>
+
+<p>  <code>ypkg-build(1)</code> ensures that a file cannot belong to multiple packages,
+  and that the last specified pattern, if matching, ALWAYS wins. It is
+  even possible to supress generation of the main package, by pattern
+  globbing <code>/*</code> to a subpackage. This will not cause any breakage.</p></li>
+<li><p><code>avx2</code> [boolean]</p>
+
+<p> If set, the package will be rebuilt again specifically to enable libraries
+ to be optimised to use <strong>Advanced Vector Extensions</strong>.</p>
+
+<p> The build will be configured with a library directory suffix of <code>avx2</code>,
+ i.e. <code>/usr/lib64/avx2</code> or <code>/usr/lib32/avx2</code>. These libraries will be
+ automatically loaded on the Solus installation if the hardware support
+ is present.</p></li>
+<li><p><code>optimize</code> [string]</p>
+
+<p> Valid keys are restricted to:</p>
+
+<ul>
+<li><code>speed</code>: Optimise this package for speed performance</li>
+<li><code>size</code>: Optimize the package build solely for size.</li>
+<li><code>no-relro</code>: Configure the package to disable certain flags, where RELRO is unsupported.</li>
+</ul>
+</li>
+<li></li>
+</ul>
+
+
 <h2 id="EXAMPLE">EXAMPLE</h2>
 
 <pre><code># Complete package
@@ -233,6 +354,24 @@ component:
 component:
     - system.base
     - devel: programming.devel
+
+# Rundeps multimap
+rundeps:
+    - somepkg
+    - devel: somepkg2
+
+# Rundeps, list as explicit key's value
+rundeps:
+    - somepkg
+    - devel:
+        - somepkg
+        - somepkg2
+
+# Build dependencies, in various flavours:
+builddeps:
+    - glibc-32bit-devel
+    - pkgconfig(gtk+-3.0)
+    - pkgconfig32(zlib)
 </code></pre>
 
 <h2 id="COPYRIGHT">COPYRIGHT</h2>
@@ -251,6 +390,7 @@ component:
 <li>https://github.com/solus-project/ypkg</li>
 <li>https://wiki.solus-project.com/Packaging</li>
 <li>https://spdx.org/licenses/</li>
+<li>https://en.wikipedia.org/wiki/Advanced_Vector_Extensions</li>
 </ul>
 
 

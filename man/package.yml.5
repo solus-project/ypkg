@@ -131,6 +131,137 @@ Set the full description of a package, i\.e\. a more in depth explanation of the
 .
 .IP "" 0
 .
+.P
+\fBOptional Keys\fR
+.
+.P
+These keys are not mandatory to a \fBpackage\.yml\fR file, but may be used to configure additional functionality\.
+.
+.IP "\(bu" 4
+\fBbuilddeps\fR [list]
+.
+.IP
+Specifies the build dependencies required to actually make this package build in an isolated environment (\fBsolbuild(1)\fR)\.
+.
+.IP
+You may use full package names here, though it is preferable to use the \fBpkg\-config(1)\fR names\.
+.
+.IP
+\fBypkg\-build(1)\fR understands pkgconfig dependencies denoted inside either the \fBpkgconfig($name)\fR identifier, or \fBpkgconfig32($name)\fR for emul32 build dependencies\.
+.
+.IP
+It is not required to list any package here that exists in the \fBsystem\.base\fR or \fBsystem\.devel\fR component\.
+.
+.IP "\(bu" 4
+\fBclang\fR [boolean]
+.
+.IP
+Set this key to \fByes\fR to force building this package with the \fBclang\fR compiler\. The build environment will be configured to use \fBclang\fR as the \fB$CC\fR and \fBclang++\fR as the \fB$CXX\fR variables\.
+.
+.IP
+By default this key is set to \fBno\fR\.
+.
+.IP "\(bu" 4
+\fBextract\fR [boolean]
+.
+.IP
+By default, \fBypkg\-build(1)\fR will extract all sources listed in the file\. If this is undesirable, set this key to \fBno\fR to disable this automatic extraction\.
+.
+.IP "\(bu" 4
+\fBautodep\fR [boolean]
+.
+.IP
+After a build has finished, \fBypkg\-build(1)\fR will automatically scan the package files to determine dependencies between the package and any of it\'s subpackages, and to external packages in the build environment\.
+.
+.IP
+This is essential in most cases, as it allows packages to benefit from automatic dependencies and ensures the user always gets all of the packages needed to run this software when installing it\.
+.
+.IP
+If for any reason you need to disable this functionality, i\.e\. for bootstrapping or sideloading, set this key to \fBno\fR\.
+.
+.IP "\(bu" 4
+\fBemul32\fR [boolean]
+.
+.IP
+\fBypkg\-build(1)\fR can optionally build your package in a multilib configuration\. If this key is set to \fByes\fR, the buildset will double, and the first build configuration will be set up for a \fB32\-bit\fR ("emul32") build\. ypkg will automatically split off \fB\-32bit\fR and \fB\-32bit\-devel\fR subpackages in this instance, using the \fB/usr/lib32\fR library directory\. It will also add additional build dependencies automatically for 32\-bit builds\.
+.
+.IP
+By default, this key is set to \fBno\fR\.
+.
+.IP "\(bu" 4
+\fBlibsplit\fR [boolean]
+.
+.IP
+The default patterns include logic to split subpackages according to the library files in library directory\. It is standard practice for ypkg to split \fB*\.so\fR symlinks into the automatic \fBdevel\fR subpackage, along with other development assets such as \fBpkgconfig\fR and \fB*\.h\fR files\.
+.
+.IP
+Some software packages provide \fB*\.so\fR files in the libdir that are not symlinks, or are required for "main" operation\. In this instance you can set this key to \fBno\fR to disable this pattern\.
+.
+.IP
+By default, this key is set to \fByes\fR, and should only be disabled if truly required\.
+.
+.IP "\(bu" 4
+\fBrundeps\fR [multimap]
+.
+.IP
+Provide a list of additional runtime dependencies for the main package\. These names should be fully qualified package names in the list, even for subpackages\.
+.
+.IP
+If the EXPLICIT multimap key is set, then the runtime dependencies will be added to the subpackage instead\. Note that you can pass a list or a single string value to the EXPLICIT rundep\.
+.
+.IP "\(bu" 4
+\fBreplaces\fR [multimap]
+.
+.IP
+When exported in the package index, this will indicate to the package manager that THIS package now replaces the name in the value\.
+.
+.IP
+You may also set \fBreplaces\fR on subpackages using the multimap notation\. Only one value per subpackage is allowed\.
+.
+.IP "\(bu" 4
+\fBpatterns\fR [multimap]
+.
+.IP
+Control package splitting and dynamically generate subpackages\. The EXPLICIT key is used to specify the new (or existing!) subpackage name\. The "pattern" is a shell compatible \fBglob(3)\fR expression\.
+.
+.IP
+All files captured by this expression will then end up in that subpackage\. Each successive pattern takes priority over the one listed before it, so if your first pattern unavoidably captures files you need in ANOTHER subpackage, simply list that pattern later\.
+.
+.IP
+\fBypkg\-build(1)\fR ensures that a file cannot belong to multiple packages, and that the last specified pattern, if matching, ALWAYS wins\. It is even possible to supress generation of the main package, by pattern globbing \fB/*\fR to a subpackage\. This will not cause any breakage\.
+.
+.IP "\(bu" 4
+\fBavx2\fR [boolean]
+.
+.IP
+If set, the package will be rebuilt again specifically to enable libraries to be optimised to use \fBAdvanced Vector Extensions\fR\.
+.
+.IP
+The build will be configured with a library directory suffix of \fBavx2\fR, i\.e\. \fB/usr/lib64/avx2\fR or \fB/usr/lib32/avx2\fR\. These libraries will be automatically loaded on the Solus installation if the hardware support is present\.
+.
+.IP "\(bu" 4
+\fBoptimize\fR [string]
+.
+.IP
+Valid keys are restricted to:
+.
+.IP "\(bu" 4
+\fBspeed\fR: Optimise this package for speed performance
+.
+.IP "\(bu" 4
+\fBsize\fR: Optimize the package build solely for size\.
+.
+.IP "\(bu" 4
+\fBno\-relro\fR: Configure the package to disable certain flags, where RELRO is unsupported\.
+.
+.IP "" 0
+
+.
+.IP "\(bu" 4
+
+.
+.IP "" 0
+.
 .SH "EXAMPLE"
 .
 .nf
@@ -175,6 +306,24 @@ component:
 component:
     \- system\.base
     \- devel: programming\.devel
+
+# Rundeps multimap
+rundeps:
+    \- somepkg
+    \- devel: somepkg2
+
+# Rundeps, list as explicit key\'s value
+rundeps:
+    \- somepkg
+    \- devel:
+        \- somepkg
+        \- somepkg2
+
+# Build dependencies, in various flavours:
+builddeps:
+    \- glibc\-32bit\-devel
+    \- pkgconfig(gtk+\-3\.0)
+    \- pkgconfig32(zlib)
 .
 .fi
 .
@@ -199,6 +348,9 @@ https://wiki\.solus\-project\.com/Packaging
 .
 .IP "\(bu" 4
 https://spdx\.org/licenses/
+.
+.IP "\(bu" 4
+https://en\.wikipedia\.org/wiki/Advanced_Vector_Extensions
 .
 .IP "" 0
 .
