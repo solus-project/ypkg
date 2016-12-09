@@ -16,4 +16,6 @@ setup(
         "License :: OSI Approved :: GPL-3.0 License",
     ],
     package_data={'ypkg2': ['rc.yml']},
+    data_files      = [("/usr/share/man/man1", ["man/ypkg.1", "man/ypkg-build.1", "man/ypkg-install-deps.1"]),
+                       ("/usr/share/man/man5", ["man/package.yml.5"])]
 )
