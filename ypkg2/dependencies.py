@@ -168,11 +168,11 @@ class DependencyResolver:
 
         if info.emul32:
             # InstallDB set
-            nom = self.idb.get_pkgconfig32_provider(name)
+            nom = self.fdb.get_pkgconfig32_provider(name)
             if nom:
                 pkg = self.idb.get_package(nom[0])
             if not pkg:
-                nom = self.idb.get_pkgconfig_provider(name)
+                nom = self.fdb.get_pkgconfig_provider(name)
                 if nom:
                     pkg = self.idb.get_package(nom[0])
 
