@@ -128,8 +128,11 @@ def create_files_xml(context, package):
             fsize = long(os.path.getsize(full_path))
             st = os.stat(fpath)
 
-        # We don't support this concept right now in ypkg.
-        permanent = None
+        permanent = package.is_permanent("/" + path)
+        if not permanent:
+            permanent = None
+        else:
+            permanent = "true"
         ftype = get_file_type("/" + path)
 
         if (stat.S_IMODE(st.st_mode) & stat.S_ISUID):

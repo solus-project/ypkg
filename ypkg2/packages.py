@@ -44,11 +44,15 @@ class Package:
     # Symbols depended upon by this package
     depend_packages = None
 
+    # List of permanent files
+    permanent = None
+
     def __init__(self, name):
         self.name = name
         self.patterns = dict()
         self.files = set()
         self.excludes = set()
+        self.permanent = set()
 
         self.provided_symbols = set()
         self.depend_packages = set()
@@ -67,7 +71,7 @@ class Package:
                          reverse=True)
         return matches[0]
 
-    def add_file(self, pattern, path):
+    def add_file(self, pattern, path, permanent):
         """ Add a file by a given pattern to this package """
         if pattern is None:
             pattern = self.default_policy
@@ -75,6 +79,8 @@ class Package:
             self.patterns[pattern] = set()
         self.patterns[pattern].add(path)
         self.files.add(path)
+        if permanent:
+            self.permanent.add(path)
 
     def remove_file(self, path):
         """ Remove a file from this package if it owns it """
@@ -103,6 +109,10 @@ class Package:
             ret.update(adds)
         return sorted(ret)
 
+    def is_permanent(self, path):
+        """ Determine if a path if a permanent path or not """
+        return path in self.permanent
+
     def emit_files_by_pattern(self):
         """ Emit file lists, using the globs though. Note that eopkg has no
             exclude concept, this is left for us to handle as we build the
@@ -126,10 +136,16 @@ class PackageGenerator:
 
     patterns = None
     packages = None
+    permanent = None
 
     def __init__(self, spec):
         self.patterns = dict()
         self.packages = dict()
+        self.permanent = set()
+
+        if spec.pkg_permanent:
+            for perm in spec.pkg_permanent:
+                self.add_permanent_pattern(perm)
 
         self.add_pattern("/usr/bin", "main")
         self.add_pattern("/usr/sbin", "main")
@@ -209,9 +225,15 @@ class PackageGenerator:
         if pattern:
             target = self.patterns[pattern]
 
+        permanent = False
+        for perm in self.permanent:
+            if perm.match(path):
+                permanent = True
+                break
+
         if target not in self.packages:
             self.packages[target] = Package(target)
-        self.packages[target].add_file(pattern, path)
+        self.packages[target].add_file(pattern, path, permanent)
 
     def remove_file(self, path):
         """ Remove a file from our set, in any of our main or sub packages
@@ -244,6 +266,17 @@ class PackageGenerator:
 
         obj = StringPathGlob(pattern, prefixMatch=is_prefix, priority=priority)
         self.patterns[obj] = pkgName
+
+    def add_permanent_pattern(self, pattern):
+        """ Add a pattern to our mapping of permanent paths. """
+        obj = None
+        is_prefix = False
+        if pattern.endswith(os.sep):
+            if not StringPathGlob.is_a_pattern(pattern):
+                is_prefix = True
+
+        obj = StringPathGlob(pattern, prefixMatch=is_prefix)
+        self.permanent.add(obj)
 
     def emit_packages(self):
         """ Ensure we've finalized our state, allowing proper theft and

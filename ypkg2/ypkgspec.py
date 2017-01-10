@@ -121,6 +121,9 @@ class YpkgSpec:
     # Path to filename
     path = None
 
+    # Permanent paths
+    pkg_permanent = None
+
     # Custom user provided patterns
     patterns = None
 
@@ -198,6 +201,7 @@ class YpkgSpec:
             ("extract", bool),
             ("libsplit", bool),
             ("patterns", MultimapFormat(self, self.add_pattern, "main")),
+            ("permanent", OneOrMoreString),
             ("builddeps", OneOrMoreString),
             ("rundeps", MultimapFormat(self, self.add_rundep, "main")),
             ("component", MultimapFormat(self, self.add_component, "main")),

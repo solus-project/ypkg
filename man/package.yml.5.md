@@ -239,6 +239,20 @@ additional functionality.
     even possible to supress generation of the main package, by pattern
     globbing `/*` to a subpackage. This will not cause any breakage.
 
+* `permanent` [list]
+
+    A list of patterns used to mark files as permanent. Any file within the
+    resulting binary packages that matches the path pattern, is marked as
+    a permanent file.
+
+    These files will not be removed from the filesystem when upgrading or
+    reinstalling the package. They will persist during standard upgrade
+    operations.
+
+    This should only be used in critical chain packages such as the kernel
+    or drivers, where the domain of control is outside of the package manager,
+    and the package is simply used as an update delivery mechanism.
+
 * `strip` [boolean]
 
     By default, this key is enabled, and as a result `ypkg-build(1)` will
