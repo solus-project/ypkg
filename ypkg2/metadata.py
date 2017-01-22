@@ -413,6 +413,13 @@ def create_eopkg(context, gene, package, outputDir):
         orgname = os.path.join(context.get_install_dir(), finfo.path)
         orgname = orgname.encode('utf-8').decode('utf-8').encode("latin1")
 
+        try:
+            st = os.stat(orgname)
+            if st.st_uid >= 1000:
+                os.lchown(orgname, 0, 0)
+        except Exception as e:
+            console_ui.emit_warning("Fail to chown {}: {}".format(orgname, e))
+
         if os.path.islink(orgname) and not os.path.isdir(orgname):
             t = history_timestamp
             cmd = "touch -d \"@{}\" -h \"{}\"".format(t, orgname)
