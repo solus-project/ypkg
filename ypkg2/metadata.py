@@ -50,6 +50,7 @@ FileTypes = OrderedDict([
 history_timestamp = None
 history_date = None
 fallback_timestamp = None
+fallback_date = None
 
 accum_packages = dict()
 
@@ -74,10 +75,12 @@ def initialize_timestamp(spec):
     global history_date
     global history_timestamp
     global fallback_timestamp
+    global fallback_date
 
     dt = datetime.datetime.utcnow()
     s = dt.strftime("%Y-%m-%d")
     fallback_timestamp = utc_date_for_date_only(s)
+    fallback_date = s
 
     # If it was already set, just skip it.
     if history_timestamp is not None:
@@ -166,6 +169,7 @@ def metadata_from_package(context, package, files):
     global history_date
     global history_timestamp
     global fallback_timestamp
+    global fallback_date
     global accum_packages
 
     meta = pisi.metadata.MetaData()
@@ -195,6 +199,7 @@ def metadata_from_package(context, package, files):
         if l_release != release or l_version != version:
             console_ui.emit_info("History", "Constructing new history entry")
             history_timestamp = fallback_timestamp
+            history_date = fallback_date
         else:
             # Last updater is listed as maintainer in eopkg blame
             update = topup
