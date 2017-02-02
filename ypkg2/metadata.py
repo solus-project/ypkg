@@ -75,16 +75,15 @@ def initialize_timestamp(spec):
     global history_timestamp
     global fallback_timestamp
 
+    dt = datetime.datetime.utcnow()
+    s = dt.strftime("%Y-%m-%d")
+    fallback_timestamp = utc_date_for_date_only(s)
+
     # If it was already set, just skip it.
     if history_timestamp is not None:
         dt = datetime.datetime.fromtimestamp(history_timestamp)
         history_date = dt.strftime("%Y-%m-%d")
-        fallback_timestamp = history_timestamp
         return
-
-    dt = datetime.datetime.utcnow()
-    s = dt.strftime("%Y-%m-%d")
-    fallback_timestamp = utc_date_for_date_only(s)
 
     if spec.history:
         up = spec.history.history[0]
