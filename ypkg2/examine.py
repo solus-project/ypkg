@@ -52,6 +52,20 @@ def is_soname_link(file, mgs):
     return False
 
 
+def is_static_archive(file, mgs):
+    """ Very trivially determine .a files """
+    if not file.endswith(".a"):
+        return False
+
+    if mgs != "current ar archive":
+        return False
+
+    if os.path.islink(file) or os.path.isdir(file):
+        return False
+
+    return True
+
+
 class FileReport:
 
     pkgconfig_deps = None
@@ -346,6 +360,8 @@ class PackageExaminer:
         if is_pkgconfig_file(pretty, mgs):
             return True
         if is_soname_link(file, mgs):
+            return True
+        if is_static_archive(file, mgs):
             return True
         return False
 
