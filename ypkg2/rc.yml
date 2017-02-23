@@ -48,7 +48,7 @@ actions:
         apply_patches
     # Make life easier with Haskell
     - cabal_configure: |
-    export GHCV=$(ghc --numeric-version)
+        export GHCV=$(ghc --numeric-version)
         mkdir -p ~/.ghc/%ARCH%-linux-$GHCV/package.conf.d
         cp /usr/lib%LIBSUFFIX%/ghc-$GHCV/package.conf.d/* ~/.ghc/%ARCH%-linux-$GHCV/package.conf.d
         ghc-pkg recache --user
