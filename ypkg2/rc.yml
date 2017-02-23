@@ -24,6 +24,8 @@ actions:
         DESTDIR="%installroot%" ninja install %JOBS%
     - qmake: |
         qmake QMAKE_CFLAGS_RELEASE="%CFLAGS%" QMAKE_CXXFLAGS_RELEASE="%CXXFLAGS%" QMAKE_LFLAGS="%LDFLAGS%"
+    - qmake4: |
+        qmake-qt4 QMAKE_CFLAGS_RELEASE="%CFLAGS%" QMAKE_CXXFLAGS_RELEASE="%CXXFLAGS%" QMAKE_LFLAGS="%LDFLAGS%" QMAKE_MOC=/usr/bin/moc-qt4 QMAKE_RCC=/usr/bin/rcc-qt4 QMAKE_UIC=/usr/bin/uic-qt4
     - patch: |
         patch -t -E --no-backup-if-mismatch -f
     # Only works if the user has a series file. They can provide the name to
