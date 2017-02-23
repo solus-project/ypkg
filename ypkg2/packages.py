@@ -3,7 +3,7 @@
 #
 #  This file is part of ypkg2
 #
-#  Copyright 2015-2016 Ikey Doherty <ikey@solus-project.com>
+#  Copyright 2015-2017 Ikey Doherty <ikey@solus-project.com>
 #
 #  Many portions of this are related to autospec, concepts included
 #

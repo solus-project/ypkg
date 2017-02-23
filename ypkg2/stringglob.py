@@ -3,7 +3,7 @@
 #
 #  Re-adapted into ypkg2 from autospec
 #
-#  Copyright (C) 2016 Intel Corporation
+#  Copyright (C) 2016-2017 Intel Corporation
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
