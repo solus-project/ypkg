@@ -46,6 +46,26 @@ actions:
             done < $srs
         }
         apply_patches
+    # Make life easier with Haskell
+    - cabal_configure: |
+    export GHCV=$(ghc --numeric-version)
+        mkdir -p ~/.ghc/%ARCH%-linux-$GHCV/package.conf.d
+        cp /usr/lib%LIBSUFFIX%/ghc-$GHCV/package.conf.d/* ~/.ghc/%ARCH%-linux-$GHCV/package.conf.d
+        ghc-pkg recache --user
+        cabal configure --prefix=%PREFIX% \
+                        --libdir=%libdir% \
+                        --libsubdir="\$compiler/\$pkgid" \
+                        --sysconfdir=/etc \
+                        --enable-executable-dynamic \
+                        --enable-shared
+    - cabal_build: |
+        cabal build %JOBS%
+    - cabal_install: |
+        cabal copy --destdir=$installdir
+    - cabal_register: |
+        export GHCV=$(ghc --numeric-version)
+        cabal register --gen-pkg-config=$package-$version.conf
+        install -D -m 00644 $package-$version.conf $installdir%libdir%/ghc-$GHCV/package.conf.d/$package-$version.conf
     # Make life easier with Perl
     - perl_setup: |
         function perl_setup() {

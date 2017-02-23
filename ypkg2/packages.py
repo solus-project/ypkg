@@ -205,6 +205,9 @@ class PackageGenerator:
         self.add_pattern("/usr/lib/cmake/", "devel")
         self.add_pattern("/usr/lib32/cmake/", "32bit-devel")
 
+        # Haskell
+        self.add_pattern("/usr/lib64/ghc-*/*/*.a", "devel")
+
         # Vala..
         self.add_pattern("/usr/share/vala*/vapi/*", "devel")
         self.add_pattern("/usr/share/vala*/vapi/*", "devel")
