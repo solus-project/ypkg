@@ -17,9 +17,9 @@ import pisi.config
 import os
 import shutil
 
-# These flag sets are courtesy of autospec in
-# Clear Linux Project For Intel Architecture
-SPEED_FLAGS = "-flto -ffunction-sections -fno-semantic-interposition -O3 " \
+# These flag sets are originally courtesy of autospec in
+# Clear Linux Project For Intel Architecture.
+SPEED_FLAGS = "-ffunction-sections -fno-semantic-interposition -O3 " \
               "-falign-functions=32"
 SIZE_FLAGS = "-Os -ffunction-sections"
 PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\""
