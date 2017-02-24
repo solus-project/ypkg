@@ -217,6 +217,9 @@ def strip_file(context, pretty, file, magic_string, mode=None):
             "RANLIB=\"gcc-ranlib\"",
             "NM=\"gcc-nm\""])
 
+    # Strip .comment too
+    strip_comment = False
+
     cmd = "{} strip {} \"{}\""
     flags = ""
     if mode == "shared":
@@ -225,10 +228,14 @@ def strip_file(context, pretty, file, magic_string, mode=None):
         flags = "-g --strip-unneeded"
     elif mode == "ar":
         flags = "--strip-debug"
+        strip_comment = True
     try:
         s = " ".join(exports)
         subprocess.check_call(cmd.format(s, flags, file), shell=True)
         console_ui.emit_info("Stripped", pretty)
+        if strip_comment:
+            decom = cmd.format(s, "-R .comment", file)
+            subprocess.check_call(decom, shell=True)
     except Exception as e:
         console_ui.emit_warning("Strip", "Failed to strip '{}'".
                                 format(pretty))
