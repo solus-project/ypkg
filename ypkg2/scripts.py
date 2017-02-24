@@ -131,6 +131,7 @@ class ScriptGenerator:
         self.define_macro("LDFLAGS", " ".join(self.context.build.ldflags))
 
         self.define_macro("HOST", self.context.build.host)
+        self.define_macro("ARCH", self.context.build.arch)
         self.define_macro("PKGNAME", self.spec.pkg_name)
         self.define_macro("PKGFILES", self.context.files_dir)
 
