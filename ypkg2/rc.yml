@@ -15,13 +15,12 @@ actions:
         cmake -DCMAKE_CFLAGS="%CFLAGS%" -DCMAKE_CXX_FLAGS="%CXXFLAGS%" \
         -DCMAKE_LD_FLAGS="%LDFLAGS%" -DCMAKE_LIB_SUFFIX="%LIBSUFFIX%" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=%PREFIX%
-    # Example: %meson_configure ..
     - meson_configure: |
-        CFLAGS="%CFLAGS%" CXXFLAGS="%CXXFLAGS%" LDFLAGS="%LDFLAGS%" meson --prefix %PREFIX% --buildtype=plain --libdir="lib%LIBSUFFIX%" --libexecdir="lib%LIBSUFFIX%/%PKGNAME%" --sysconfdir=/etc --localstatedir=/var
+        CFLAGS="%CFLAGS%" CXXFLAGS="%CXXFLAGS%" LDFLAGS="%LDFLAGS%" meson --prefix %PREFIX% --buildtype=plain --libdir="lib%LIBSUFFIX%" --libexecdir="lib%LIBSUFFIX%/%PKGNAME%" --sysconfdir=/etc --localstatedir=/var solusBuildDir
     - meson_build: |
-        ninja %JOBS%
+        ninja %JOBS% -C solusBuildDir
     - meson_install: |
-        DESTDIR="%installroot%" ninja install %JOBS%
+        DESTDIR="%installroot%" ninja install %JOBS% -C solusBuildDir
     - qmake: |
         qmake QMAKE_CFLAGS_RELEASE="%CFLAGS%" QMAKE_CXXFLAGS_RELEASE="%CXXFLAGS%" QMAKE_LFLAGS="%LDFLAGS%"
     - qmake4: |
