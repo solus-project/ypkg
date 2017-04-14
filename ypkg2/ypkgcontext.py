@@ -24,7 +24,7 @@ SPEED_FLAGS = "-ffunction-sections -fno-semantic-interposition -O3 " \
 SIZE_FLAGS = "-Os -ffunction-sections"
 PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\""
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
-BIND_NOW_FLAGS = ["-Wl,-z,now"]
+BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
 
 # AVX2
 AVX2_FLAGS = "-mavx2"
