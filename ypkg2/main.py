@@ -400,9 +400,9 @@ def build_package(filename, outputDir):
 
     if len(gene.packages) == 0:
         console_ui.emit_error("Package", "No resulting packages found")
-        wk = "https://wiki.solus-project.com/Packaging"
+        w = "https://solus-project.com/articles/packaging/"
         print("Ensure your files end up in $installdir. Did you mean to "
-              "use %make_install?\n\nPlease see the wiki: {}".format(wk))
+              "use %make_install?\n\nPlease see the help center: {}".format(w))
         sys.exit(1)
 
     gene.emit_packages()
