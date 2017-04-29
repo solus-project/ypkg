@@ -121,3 +121,6 @@ defines:
     # Inspired by the RPM guys :]
     - perl_privlib: |
         $(eval `perl -V:installprivlib`; echo $installprivlib)
+    # Get LTS kernel version
+    - kernel_version_lts: |
+        $(echo "$(basename `readlink /usr/lib/kernel/default-lts` | cut -d '.' -f 4,5,6)".lts)
