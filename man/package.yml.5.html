@@ -301,6 +301,19 @@ additional functionality.</p>
   and that the last specified pattern, if matching, ALWAYS wins. It is
   even possible to supress generation of the main package, by pattern
   globbing <code>/*</code> to a subpackage. This will not cause any breakage.</p></li>
+<li><p><code>permanent</code> [list]</p>
+
+<p>  A list of patterns used to mark files as permanent. Any file within the
+  resulting binary packages that matches the path pattern, is marked as
+  a permanent file.</p>
+
+<p>  These files will not be removed from the filesystem when upgrading or
+  reinstalling the package. They will persist during standard upgrade
+  operations.</p>
+
+<p>  This should only be used in critical chain packages such as the kernel
+  or drivers, where the domain of control is outside of the package manager,
+  and the package is simply used as an update delivery mechanism.</p></li>
 <li><p><code>strip</code> [boolean]</p>
 
 <p>  By default, this key is enabled, and as a result <code>ypkg-build(1)</code> will
@@ -315,6 +328,15 @@ additional functionality.</p>
 <p>  The Go programming language generates <code>*.a</code> archive files that under
   no circumstance should be stripped, and there are likely other cases.
   This key, when set to <code>no</code>, will disable any and all stripping.</p></li>
+<li><p><code>debug</code> [boolean]</p>
+
+<p>  By default, this key is enabled, and as a result <code>ypkg-build(1)</code> will
+  automatically create resulting <code>-dbginfo</code> packages where it can.</p>
+
+<p>  In the majority of cases, this is the desired behaviour in full build
+  environments, such as a build server. However in very rare cases, this
+  may cause problems for the package, especially if it contains binaries
+  that have not been bootstrapped with the native toolchain.</p></li>
 <li><p><code>avx2</code> [boolean]</p>
 
 <p>  If set, the package will be rebuilt again specifically to enable libraries
@@ -525,7 +547,7 @@ builddeps:
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>December 2016</li>
+    <li class='tc'>May 2017</li>
     <li class='tr'>package.yml(5)</li>
   </ol>
 
