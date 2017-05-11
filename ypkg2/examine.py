@@ -290,6 +290,8 @@ def examine_file(*args):
 def store_debug(context, pretty, file, magic_string):
     if not context.can_dbginfo:
         return
+    if not context.spec.pkg_debug:
+        return
 
     did = get_debug_path(context, file, magic_string)
 

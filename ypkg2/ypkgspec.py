@@ -81,6 +81,7 @@ class YpkgSpec:
 
     # Build control
     pkg_devel = False
+    pkg_debug = True
     pkg_clang = False
     pkg_strip = True
     pkg_ccache = True
@@ -192,6 +193,7 @@ class YpkgSpec:
             ("homepage", str),
             ("devel", bool),
             ("clang", bool),
+            ("debug", bool),
             ("strip", bool),
             ("ccache", bool),
             ("emul32", bool),

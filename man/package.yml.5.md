@@ -268,6 +268,16 @@ additional functionality.
     no circumstance should be stripped, and there are likely other cases.
     This key, when set to `no`, will disable any and all stripping.
 
+* `debug` [boolean]
+
+    By default, this key is enabled, and as a result `ypkg-build(1)` will
+    automatically create resulting `-dbginfo` packages where it can.
+
+    In the majority of cases, this is the desired behaviour in full build
+    environments, such as a build server. However in very rare cases, this
+    may cause problems for the package, especially if it contains binaries
+    that have not been bootstrapped with the native toolchain.
+
 * `avx2` [boolean]
 
     If set, the package will be rebuilt again specifically to enable libraries
