@@ -100,13 +100,13 @@ actions:
         }
         perl_install
     - python_setup: |
-        python2.7 setup.py build
+        python2.7 setup.py build -b __py2_build
     - python_install: |
-        python2.7 setup.py install --root="%installroot%"
+        python2.7 setup.py build -b __py2_build install --root="%installroot%"
     - python3_setup: |
-        python3 setup.py build
+        python3 setup.py build -b __py3_build
     - python3_install: |
-        python3 setup.py install --root="%installroot%"
+        python3 setup.py build -b __py3_build install --root="%installroot%"
     - waf_configure: |
         ./waf configure --prefix=%PREFIX%
     - waf_build: |
