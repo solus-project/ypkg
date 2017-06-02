@@ -161,7 +161,8 @@ class YpkgSpec:
         """ Add a 'replaces:' to the package """
         if key not in self.replaces:
             self.replaces[key] = list()
-        if val in self.replaces:
+        # i.e. llvm-clang-devel replaces clang-devel
+        if val in self.replaces and val != key:
             console_ui.emit_warning("YAML",
                                     "Duplicate replace: {}".format(val))
             return
