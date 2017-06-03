@@ -118,6 +118,20 @@ def execute_step(context, step, step_n, work_dir):
         script.define_export("PKG_CONFIG_PATH", EMUL32PC)
     if context.avx2:
         script.define_export("AVX2BUILD", "1")
+    extraScript = None
+
+    # Handle the anal nature of llvm profiling
+    if context.gen_pgo and context.spec.pkg_clang:
+        profileFile = os.path.join(context.get_pgo_dir(),
+                                   "default-%m.profraw")
+        script.define_export("LLVM_PROFILE_FILE", profileFile)
+        script.define_export("YPKG_PGO_DIR", context.get_pgo_dir())
+    elif context.use_pgo and context.spec.pkg_clang:
+        profileFile = os.path.join(context.get_pgo_dir(),
+                                   "default.profdata")
+        extraScript = "%llvm_profile_merge"
+        script.define_export("LLVM_PROFILE_FILE", profileFile)
+        script.define_export("YPKG_PGO_DIR", context.get_pgo_dir())
 
     exports = script.emit_exports()
 
@@ -129,6 +143,8 @@ def execute_step(context, step, step_n, work_dir):
 
     # Add our exports
     full_text += "\n".join(exports)
+    if extraScript:
+        full_text += "\n\n{}\n".format(extraScript)
     full_text += "\n\n{}\n".format(step)
     output = script.escape_string(full_text)
 
@@ -307,6 +323,15 @@ def build_package(filename, outputDir):
                     if not src.extract(context):
                         console_ui.emit_error("Source",
                                               "Cannot extract sources")
+                        sys.exit(1)
+
+                if spec.step_profile:
+                    try:
+                        if not os.path.exists(context.get_pgo_dir()):
+                            os.makedirs(context.get_pgo_dir(), 00755)
+                    except Exception as e:
+                        console_ui.emit_error("Source", "Error creating dir")
+                        print(e)
                         sys.exit(1)
 
             work_dir = manager.get_working_dir(context)

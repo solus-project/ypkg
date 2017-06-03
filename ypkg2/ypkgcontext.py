@@ -17,14 +17,28 @@ import pisi.config
 import os
 import shutil
 
-# These flag sets are originally courtesy of autospec in
+# This speed flag set was originally from autospec in
 # Clear Linux Project For Intel Architecture.
 SPEED_FLAGS = "-ffunction-sections -fno-semantic-interposition -O3 " \
               "-falign-functions=32"
+
+# Clang defaults to -fno-semantic-interposition behaviour but doesn't have a
+# CLI flag to control it. It also does a better job on function alignment.
+SPEED_FLAGS_CLANG = "-ffunction-sections -fdata-sections -flto -O3"
+
+BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
+
+# Allow optimizing for size
 SIZE_FLAGS = "-Os -ffunction-sections"
+
+# GCC PGO flags
 PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\""
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
-BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
+
+# Clang can handle parameters to the args unlike GCC
+PGO_GEN_FLAGS_CLANG = "-fprofile-instr-generate=\"{}/default-%m.profraw\""
+PGO_USE_FLAGS_CLANG = "-fprofile-instr-use=\"{}/default.profdata\" " \
+                      "-fprofile-correction"
 
 # AVX2
 AVX2_FLAGS = "-mavx2"
@@ -55,7 +69,7 @@ class Flags:
         return nflags
 
     @staticmethod
-    def optimize_flags(f, opt_type):
+    def optimize_flags(f, opt_type, clang=False):
         """ Optimize this flag set for a given optimisation type """
         optimisations = ["-O%s" % x for x in range(0, 4)]
         optimisations.extend("-Os")
@@ -63,7 +77,10 @@ class Flags:
         newflags = Flags.filter_flags(f, optimisations)
 
         if opt_type == "speed":
-            newflags.extend(SPEED_FLAGS.split(" "))
+            if clang:
+                newflags.extend(SPEED_FLAGS_CLANG.split(" "))
+            else:
+                newflags.extend(SPEED_FLAGS.split(" "))
         elif opt_type == "size":
             newflags.extend(SIZE_FLAGS.split(" "))
         elif opt_type == "no-bind-now":
@@ -75,17 +92,19 @@ class Flags:
         return newflags
 
     @staticmethod
-    def pgo_gen_flags(f, d):
+    def pgo_gen_flags(f, d, clang=False):
         """ Update flags with PGO generator flags """
         r = list(f)
-        r.extend((PGO_GEN_FLAGS.format(d).split(" ")))
+        flagSet = PGO_GEN_FLAGS if not clang else PGO_GEN_FLAGS_CLANG
+        r.extend((flagSet.format(d).split(" ")))
         return r
 
     @staticmethod
-    def pgo_use_flags(f, d):
+    def pgo_use_flags(f, d, clang=False):
         """ Update flags with PGO use flags """
         r = list(f)
-        r.extend((PGO_USE_FLAGS.format(d).split(" ")))
+        flagSet = PGO_USE_FLAGS if not clang else PGO_USE_FLAGS_CLANG
+        r.extend((flagSet.format(d).split(" ")))
         return r
 
 
@@ -129,6 +148,8 @@ class YpkgContext:
     files_dir = None
     pconfig = None
     avx2 = False
+    use_pgo = None
+    gen_pgo = None
 
     can_dbginfo = False
 
@@ -240,12 +261,15 @@ class YpkgContext:
 
         if self.spec.pkg_optimize is not None:
             self.build.cflags = Flags.optimize_flags(self.build.cflags,
-                                                     self.spec.pkg_optimize)
+                                                     self.spec.pkg_optimize,
+                                                     self.spec.pkg_clang)
             self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
-                                                       self.spec.pkg_optimize)
+                                                       self.spec.pkg_optimize,
+                                                       self.spec.pkg_clang)
         if self.spec.pkg_optimize in ["no-bind-now"]:
             self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
-                                                      self.spec.pkg_optimize)
+                                                      self.spec.pkg_optimize,
+                                                      self.spec.pkg_clang)
 
         # Adjust for emul32 (-m32) build
         if self.emul32:
@@ -298,14 +322,24 @@ class YpkgContext:
     def enable_pgo_generate(self):
         """ Enable GPO generate step """
         pgo_dir = self.get_pgo_dir()
-        self.build.cflags = Flags.pgo_gen_flags(self.build.cflags, pgo_dir)
-        self.build.cxxflags = Flags.pgo_gen_flags(self.build.cxxflags, pgo_dir)
+        self.gen_pgo = True
+        self.build.cflags = Flags.pgo_gen_flags(self.build.cflags,
+                                                pgo_dir,
+                                                self.spec.pkg_clang)
+        self.build.cxxflags = Flags.pgo_gen_flags(self.build.cxxflags,
+                                                  pgo_dir,
+                                                  self.spec.pkg_clang)
 
     def enable_pgo_use(self):
         """ Enable PGO use step """
         pgo_dir = self.get_pgo_dir()
-        self.build.cflags = Flags.pgo_use_flags(self.build.cflags, pgo_dir)
-        self.build.cxxflags = Flags.pgo_use_flags(self.build.cxxflags, pgo_dir)
+        self.use_pgo = True
+        self.build.cflags = Flags.pgo_use_flags(self.build.cflags,
+                                                pgo_dir,
+                                                self.spec.pkg_clang)
+        self.build.cxxflags = Flags.pgo_use_flags(self.build.cxxflags,
+                                                  pgo_dir,
+                                                  self.spec.pkg_clang)
 
     def clean_pgo(self):
         suffixes = ["pgo", "pgo-avx2", "pgo-32", "pgo-32-avx2"]

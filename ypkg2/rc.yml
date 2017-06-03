@@ -113,6 +113,16 @@ actions:
         ./waf build --jobs="%YJOBS%"
     - waf_install: |
         ./waf install --jobs="%YJOBS%" --destdir="%installroot%"
+    - llvm_profile_merge: |
+        if [[ -d "$YPKG_PGO_DIR" ]]; then
+            pushd "$YPKG_PGO_DIR"
+            if [[ ! -e default.profdata ]]; then
+                llvm-profdata merge -output=default.profdata default-*.profraw
+            fi
+            popd
+        else
+            echo "\n\nError: Profiling requested by ypkg but doesn't exist\n\n"
+        fi
 defines:
     - CONFOPTS: |
         --prefix=%PREFIX% --build=%HOST% --libdir=%libdir% --mandir=/usr/share/man \
