@@ -229,6 +229,9 @@ class DependencyResolver:
             # Yes, it's a set, but i  dont want the ui emission spam
             if prov in tgtPkg.depend_packages:
                 continue
+            # Forbid circular dependencies
+            if pkgName == prov:
+                continue
             tgtPkg.depend_packages.add(prov)
 
             console_ui.emit_info("PKGCONFIG", "{} adds depend on {}".
