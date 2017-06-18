@@ -116,8 +116,24 @@ class FileReport:
 
     def scan_pkgconfig(self, file):
         sub = ""
+        pcDir = os.path.dirname(file)
+        pcPaths = []
+        # Ensure we account for private pkgconfig deps too
         if self.emul32:
-            sub = "PKG_CONFIG_PATH=\"{}\" ".format(EMUL32PC)
+            pcPaths.append(os.path.join(pcDir, "../lib32/pkgconfig"))
+            pcPaths.append(EMUL32PC)
+        else:
+            pcPaths.append(os.path.join(pcDir, "../lib64/pkgconfig"))
+            pcPaths.append(os.path.join(pcDir, "../lib/pkgconfig"))
+        pcPaths.append(os.path.join(pcDir, "../share/pkgconfig"))
+        pkgConfigPaths = []
+        for path in pcPaths:
+            p = os.path.realpath(path)
+            if p and os.path.exists(p) and p not in pkgConfigPaths:
+                pkgConfigPaths.append(p)
+
+        if len(pcPaths) > 0:
+            sub = "PKG_CONFIG_PATH=\"{}\" ".format(":".join(pkgConfigPaths))
 
         cmds = [
             "LC_ALL=C {}pkg-config --print-requires \"{}\"",
