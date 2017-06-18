@@ -120,19 +120,19 @@ class FileReport:
         pcPaths = []
         # Ensure we account for private pkgconfig deps too
         if self.emul32:
-            pcPaths.append(os.path.join(pcDir, "../lib32/pkgconfig"))
+            pcPaths.append(os.path.join(pcDir, "../../lib32/pkgconfig"))
             pcPaths.append(EMUL32PC)
         else:
-            pcPaths.append(os.path.join(pcDir, "../lib64/pkgconfig"))
-            pcPaths.append(os.path.join(pcDir, "../lib/pkgconfig"))
-        pcPaths.append(os.path.join(pcDir, "../share/pkgconfig"))
+            pcPaths.append(os.path.join(pcDir, "../../lib64/pkgconfig"))
+            pcPaths.append(os.path.join(pcDir, "../../lib/pkgconfig"))
+        pcPaths.append(os.path.join(pcDir, "../../share/pkgconfig"))
         pkgConfigPaths = []
         for path in pcPaths:
-            p = os.path.realpath(path)
+            p = os.path.abspath(path)
             if p and os.path.exists(p) and p not in pkgConfigPaths:
                 pkgConfigPaths.append(p)
 
-        if len(pcPaths) > 0:
+        if len(pkgConfigPaths) > 0:
             sub = "PKG_CONFIG_PATH=\"{}\" ".format(":".join(pkgConfigPaths))
 
         cmds = [
