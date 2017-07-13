@@ -181,7 +181,8 @@ class GitSource(YpkgSource):
                                       "directory: {}".format(e))
                 return False
         try:
-            shutil.copytree(source, target)
+            cmd = "cp -Ra \"{}/\" \"{}\"".format(source, target)
+            subprocess.check_call(cmd, shell=True)
         except Exception as e:
             console_ui.emit_error("Git", "Failed to copy source to build")
             print(e)
