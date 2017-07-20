@@ -32,8 +32,7 @@ BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
 SIZE_FLAGS = "-Os -ffunction-sections"
 
 # GCC PGO flags
-PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\" " \
-                "-fprofile-update=atomic"
+PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\" "
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
 
 # Clang can handle parameters to the args unlike GCC
