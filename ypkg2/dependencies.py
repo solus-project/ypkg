@@ -45,7 +45,9 @@ class DependencyResolver:
     fdb = None
 
     global_rpaths = set()
+    global_rpaths32 = set()
     global_sonames = dict()
+    global_sonames32 = dict()
     global_pkgconfigs = dict()
     global_pkgconfig32s = dict()
     gene = None
@@ -78,13 +80,21 @@ class DependencyResolver:
         # Cache the pkgconfigs known in the pdb
         self.pkgConfigs, self.pkgConfigs32 = self.pdb.get_pkgconfig_providers()
 
-    def get_symbol_provider(self, symbol):
+    def get_symbol_provider(self, info, symbol):
         """ Grab the symbol from the local packages """
-        if symbol in self.global_sonames:
-            pkgname = self.global_sonames[symbol]
+        if info.emul32:
+            tgtMap = self.global_sonames32
+            rPaths = self.global_rpaths32
+        else:
+            tgtMap = self.global_sonames
+            rPaths = self.global_rpaths
+
+        if symbol in tgtMap:
+            pkgname = tgtMap[symbol]
             return self.ctx.spec.get_package_name(pkgname)
+
         # Check if its in any rpath
-        for rpath in self.global_rpaths:
+        for rpath in rPaths:
             fpath = os.path.join(rpath, symbol)
             pkg = self.gene.get_file_owner(fpath)
             if pkg:
@@ -201,19 +211,25 @@ class DependencyResolver:
 
     def handle_binary_deps(self, packageName, info):
         """ Handle direct binary dependencies """
+        pkgName = self.ctx.spec.get_package_name(packageName)
+
         for sym in info.symbol_deps:
-            r = self.get_symbol_provider(sym)
+            r = self.get_symbol_provider(info, sym)
             if not r:
                 r = self.get_symbol_external(info, sym)
                 if not r:
                     print("Fatal: Unknown symbol: {}".format(sym))
                     continue
+            # Don't self depend
+            if pkgName == r:
+                continue
             self.gene.packages[packageName].depend_packages.add(r)
 
     def handle_pkgconfig_deps(self, packageName, info):
         """ Handle pkgconfig dependencies """
+        pkgName = self.ctx.spec.get_package_name(packageName)
+
         for item in info.pkgconfig_deps:
-            pkgName = self.ctx.spec.get_package_name(packageName)
 
             prov = self.get_pkgconfig_provider(info, item)
             if not prov:
@@ -275,9 +291,15 @@ class DependencyResolver:
         for packageName in packageSet:
             for info in packageSet[packageName]:
                 if info.rpaths:
-                    self.global_rpaths.update(info.rpaths)
+                    if info.emul32:
+                        self.global_rpaths32.update(info.rpaths)
+                    else:
+                        self.global_rpaths.update(info.rpaths)
                 if info.soname:
-                    self.global_sonames[info.soname] = packageName
+                    if info.emul32:
+                        self.global_sonames32[info.soname] = packageName
+                    else:
+                        self.global_sonames[info.soname] = packageName
                 if info.pkgconfig_name:
                     pcName = info.pkgconfig_name
                     if info.emul32:
