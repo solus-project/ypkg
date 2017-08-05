@@ -134,3 +134,6 @@ defines:
     # Get LTS kernel version
     - kernel_version_lts: |
         $(echo "$(basename `readlink /usr/lib/kernel/default-lts` | cut -d '.' -f 4,5,6)".lts)
+    # Get "Current" kernel version
+    - kernel_version_current: |
+        $(echo "$(basename `readlink /usr/lib/kernel/default-current` | cut -d '.' -f 4,5,6)".current)
