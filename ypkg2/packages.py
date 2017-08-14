@@ -210,7 +210,12 @@ class PackageGenerator:
 
         # Vala..
         self.add_pattern("/usr/share/vala*/vapi/*", "devel")
-        self.add_pattern("/usr/share/vala*/vapi/*", "devel")
+
+        # KDE developer documentation
+        self.add_pattern("/usr/share/doc/qt5/*.qch", "devel",
+                         priority=PRIORITY_DEFAULT+1)
+        self.add_pattern("/usr/share/doc/qt5/*.tags", "devel",
+                         priority=PRIORITY_DEFAULT+1)
 
     def add_file(self, path):
         """ Add a file path to the owned list and place it into the correct
