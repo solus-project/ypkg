@@ -21,6 +21,8 @@ actions:
         LC_ALL=en_US.utf8 ninja %JOBS% -C solusBuildDir
     - meson_install: |
         LC_ALL=en_US.utf8 DESTDIR="%installroot%" ninja install %JOBS% -C solusBuildDir
+    - meson_check: |
+        LC_ALL=en_US.utf8 ninja test %JOBS% -C solusBuildDir
     - qmake: |
         qmake QMAKE_CFLAGS_RELEASE="%CFLAGS%" QMAKE_CXXFLAGS_RELEASE="%CXXFLAGS%" QMAKE_LFLAGS="%LDFLAGS%"
     - qmake4: |
