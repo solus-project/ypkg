@@ -102,13 +102,51 @@ actions:
         }
         perl_install
     - python_setup: |
-        python2.7 setup.py build -b __py2_build
+        function python_setup() {
+            instdir=`basename %installroot%`
+            pushd ..
+                cp -a instdir py2build && pushd py2build
+                    python2.7 setup.py build $* || exit
+                popd
+            popd
+        }
+        python_setup
     - python_install: |
-        python2.7 setup.py build -b __py2_build install --root="%installroot%"
+        function python_install() {
+            instdir=`basename %installroot%`
+            pushd ..
+                if [[ ! -d py2build ]]; then
+                    cp -a instdir py2build
+                fi
+                pushd py2build
+                    python2.7 setup.py install --root="%installroot%" $* || exit
+                popd
+            popd
+        }
+        python_install
     - python3_setup: |
-        python3 setup.py build -b __py3_build
+        function python3_setup() {
+            instdir=`basename %installroot%`
+            pushd ..
+                cp -a instdir py3build && pushd py3build
+                    python3 setup.py build $* || exit
+                popd
+            popd
+        }
+        python3_setup
     - python3_install: |
-        python3 setup.py build -b __py3_build install --root="%installroot%"
+        function python3_install() {
+            instdir=`basename %installroot%`
+            pushd ..
+                if [[ ! -d py3build ]]; then
+                    cp -a instdir py3build
+                fi
+                pushd py3build
+                    python3 setup.py install --root="%installroot%" $* || exit
+                popd
+            popd
+        }
+        python3_install
     - waf_configure: |
         ./waf configure --prefix=%PREFIX%
     - waf_build: |
