@@ -210,7 +210,7 @@ class YpkgSpec:
             ("component", MultimapFormat(self, self.add_component, "main")),
             ("conflicts", MultimapFormat(self, self.add_conflict, "main")),
             ("replaces", MultimapFormat(self, self.add_replace, "main")),
-            ("optimize", unicode),
+            ("optimize", OneOrMoreString),
         ])
         # Build steps are handled separately
         self.build_steps = OrderedDict([

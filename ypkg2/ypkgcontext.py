@@ -31,6 +31,12 @@ BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
 # Allow optimizing for size
 SIZE_FLAGS = "-Os -ffunction-sections"
 
+# Allow optimizing for lto
+LTO_FLAGS = "-flto"
+
+# Allow unrolling loops
+UNROLL_LOOPS_FLAGS = "-funroll-loops"
+
 # GCC PGO flags
 PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\" "
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
@@ -83,10 +89,14 @@ class Flags:
                 newflags.extend(SPEED_FLAGS.split(" "))
         elif opt_type == "size":
             newflags.extend(SIZE_FLAGS.split(" "))
+        elif opt_type == "lto":
+            newflags.extend(LTO_FLAGS.split(" "))
+        elif opt_type == "unroll-loops":
+            newflags.extend(UNROLL_LOOPS_FLAGS.split(" "))
         elif opt_type == "no-bind-now":
             newflags = Flags.filter_flags(f, BIND_NOW_FLAGS)
         else:
-            console_ui.emit_warning("Flags", "Uknown optimization: {}".
+            console_ui.emit_warning("Flags", "Unknown optimization: {}".
                                     format(opt_type))
             return f
         return newflags
@@ -259,17 +269,18 @@ class YpkgContext:
             self.build.cc = "{}-gcc".format(conf.values.build.host)
             self.build.cxx = "{}-g++".format(conf.values.build.host)
 
-        if self.spec.pkg_optimize is not None:
-            self.build.cflags = Flags.optimize_flags(self.build.cflags,
-                                                     self.spec.pkg_optimize,
-                                                     self.spec.pkg_clang)
-            self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
-                                                       self.spec.pkg_optimize,
-                                                       self.spec.pkg_clang)
-        if self.spec.pkg_optimize in ["no-bind-now"]:
-            self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
-                                                      self.spec.pkg_optimize,
-                                                      self.spec.pkg_clang)
+        if self.spec.pkg_optimize:
+            for opt in self.spec.pkg_optimize:
+                self.build.cflags = Flags.optimize_flags(self.build.cflags,
+                                                        opt,
+                                                        self.spec.pkg_clang)
+                self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
+                                                        opt,
+                                                        self.spec.pkg_clang)
+                if opt  == "no-bind-now":
+                    self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
+                                                            opt,
+                                                            self.spec.pkg_clang)
 
         # Adjust for emul32 (-m32) build
         if self.emul32:
