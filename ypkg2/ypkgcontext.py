@@ -30,6 +30,9 @@ BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
 # Allow optimizing for size
 SIZE_FLAGS = "-Os"
 
+# Unfortunately clang's LLVMGold will not accept -Os and is broken by design
+SIZE_FLAGS_CLANG = "-O2"
+
 # Allow optimizing for lto
 LTO_FLAGS = "-flto"
 
@@ -92,7 +95,10 @@ class Flags:
                 else:
                     newflags.extend(SPEED_FLAGS.split(" "))
             else:
-                newflags.extend(SIZE_FLAGS.split(" "))
+                if clang:
+                    newflags.extend(SIZE_FLAGS_CLANG.split(" "))
+                else:
+                    newflags.extend(SIZE_FLAGS.split(" "))
         elif opt_type == "lto":
             newflags.extend(LTO_FLAGS.split(" "))
         elif opt_type == "unroll-loops":
