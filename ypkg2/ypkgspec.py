@@ -273,7 +273,7 @@ class YpkgSpec:
         if self.pkg_clang:
             extras.extend(["llvm-clang", "llvm-clang-devel"])
         if self.pkg_optimize:
-            if "lto" in self.pkg_optimize:
+            if "thin-lto" in self.pkg_optimize:
                 extras.extend(["binutils-gold"])
 
         man = SourceManager()

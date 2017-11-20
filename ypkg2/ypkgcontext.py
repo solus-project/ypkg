@@ -34,6 +34,9 @@ SIZE_FLAGS = "-Os -ffunction-sections"
 # Allow optimizing for lto
 LTO_FLAGS = "-flto"
 
+# Use gold for thin LTO
+THIN_LTO_FLAGS = "-flto=thin"
+
 # Allow unrolling loops
 UNROLL_LOOPS_FLAGS = "-funroll-loops"
 
@@ -95,6 +98,8 @@ class Flags:
             newflags.extend(UNROLL_LOOPS_FLAGS.split(" "))
         elif opt_type == "no-bind-now":
             newflags = Flags.filter_flags(f, BIND_NOW_FLAGS)
+        elif opt_type == "thin-lto":
+            newflags.extend(THIN_LTO_FLAGS.split(" "))
         else:
             console_ui.emit_warning("Flags", "Unknown optimization: {}".
                                     format(opt_type))
