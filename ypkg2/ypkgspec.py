@@ -272,6 +272,9 @@ class YpkgSpec:
                 extras.extend(["llvm-clang-32bit", "llvm-clang-32bit-devel"])
         if self.pkg_clang:
             extras.extend(["llvm-clang", "llvm-clang-devel"])
+        if self.pkg_optimize:
+            if "lto" in self.pkg_optimize:
+                extras.extend(["binutils-gold"])
 
         man = SourceManager()
         try:
