@@ -24,7 +24,7 @@ SPEED_FLAGS = "-ffunction-sections -fno-semantic-interposition -O3 " \
 
 # Clang defaults to -fno-semantic-interposition behaviour but doesn't have a
 # CLI flag to control it. It also does a better job on function alignment.
-SPEED_FLAGS_CLANG = "-ffunction-sections -fdata-sections -flto -O3"
+SPEED_FLAGS_CLANG = "-ffunction-sections -fdata-sections -O3"
 
 BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
 
