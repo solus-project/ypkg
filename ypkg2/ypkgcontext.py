@@ -262,55 +262,7 @@ class YpkgContext:
         self.can_dbginfo = conf.values.build.generatedebug
         self.pconfig = conf
 
-        if self.spec.pkg_clang:
-            self.build.cc = "clang"
-            self.build.cxx = "clang++"
-        else:
-            self.build.cc = "{}-gcc".format(conf.values.build.host)
-            self.build.cxx = "{}-g++".format(conf.values.build.host)
-
-        if self.spec.pkg_optimize:
-            for opt in self.spec.pkg_optimize:
-                self.build.cflags = Flags.optimize_flags(self.build.cflags,
-                                                        opt,
-                                                        self.spec.pkg_clang)
-                self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
-                                                        opt,
-                                                        self.spec.pkg_clang)
-                if opt  == "no-bind-now":
-                    self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
-                                                            opt,
-                                                            self.spec.pkg_clang)
-
-        # Adjust for emul32 (-m32) build
-        if self.emul32:
-            ncflags = list()
-            for flag in self.build.cflags:
-                if flag.startswith("-march="):
-                    flag = "-march=i686"
-                ncflags.append(flag)
-            self.build.cflags = ncflags
-            ncxxflags = list()
-            for flag in self.build.cxxflags:
-                if flag.startswith("-march="):
-                    flag = "-march=i686"
-                ncxxflags.append(flag)
-            self.build.cxxflags = ncxxflags
-
-            self.build.host = "i686-pc-linux-gnu"
-
-            # Get the multilib gcc stuff set up
-            if self.spec.pkg_clang:
-                self.build.cc = "clang -m32"
-                self.build.cxx = "clang++ -m32"
-            else:
-                self.build.cc = "gcc -m32"
-                self.build.cxx = "g++ -m32"
-
-        # Adjust flags for AVX2 builds
-        if self.avx2:
-            self.build.cflags.extend(AVX2_FLAGS.split(" "))
-            self.build.cxxflags.extend(AVX2_FLAGS.split(" "))
+        self.init_compiler()
 
         # Set the $pkgfiles up properly
         spec_dir = os.path.dirname(os.path.abspath(self.spec.path))
@@ -329,6 +281,67 @@ class YpkgContext:
                                     format(jobs))
 
         self.global_archive_dir = conf.values.dirs.archives_dir
+
+    def init_compiler(self):
+        if self.spec.pkg_clang:
+            self.build.cc = "clang"
+            self.build.cxx = "clang++"
+        else:
+            self.build.cc = "{}-gcc".format(self.pconfig.values.build.host)
+            self.build.cxx = "{}-g++".format(self.pconfig.values.build.host)
+
+        if self.spec.pkg_optimize:
+            self.init_optimize()
+
+        if self.emul32:
+            self.init_emul32()
+
+        if self.avx2:
+            self.init_avx2()
+
+    def init_optimize(self):
+        """ Handle optimize settings within the spec """
+        for opt in self.spec.pkg_optimize:
+            self.build.cflags = Flags.optimize_flags(self.build.cflags,
+                                                     opt,
+                                                     self.spec.pkg_clang)
+            self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
+                                                       opt,
+                                                       self.spec.pkg_clang)
+            if opt == "no-bind-now":
+                self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
+                                                          opt,
+                                                          self.spec.pkg_clang)
+
+    def init_emul32(self):
+        """ Handle emul32 toolchain options """
+        ncflags = list()
+        for flag in self.build.cflags:
+            if flag.startswith("-march="):
+                flag = "-march=i686"
+            ncflags.append(flag)
+        self.build.cflags = ncflags
+        ncxxflags = list()
+        for flag in self.build.cxxflags:
+            if flag.startswith("-march="):
+                flag = "-march=i686"
+            ncxxflags.append(flag)
+        self.build.cxxflags = ncxxflags
+
+        self.build.host = "i686-pc-linux-gnu"
+
+        # Get the multilib gcc stuff set up
+        if self.spec.pkg_clang:
+            self.build.cc = "clang -m32"
+            self.build.cxx = "clang++ -m32"
+        else:
+            self.build.cc = "gcc -m32"
+            self.build.cxx = "g++ -m32"
+
+    def init_avx2(self):
+        """ Adjust flags for AVX2 builds """
+        self.build.cflags.extend(AVX2_FLAGS.split(" "))
+        self.build.cxxflags.extend(AVX2_FLAGS.split(" "))
 
     def enable_pgo_generate(self):
         """ Enable GPO generate step """
