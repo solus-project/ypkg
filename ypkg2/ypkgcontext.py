@@ -19,17 +19,16 @@ import shutil
 
 # This speed flag set was originally from autospec in
 # Clear Linux Project For Intel Architecture.
-SPEED_FLAGS = "-ffunction-sections -fno-semantic-interposition -O3 " \
-              "-falign-functions=32"
+SPEED_FLAGS = "-fno-semantic-interposition -O3 -falign-functions=32"
 
 # Clang defaults to -fno-semantic-interposition behaviour but doesn't have a
 # CLI flag to control it. It also does a better job on function alignment.
-SPEED_FLAGS_CLANG = "-ffunction-sections -fdata-sections -O3"
+SPEED_FLAGS_CLANG = "-O3"
 
 BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
 
 # Allow optimizing for size
-SIZE_FLAGS = "-Os -ffunction-sections"
+SIZE_FLAGS = "-Os"
 
 # Allow optimizing for lto
 LTO_FLAGS = "-flto"
@@ -80,18 +79,20 @@ class Flags:
     @staticmethod
     def optimize_flags(f, opt_type, clang=False):
         """ Optimize this flag set for a given optimisation type """
-        optimisations = ["-O%s" % x for x in range(0, 4)]
-        optimisations.extend("-Os")
+        newflags = f
+        if opt_type == "speed" or opt_type == "size":
+            # Only filter optimisation levels when changing it
+            optimisations = ["-O%s" % x for x in range(0, 4)]
+            optimisations.extend("-Os")
 
-        newflags = Flags.filter_flags(f, optimisations)
-
-        if opt_type == "speed":
-            if clang:
-                newflags.extend(SPEED_FLAGS_CLANG.split(" "))
+            newflags = Flags.filter_flags(f, optimisations)
+            if opt_type == "speed":
+                if clang:
+                    newflags.extend(SPEED_FLAGS_CLANG.split(" "))
+                else:
+                    newflags.extend(SPEED_FLAGS.split(" "))
             else:
-                newflags.extend(SPEED_FLAGS.split(" "))
-        elif opt_type == "size":
-            newflags.extend(SIZE_FLAGS.split(" "))
+                newflags.extend(SIZE_FLAGS.split(" "))
         elif opt_type == "lto":
             newflags.extend(LTO_FLAGS.split(" "))
         elif opt_type == "unroll-loops":
