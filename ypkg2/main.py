@@ -120,6 +120,10 @@ def execute_step(context, step, step_n, work_dir):
         script.define_export("AVX2BUILD", "1")
     extraScript = None
 
+    # Allow GCC and such to pick up on our timestamp
+    script.define_export("SOURCE_DATA_EPOCH",
+                         "{}".format(metadata.history_timestamp))
+
     # Handle the anal nature of llvm profiling
     if context.gen_pgo and context.spec.pkg_clang:
         profileFile = os.path.join(context.get_pgo_dir(),
