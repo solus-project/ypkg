@@ -288,13 +288,17 @@ additional functionality.
     automatically loaded on the Solus installation if the hardware support
     is present.
 
-* `optimize` [string]
+* `optimize` [list]
 
     Valid keys are restricted to:
 
      * `speed`: Optimise this package for speed performance
      * `size`: Optimize the package build solely for size.
      * `no-bind-now`: Configure the package to disable certain flags, where RELRO is unsupported.
+     * `no-symbolic`: Disable `-Wl,-Bsymbolic-functions` linker flag
+     * `unroll-loops`: Enable `-funroll-loops`. Use this sparingly, only when it provides benefit.
+     * `thin-lto`: Enable Thin Link Time Optimization
+     * `lto`: Enable Link Time Optimization
 
 * `networking` [boolean]
 
