@@ -27,6 +27,9 @@ SPEED_FLAGS_CLANG = "-O3"
 
 BIND_NOW_FLAGS = ["-Wl,-z,now", "-Wl,-z -Wl,relro", "-Wl,-z -Wl,now"]
 
+# Allow turning off the symbolic functions linker flag
+SYMBOLIC_FLAGS = ["-Wl,-Bsymbolic-functions"]
+
 # Allow optimizing for size
 SIZE_FLAGS = "-Os"
 
@@ -105,6 +108,8 @@ class Flags:
             newflags.extend(UNROLL_LOOPS_FLAGS.split(" "))
         elif opt_type == "no-bind-now":
             newflags = Flags.filter_flags(f, BIND_NOW_FLAGS)
+        elif opt_type == "no-symbolic":
+            newflags = Flags.filter_flags(f, SYMBOLIC_FLAGS)
         elif opt_type == "thin-lto":
             newflags.extend(THIN_LTO_FLAGS.split(" "))
         else:
