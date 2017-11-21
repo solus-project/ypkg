@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PACKAGE\.YML" "5" "May 2017" "" ""
+.TH "PACKAGE\.YML" "5" "November 2017" "" ""
 .
 .SH "NAME"
 \fBpackage\.yml\fR \- Solus package build format
@@ -288,7 +288,7 @@ If set, the package will be rebuilt again specifically to enable libraries to be
 The build will be configured with a library directory suffix of \fBavx2\fR, i\.e\. \fB/usr/lib64/avx2\fR or \fB/usr/lib32/avx2\fR\. These libraries will be automatically loaded on the Solus installation if the hardware support is present\.
 .
 .IP "\(bu" 4
-\fBoptimize\fR [string]
+\fBoptimize\fR [list]
 .
 .IP
 Valid keys are restricted to:
@@ -301,6 +301,18 @@ Valid keys are restricted to:
 .
 .IP "\(bu" 4
 \fBno\-bind\-now\fR: Configure the package to disable certain flags, where RELRO is unsupported\.
+.
+.IP "\(bu" 4
+\fBno\-symbolic\fR: Disable \fB\-Wl,\-Bsymbolic\-functions\fR linker flag
+.
+.IP "\(bu" 4
+\fBunroll\-loops\fR: Enable \fB\-funroll\-loops\fR\. Use this sparingly, only when it provides benefit\.
+.
+.IP "\(bu" 4
+\fBthin\-lto\fR: Enable Thin Link Time Optimization
+.
+.IP "\(bu" 4
+\fBlto\fR: Enable Link Time Optimization
 .
 .IP "" 0
 

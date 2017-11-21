@@ -346,7 +346,7 @@ additional functionality.</p>
   i.e. <code>/usr/lib64/avx2</code> or <code>/usr/lib32/avx2</code>. These libraries will be
   automatically loaded on the Solus installation if the hardware support
   is present.</p></li>
-<li><p><code>optimize</code> [string]</p>
+<li><p><code>optimize</code> [list]</p>
 
 <p>  Valid keys are restricted to:</p>
 
@@ -354,6 +354,10 @@ additional functionality.</p>
 <li> <code>speed</code>: Optimise this package for speed performance</li>
 <li> <code>size</code>: Optimize the package build solely for size.</li>
 <li> <code>no-bind-now</code>: Configure the package to disable certain flags, where RELRO is unsupported.</li>
+<li> <code>no-symbolic</code>: Disable <code>-Wl,-Bsymbolic-functions</code> linker flag</li>
+<li> <code>unroll-loops</code>: Enable <code>-funroll-loops</code>. Use this sparingly, only when it provides benefit.</li>
+<li> <code>thin-lto</code>: Enable Thin Link Time Optimization</li>
+<li> <code>lto</code>: Enable Link Time Optimization</li>
 </ul>
 </li>
 <li><p><code>networking</code> [boolean]</p>
@@ -547,7 +551,7 @@ builddeps:
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>May 2017</li>
+    <li class='tc'>November 2017</li>
     <li class='tr'>package.yml(5)</li>
   </ol>
 
