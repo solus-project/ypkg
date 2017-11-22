@@ -246,6 +246,12 @@ class YpkgContext:
                                self.spec.pkg_name,
                                buildSuffix))
 
+    def get_package_root_dir(self):
+        """ Return the root directory for the package """
+        return os.path.abspath("{}/root/{}".format(
+                               self.get_build_prefix(),
+                               self.spec.pkg_name))
+
     def get_pgo_dir(self):
         """ Get the PGO data directory for the given package """
         pgoSuffix = "pgo"

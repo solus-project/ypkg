@@ -140,6 +140,9 @@ class ScriptGenerator:
         self.define_macro("version", self.context.spec.pkg_version)
         self.define_macro("sources", self.context.get_sources_directory())
 
+        self.define_macro("rootdir", self.context.get_package_root_dir())
+        self.define_macro("builddir", self.context.get_build_dir())
+
     def init_default_exports(self):
         """ Initialise our exports """
         self.exports = OrderedDict()
@@ -158,6 +161,9 @@ class ScriptGenerator:
         self.define_export("sources", "%sources%")
         self.define_export("pkgfiles", "%PKGFILES%")
         self.define_export("installdir", "%installroot%")
+        self.define_export("PKG_ROOT_DIR", "%rootdir%")
+        # Build dir, which is one level up from the source directory.
+        self.define_export("PKG_BUILD_DIR", "%builddir%")
         self.define_export("CC", self.context.build.cc)
         self.define_export("CXX", self.context.build.cxx)
         if self.context.build.ld_as_needed:
