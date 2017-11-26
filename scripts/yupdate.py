@@ -22,7 +22,7 @@ def usage(msg=None, ex=1):
     if msg:
         print(msg)
     else:
-        print("Usage: %s" % sys.argv[0])
+        print("Usage: %s [version] [url]" % sys.argv[0])
     sys.exit(ex)
 
 if __name__ == "__main__":
