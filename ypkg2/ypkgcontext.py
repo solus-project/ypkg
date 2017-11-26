@@ -16,6 +16,7 @@ from . import console_ui
 import pisi.config
 import os
 import shutil
+import multiprocessing
 
 # This speed flag set was originally from autospec in
 # Clear Linux Project For Intel Architecture.
@@ -151,7 +152,7 @@ class BuildConfig:
 
     ld_as_needed = True  # Make this configurable at some point.
 
-    jobcount = 2
+    jobcount = 4
 
     def get_flags(self, t):
         """ Simple switch to grab a set of flags by a type """
@@ -296,12 +297,18 @@ class YpkgContext:
         jobs = conf.values.build.jobs
         if "-j" in jobs:
             jobs = jobs.replace("-j", "")
+        elif jobs == "auto":
+            try:
+                jobs = multiprocessing.cpu_count()
+            except Exception as e:
+                console_ui.emit_warning(
+                    "BUILD", "Failed to detect CPU count, defaulting to 4")
         try:
             jcount = int(jobs)
             self.build.jobcount = jcount
         except Exception as e:
             console_ui.emit_warning("BUILD",
-                                    "Invalid job count of {}, defaulting to 2".
+                                    "Invalid job count of {}, defaulting to".
                                     format(jobs))
 
         self.global_archive_dir = conf.values.dirs.archives_dir
