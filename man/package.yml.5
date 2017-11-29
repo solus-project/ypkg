@@ -51,6 +51,9 @@ For each item in the list, if the \fBkey\fR is EXPLICIT, by using \fBdict\fR sty
 Within \fBypkg(1)\fR, that key is always a package name\. This name should be the shortform name, not the fully qualified name, i\.e the subpackage name without the \fBname\fR prefix\.
 .
 .IP
+As a special exception to the subpackage rule, keys beginning with \fB^\fR will result in an explicitly named package lookup, i\.e\. one that doesn\'t follow the subpackage convention\. This should be used only in rare cases where it is illogical to share a common root name, or a migration with name changes from a legacy format is too complex\.
+.
+.IP
 This allows a general key to accept sane defaults, but also allows the key to be extended to override attributes of a subpackage\.
 .
 .IP "" 0

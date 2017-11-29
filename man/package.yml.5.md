@@ -47,6 +47,12 @@ Some of the specialised types expected by `package.yml(5)` are explained below.
     the shortform name, not the fully qualified name, i.e the subpackage name
     without the `name` prefix.
 
+    As a special exception to the subpackage rule, keys beginning with `^` will
+    result in an explicitly named package lookup, i.e. one that doesn't follow
+    the subpackage convention. This should be used only in rare cases where
+    it is illogical to share a common root name, or a migration with name
+    changes from a legacy format is too complex.
+
     This allows a general key to accept sane defaults, but also allows the key
     to be extended to override attributes of a subpackage.
 
