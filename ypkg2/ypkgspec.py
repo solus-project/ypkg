@@ -38,6 +38,12 @@ class PackageSanity:
     @staticmethod
     def is_name_valid(name):
         """ Determine if a package name is actually valid. """
+        name = str(name.strip())
+        if len(name) < 1:
+            console_ui.emit_error("YAML:name",
+                                  "Package name cannot be empty")
+            return False
+
         if " " in name:
             console_ui.emit_error("YAML:name",
                                   "Package names cannot contain whitespace")
@@ -425,6 +431,8 @@ class YpkgSpec:
     def get_package_name(self, name):
         if name == "main":
             return self.pkg_name
+        if name.startswith('^'):
+            return str(name[1:])
         return "{}-{}".format(self.pkg_name, name)
 
     def get_component(self, name):
