@@ -11,7 +11,7 @@ setup(
     keywords = "example documentation tutorial",
     url = "https://github.com/solus-project/ypkg",
     packages=['ypkg2'],
-    scripts=['ypkg', 'ypkg-install-deps', 'ypkg-gen-history', 'ypkg-build'],
+    scripts=['ypkg', 'ypkg-install-deps', 'ypkg-gen-history', 'ypkg-build', 'ybump', 'yupdate'],
     classifiers=[
         "License :: OSI Approved :: GPL-3.0 License",
     ],
