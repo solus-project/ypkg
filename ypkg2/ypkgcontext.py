@@ -339,7 +339,7 @@ class YpkgContext:
             self.build.cxxflags = Flags.optimize_flags(self.build.cxxflags,
                                                        opt,
                                                        self.spec.pkg_clang)
-            if opt == "no-bind-now":
+            if opt == "no-bind-now" or opt == "no-symbolic":
                 self.build.ldflags = Flags.optimize_flags(self.build.ldflags,
                                                           opt,
                                                           self.spec.pkg_clang)
