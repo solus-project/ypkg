@@ -299,7 +299,8 @@ def handle_dependencies(context, gene, metadata, package, files):
 
     # Ensure some sane defaults are in place
     if package.name == "32bit" and "main" in gene.packages:
-        dependencies.add(context.spec.get_package_name("main"))
+        if context.spec.get_component("main") != "kernel.drivers":
+            dependencies.add(context.spec.get_package_name("main"))
     elif package.name == "32bit-devel":
         if "32bit" in gene.packages:
             dependencies.add(context.spec.get_package_name("32bit"))
