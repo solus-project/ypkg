@@ -400,6 +400,11 @@ def build_package(filename, outputDir):
             sys.exit(1)
 
     exa = PackageExaminer()
+    # Avoid expensive self calculations for kernels
+    exa.can_kernel = True
+    if spec.get_component("main") == "kernel.image":
+        exa.can_kernel = False
+
     exaResults = exa.examine_packages(ctx, gene.packages.values())
     if exaResults is None:
         console_ui.emit_error("Package", "Failed to correctly examine all "

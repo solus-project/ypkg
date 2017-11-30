@@ -394,6 +394,7 @@ class PackageExaminer:
 
     def __init__(self):
         self.libtool_file = re.compile("libtool library file, ASCII text.*")
+        self.can_kernel = True
 
     def should_nuke_file(self, pretty, file, mgs):
         # it's not that we hate.. Actually, no, we do. We hate you libtool.
@@ -416,6 +417,8 @@ class PackageExaminer:
     def file_is_of_interest(self, pretty, file, mgs):
         """ So we can keep our list of things to check low """
         if v_dyn.match(mgs) or v_bin.match(mgs) or v_rel.match(mgs):
+            if not self.can_kernel and file.endswith(".ko"):
+                return False
             return True
         if is_pkgconfig_file(pretty, mgs):
             return True
@@ -423,7 +426,7 @@ class PackageExaminer:
             return True
         if is_static_archive(file, mgs):
             return True
-        if is_system_map(file, mgs):
+        if self.can_kernel and is_system_map(file, mgs):
             return True
         return False
 
