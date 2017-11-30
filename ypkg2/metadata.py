@@ -331,7 +331,11 @@ def handle_dependencies(context, gene, metadata, package, files):
                 idb = InstallDB()
             pkg = idb.get_package(dependency)
             newDep.package = dependency
-            newDep.releaseFrom = str(pkg.release)
+            # Special case, kernel.image is an explicit dependency
+            if pkg.partOf == "kernel.image":
+                newDep.release = str(pkg.release)
+            else:
+                newDep.releaseFrom = str(pkg.release)
         else:
             newDep.package = dependency
             newDep.release = str(release)
