@@ -66,6 +66,20 @@ def is_static_archive(file, mgs):
     return True
 
 
+def is_system_map(file, mgs):
+    """ Ensure we have a system map file """
+    if "kernel/System.map-" not in file:
+        return False
+
+    if mgs != "ASCII text":
+        return False
+
+    if os.path.islink(file) or os.path.isdir(file):
+        return False
+
+    return True
+
+
 class FileReport:
 
     pkgconfig_deps = None
@@ -79,6 +93,27 @@ class FileReport:
     rpaths = None
 
     soname_links = None
+
+    # Dependent kernel versions
+    dep_kernel = None
+    prov_kernel = None
+
+    def scan_kernel(self, file):
+        """ Scan a .ko file to figure out which kernel this depends on """
+        cmd = "LC_ALL=C /sbin/modinfo --field=vermagic \"{}\"".format(file)
+        try:
+            output = subprocess.check_output(cmd, shell=True)
+        except Exception as e:
+            console_ui.emit_warning("File", "Failed to scan kernel modules for"
+                                    " path: {}".format(file))
+            return
+        line = output.split("\n")[0]
+        splits = line.strip().split(" ")
+        if "modversions" not in splits:
+            return
+        if "mod_unload" not in splits:
+            return
+        self.dep_kernel = splits[0].strip()
 
     def scan_binary(self, file, check_soname=False):
         cmd = "LC_ALL=C /usr/bin/readelf -d \"{}\"".format(file)
@@ -202,6 +237,9 @@ class FileReport:
             self.soname_links = set()
         self.soname_links.add(fpath)
 
+    def add_kernel_prov(self, file):
+        self.prov_kernel = str(file.split("System.map-")[1])
+
     def __init__(self, pretty, file, mgs):
         global share_ctx
         self.pretty = pretty
@@ -211,6 +249,8 @@ class FileReport:
             self.emul32 = True
         if is_pkgconfig_file(pretty, mgs):
             self.scan_pkgconfig(file)
+        if is_system_map(pretty, mgs):
+            self.add_kernel_prov(file)
 
         # Some things omit automatic dependencies
         if share_ctx.spec.pkg_autodep:
@@ -220,6 +260,8 @@ class FileReport:
                 self.scan_binary(file, True)
             elif v_bin.match(mgs):
                 self.scan_binary(file, False)
+            elif v_rel.match(mgs) and file.endswith(".ko"):
+                self.scan_kernel(file)
 
 
 def strip_file(context, pretty, file, magic_string, mode=None):
@@ -380,6 +422,8 @@ class PackageExaminer:
         if is_soname_link(file, mgs):
             return True
         if is_static_archive(file, mgs):
+            return True
+        if is_system_map(file, mgs):
             return True
         return False
 

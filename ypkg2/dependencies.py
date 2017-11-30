@@ -50,6 +50,7 @@ class DependencyResolver:
     global_sonames32 = dict()
     global_pkgconfigs = dict()
     global_pkgconfig32s = dict()
+    global_kernels = dict()
     gene = None
 
     bindeps_cache = dict()
@@ -59,6 +60,8 @@ class DependencyResolver:
     pkgconfig32_cache = dict()
 
     files_cache = dict()
+
+    kernel_cache = dict()
 
     # Cached from packagedb
     pkgConfigs = None
@@ -281,6 +284,65 @@ class DependencyResolver:
             console_ui.emit_info("SOLINK", "{} depends on {} through .so link".
                                  format(ourName, pkgName))
 
+    def get_kernel_provider(self, info, version):
+        """ i.e. self dependency situation """
+        if version in self.global_kernels:
+            pkg = self.global_kernels[version]
+            return self.ctx.spec.get_package_name(pkg)
+        return None
+
+    def get_kernel_external(self, info, version):
+        """ Try to find the owning kernel for a version """
+        if version in self.kernel_cache:
+            return self.kernel_cache[version]
+
+        paths = [
+            "/usr/lib/kernel",
+            "/usr/lib64/kernel"
+        ]
+
+        pkg = None
+        for path in paths:
+            # Special file in the main kernel package
+            fpath = "{}/System.map-{}".format(path, version)
+            if not os.path.exists(fpath):
+                continue
+            lpkg = None
+            if fpath in self.files_cache:
+                lpkg = self.files_cache[fpath]
+            else:
+                pkg = self.search_file(fpath)
+                if pkg:
+                    lpkg = pkg[0]
+            if lpkg:
+                self.kernel_cache[version] = lpkg
+                console_ui.emit_info("Kernel",
+                                     "{} adds module dependency on {} from {}".
+                                     format(info.pretty, version, lpkg))
+
+                # Populate a global files cache, basically there is a high
+                # chance that each package depends on multiple things in a
+                # single package.
+                for file in self.idb.get_files(lpkg).list:
+                    self.files_cache["/" + file.path] = lpkg
+                return lpkg
+        return None
+
+    def handle_kernel_deps(self, packageName, info):
+        """ Add dependency between packages due to kernel version """
+        pkgName = self.ctx.spec.get_package_name(packageName)
+
+        r = self.get_kernel_provider(info, info.dep_kernel)
+        if not r:
+            r = self.get_kernel_external(info, info.dep_kernel)
+            if not r:
+                print("Fatal: Unknown kernel: {}".format(sym))
+                return
+        # Don't self depend
+        if pkgName == r:
+            return
+        self.gene.packages[packageName].depend_packages.add(r)
+
     def compute_for_packages(self, context, gene, packageSet):
         """ packageSet is a dict mapping here. """
         self.gene = gene
@@ -306,6 +368,8 @@ class DependencyResolver:
                         self.global_pkgconfig32s[pcName] = packageName
                     else:
                         self.global_pkgconfigs[pcName] = packageName
+                if info.prov_kernel:
+                    self.global_kernels[info.prov_kernel] = packageName
 
         # Ok now find the dependencies
         for packageName in packageSet:
@@ -321,4 +385,7 @@ class DependencyResolver:
 
                 if info.soname_links:
                     self.handle_soname_links(packageName, info)
+
+                if info.dep_kernel:
+                    self.handle_kernel_deps(packageName, info)
         return True
