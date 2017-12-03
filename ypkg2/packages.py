@@ -181,6 +181,7 @@ class PackageGenerator:
         self.add_pattern("/usr/lib/lib*.a", "devel")
         self.add_pattern("/usr/lib/pkgconfig/*.pc", "devel")
         self.add_pattern("/usr/lib64/pkgconfig/*.pc", "devel")
+        self.add_pattern("/usr/share/pkgconfig/*.pc", "devel")
         self.add_pattern("/usr/include/", "devel")
         self.add_pattern("/usr/share/man3/", "devel",
                          priority=PRIORITY_DEFAULT+1)
