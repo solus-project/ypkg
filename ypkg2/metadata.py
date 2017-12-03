@@ -422,20 +422,20 @@ def create_eopkg(context, gene, package, outputDir):
         orgname = os.path.join(context.get_install_dir(), finfo.path)
         orgname = orgname.encode('utf-8').decode('utf-8').encode("latin1")
 
-        if os.path.islink(orgname) and not os.path.isdir(orgname):
-            t = history_timestamp
-            cmd = "touch -d \"@{}\" -h \"{}\"".format(t, orgname)
-            try:
-                subprocess.check_call(cmd, shell=True)
-            except Exception as e:
-                console_ui.emit_warning("utime", "Failed to modify utime")
-                print("Reproducible builds will be affected: {}".format(e))
-        else:
-            try:
-                os.utime(orgname, (history_timestamp, history_timestamp))
-            except Exception as e:
-                console_ui.emit_warning("utime", "Failed to modify utime")
-                print("Reproducible builds will be affected: {}".format(e))
+        # if os.path.islink(orgname) and not os.path.isdir(orgname):
+        #     t = history_timestamp
+        #     cmd = "touch -d \"@{}\" -h \"{}\"".format(t, orgname)
+        #     try:
+        #         subprocess.check_call(cmd, shell=True)
+        #     except Exception as e:
+        #         console_ui.emit_warning("utime", "Failed to modify utime")
+        #         print("Reproducible builds will be affected: {}".format(e))
+        # else:
+        #     try:
+        #         os.utime(orgname, (history_timestamp, history_timestamp))
+        #     except Exception as e:
+        #         console_ui.emit_warning("utime", "Failed to modify utime")
+        #         print("Reproducible builds will be affected: {}".format(e))
 
         pkg.add_to_install(orgname, finfo.path)
 
