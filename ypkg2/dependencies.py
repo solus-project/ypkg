@@ -63,6 +63,8 @@ class DependencyResolver:
 
     kernel_cache = dict()
 
+    deadends = dict()
+
     # Cached from packagedb
     pkgConfigs = None
     pkgConfigs32 = None
@@ -70,9 +72,18 @@ class DependencyResolver:
     def search_file(self, fname):
         if fname[0] == '/':
             fname = fname[1:]
-        if not self.fdb.has_file(fname):
+        if fname in self.deadends:
             return None
-        return self.fdb.get_file(fname)
+        if self.fdb.has_file(fname):
+            return self.fdb.get_file(fname)
+        # Nasty file conflict crap happened on update and the filesdb
+        # is now inconsistent ..
+        ret = self.fdb.search_file(fname)
+        if len(ret) == 1:
+            return ret[0]
+        # Just blacklist further lookups here
+        self.deadends[fname] = 0
+        return None
 
     def __init__(self):
         """ Allows us to do look ups on all packages """
