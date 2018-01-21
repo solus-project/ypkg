@@ -17,9 +17,9 @@ from pisi.db.packagedb import PackageDB
 from pisi.db.filesdb import FilesDB
 import os
 
-
-# On Solus, these are provided only by links. Ensure that it only ever
-# depends on mesalib, and *not* the resolved nvidia, etc, possibilities
+# Provided historically for our pre-glvnd architecture.
+# Technically speaking this isn't required anymore, but lets just
+# play it safe for those directly using ypkg on old NVIDIA drivers.
 ExceptionRules = [
     "libEGL.so",
     "libEGL.so.1",
@@ -32,6 +32,7 @@ ExceptionRules = [
     "libGLESv2.so.2.0.0",
     "libGL.so",
     "libGL.so.1",
+    "libGL.so.1.0.0",
     "libGL.so.1.2.0",
     "libglx.so",
     "libglx.so.1",
@@ -129,9 +130,9 @@ class DependencyResolver:
 
         if symbol in ExceptionRules:
             if info.emul32:
-                return "mesalib-32bit"
+                return "libglvnd-32bit"
             else:
-                return "mesalib"
+                return "libglvnd"
 
         if not paths:
             paths = ["/usr/lib64", "/usr/lib"]
