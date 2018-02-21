@@ -270,7 +270,12 @@ class TarSource(YpkgSource):
 
     def get_extract_command_tar(self, context, bpath):
         """ Get a command tailored for tar usage """
-        cmd = "tar xf \"{}\" -C \"{}/\"".format(bpath, context.get_build_dir())
+        if os.path.exists("/usr/bin/bsdtar"):
+            frag = "bsdtar"
+        else:
+            frag = "tar"
+        cmd = "{} xf \"{}\" -C \"{}/\"".format(
+            frag, bpath, context.get_build_dir())
         return cmd
 
     def extract(self, context):
