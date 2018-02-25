@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PACKAGE\.YML" "5" "November 2017" "" ""
+.TH "PACKAGE\.YML" "5" "February 2018" "" ""
 .
 .SH "NAME"
 \fBpackage\.yml\fR \- Solus package build format
@@ -271,6 +271,15 @@ In most cases, stripping should remain enabled\. However, there are known cases 
 .
 .IP
 The Go programming language generates \fB*\.a\fR archive files that under no circumstance should be stripped, and there are likely other cases\. This key, when set to \fBno\fR, will disable any and all stripping\.
+.
+.IP "\(bu" 4
+\fBlastrip\fR [boolean]
+.
+.IP
+By default, this key is enabled, and will result in \fB*\.la\fR libtool files being stripped from the build\. However in some very rare cases these files need to be preserved because they\'re not \fBtrue\fR libtool scripts which led to the creation of successful \fB\.so\fR linkage\.
+.
+.IP
+If in doubt, omit this option where possible\.
 .
 .IP "\(bu" 4
 \fBdebug\fR [boolean]

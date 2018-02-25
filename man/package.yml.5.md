@@ -274,6 +274,15 @@ additional functionality.
     no circumstance should be stripped, and there are likely other cases.
     This key, when set to `no`, will disable any and all stripping.
 
+* `lastrip` [boolean]
+
+    By default, this key is enabled, and will result in `*.la` libtool files
+    being stripped from the build. However in some very rare cases these files
+    need to be preserved because they're not **true** libtool scripts which
+    led to the creation of successful `.so` linkage.
+
+    If in doubt, omit this option where possible.
+
 * `debug` [boolean]
 
     By default, this key is enabled, and as a result `ypkg-build(1)` will

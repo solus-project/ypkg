@@ -396,9 +396,9 @@ class PackageExaminer:
         self.libtool_file = re.compile("libtool library file, ASCII text.*")
         self.can_kernel = True
 
-    def should_nuke_file(self, pretty, file, mgs):
+    def should_nuke_file(self, context, pretty, file, mgs):
         # it's not that we hate.. Actually, no, we do. We hate you libtool.
-        if self.libtool_file.match(mgs):
+        if context.spec.pkg_lastrip and self.libtool_file.match(mgs):
             return True
         if pretty == "/usr/share/info/dir":
             return True
@@ -453,7 +453,7 @@ class PackageExaminer:
             except Exception as e:
                 print(e)
                 continue
-            if self.should_nuke_file("/" + file, fpath, mgs):
+            if self.should_nuke_file(context, "/" + file, fpath, mgs):
                 try:
                     if os.path.isfile(fpath):
                         os.unlink(fpath)

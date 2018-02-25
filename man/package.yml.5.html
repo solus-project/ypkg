@@ -334,6 +334,14 @@ additional functionality.</p>
 <p>  The Go programming language generates <code>*.a</code> archive files that under
   no circumstance should be stripped, and there are likely other cases.
   This key, when set to <code>no</code>, will disable any and all stripping.</p></li>
+<li><p><code>lastrip</code> [boolean]</p>
+
+<p>  By default, this key is enabled, and will result in <code>*.la</code> libtool files
+  being stripped from the build. However in some very rare cases these files
+  need to be preserved because they're not <strong>true</strong> libtool scripts which
+  led to the creation of successful <code>.so</code> linkage.</p>
+
+<p>  If in doubt, omit this option where possible.</p></li>
 <li><p><code>debug</code> [boolean]</p>
 
 <p>  By default, this key is enabled, and as a result <code>ypkg-build(1)</code> will
@@ -557,7 +565,7 @@ builddeps:
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>November 2017</li>
+    <li class='tc'>February 2018</li>
     <li class='tr'>package.yml(5)</li>
   </ol>
 

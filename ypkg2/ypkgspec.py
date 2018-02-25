@@ -90,6 +90,7 @@ class YpkgSpec:
     pkg_debug = True
     pkg_clang = False
     pkg_strip = True
+    pkg_lastrip = True
     pkg_ccache = True
     pkg_emul32 = False
     pkg_avx2 = False
@@ -202,6 +203,7 @@ class YpkgSpec:
             ("clang", bool),
             ("debug", bool),
             ("strip", bool),
+            ("lastrip", bool),
             ("ccache", bool),
             ("emul32", bool),
             ("networking", bool),
