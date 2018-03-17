@@ -173,16 +173,23 @@ actions:
         python3_install
     # Make life easier with Ruby gems
     - gem_build: |
-        gem build *.gemspec
+        function gem_build() {
+            if [ -z "$1" ]; then
+                gem build *.gemspec || exit 1
+            else
+                gem build $* || exit 1
+            fi
+        }
+        gem_build
     - gem_install: |
         function gem_install() {
             export geminstalldir=$(ruby -e'puts Gem.default_dir')
             export GEM_HOME=$geminstalldir
             export GEM_PATH=$geminstalldir
             if [ -a *.gem ]; then
-                gem install --minimal-deps --no-user-install --no-document -i "$installdir/$geminstalldir" -n "$installdir/usr/bin" *.gem $* || exit 1
+                gem install --ignore-dependencies --no-user-install --no-document -i "$installdir/$geminstalldir" -n "$installdir/usr/bin" *.gem || exit 1
             else
-                gem install --minimal-deps --no-user-install --no-document -i "$installdir/$geminstalldir" -n "$installdir/usr/bin" $sources/*.gem $* || exit 1
+                gem install --ignore-dependencies --no-user-install --no-document -i "$installdir/$geminstalldir" -n "$installdir/usr/bin" $sources/*.gem || exit 1
             fi
             if [[ -e "$installdir/$geminstalldir/cache" ]]; then
                 rm -rfv $installdir/$geminstalldir/cache
