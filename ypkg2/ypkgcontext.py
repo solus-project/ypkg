@@ -375,7 +375,7 @@ class YpkgContext:
         self.build.cxxflags.extend(AVX2_FLAGS.split(" "))
 
     def enable_pgo_generate(self):
-        """ Enable GPO generate step """
+        """ Enable PGO generate step """
         pgo_dir = self.get_pgo_dir()
         self.gen_pgo = True
         self.build.cflags = Flags.pgo_gen_flags(self.build.cflags,

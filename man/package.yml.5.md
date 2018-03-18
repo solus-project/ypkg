@@ -242,7 +242,7 @@ additional functionality.
 
     `ypkg-build(1)` ensures that a file cannot belong to multiple packages,
     and that the last specified pattern, if matching, ALWAYS wins. It is
-    even possible to supress generation of the main package, by pattern
+    even possible to suppress generation of the main package, by pattern
     globbing `/*` to a subpackage. This will not cause any breakage.
 
 * `permanent` [list]
@@ -322,7 +322,7 @@ additional functionality.
     packages do not accidently download unverifiable content during build.
 
     If for any reason, networking is still required, you can set this key to `yes`.
-    However, always evalaute whether it is avoidable first.
+    However, always evaluate whether it is avoidable first.
 
 `Build Steps`
 
