@@ -106,7 +106,7 @@ class ScriptGenerator:
 
         if self.context.emul32:
             if self.context.avx2:
-                self.define_macro("libdir", "/usr/lib32/avx2")
+                self.define_macro("libdir", "/usr/lib32/haswell")
             else:
                 self.define_macro("libdir", "/usr/lib32")
             self.define_macro("LIBSUFFIX", "32")
@@ -114,7 +114,7 @@ class ScriptGenerator:
         else:
             # 64-bit AVX2 build in subdirectory
             if self.context.avx2:
-                self.define_macro("libdir", "/usr/lib64/avx2")
+                self.define_macro("libdir", "/usr/lib64/haswell")
             else:
                 self.define_macro("libdir", "/usr/lib64")
             self.define_macro("LIBSUFFIX", "64")

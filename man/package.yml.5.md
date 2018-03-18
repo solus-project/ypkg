@@ -298,8 +298,8 @@ additional functionality.
     If set, the package will be rebuilt again specifically to enable libraries
     to be optimised to use **Advanced Vector Extensions**.
 
-    The build will be configured with a library directory suffix of `avx2`,
-    i.e. `/usr/lib64/avx2` or `/usr/lib32/avx2`. These libraries will be
+    The build will be configured with a library directory suffix of `haswell`,
+    i.e. `/usr/lib64/haswell` or `/usr/lib32/haswell`. These libraries will be
     automatically loaded on the Solus installation if the hardware support
     is present.
 
