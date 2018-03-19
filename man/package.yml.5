@@ -246,7 +246,7 @@ Control package splitting and dynamically generate subpackages\. The EXPLICIT ke
 All files captured by this expression will then end up in that subpackage\. Each successive pattern takes priority over the one listed before it, so if your first pattern unavoidably captures files you need in ANOTHER subpackage, simply list that pattern later\.
 .
 .IP
-\fBypkg\-build(1)\fR ensures that a file cannot belong to multiple packages, and that the last specified pattern, if matching, ALWAYS wins\. It is even possible to supress generation of the main package, by pattern globbing \fB/*\fR to a subpackage\. This will not cause any breakage\.
+\fBypkg\-build(1)\fR ensures that a file cannot belong to multiple packages, and that the last specified pattern, if matching, ALWAYS wins\. It is even possible to suppress generation of the main package, by pattern globbing \fB/*\fR to a subpackage\. This will not cause any breakage\.
 .
 .IP "\(bu" 4
 \fBpermanent\fR [list]
@@ -336,7 +336,7 @@ Valid keys are restricted to:
 When built using \fBsolbuild(1)\fR, access to the network is removed\. A new loopback device will be provided within the container\. This ensures that packages do not accidently download unverifiable content during build\.
 .
 .IP
-If for any reason, networking is still required, you can set this key to \fByes\fR\. However, always evalaute whether it is avoidable first\.
+If for any reason, networking is still required, you can set this key to \fByes\fR\. However, always evaluate whether it is avoidable first\.
 .
 .IP "" 0
 .
