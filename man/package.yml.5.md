@@ -386,8 +386,8 @@ ypkg supports a wide range of macros for easier package building. They evolve
 often and quickly, so you should always refer to the main `package.yml`
 documentation:
 
- * https://wiki.solus-project.com/Package.yml#Actionable_Macros
- * https://wiki.solus-project.com/Package.yml#Variable_Macros
+ * https://solus-project.com/articles/packaging/package.yml/en/#actionable-macros
+ * https://solus-project.com/articles/packaging/package.yml/en/#variable-macros
 
 It may also be beneficial to study the `rc.yml` file defining the build macros:
 
