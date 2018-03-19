@@ -57,7 +57,8 @@ PGO_USE_FLAGS_CLANG = "-fprofile-instr-use=\"{}/default.profdata\" " \
                       "-fprofile-correction"
 
 # AVX2
-AVX2_FLAGS = "-mavx2"
+AVX2_ARCH = "haswell"
+AVX2_TUNE = "haswell"
 
 
 class Flags:
@@ -269,6 +270,17 @@ class YpkgContext:
                                 self.spec.pkg_name,
                                 pgoSuffix))
 
+    def repl_flags_avx2(self, flags):
+        """ Adjust flags to compensate for avx2 build """
+        ncflags = list()
+        for flag in flags:
+            if flag.startswith("-march="):
+                flag = "-march={}".format(AVX2_ARCH)
+            elif flag.startswith("-mtune="):
+                flag = "-mtune={}".format(AVX2_TUNE)
+            ncflags.append(flag)
+        return ncflags
+
     def init_config(self):
         """ Initialise our configuration prior to building """
         conf = pisi.config.Config()
@@ -371,8 +383,8 @@ class YpkgContext:
 
     def init_avx2(self):
         """ Adjust flags for AVX2 builds """
-        self.build.cflags.extend(AVX2_FLAGS.split(" "))
-        self.build.cxxflags.extend(AVX2_FLAGS.split(" "))
+        self.build.cflags = self.repl_flags_avx2(self.build.cflags)
+        self.build.cxxflags = self.repl_flags_avx2(self.build.cxxflags)
 
     def enable_pgo_generate(self):
         """ Enable GPO generate step """

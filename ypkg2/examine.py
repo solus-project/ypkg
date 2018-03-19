@@ -405,8 +405,8 @@ class PackageExaminer:
         if pretty.startswith("/emul32"):
             return True
         # Nuke AVX2 dir .a files with no remorse
-        if (pretty.startswith("/usr/lib64/avx2/") or
-                pretty.startswith("/usr/lib32/avx2/")):
+        if (pretty.startswith("/usr/lib64/haswell/") or
+                pretty.startswith("/usr/lib32/haswell/")):
             if ".so" not in pretty:
                 return True
             # Don't want .so links, they're useless.
