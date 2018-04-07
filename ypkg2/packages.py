@@ -153,12 +153,12 @@ class PackageGenerator:
         self.add_pattern("/bin", "main")
         self.add_pattern("/usr/share/info", "main")
         self.add_pattern("/usr/lib64/lib*.so.*", "main")
-        self.add_pattern("/usr/lib64/avx2/*.so*", "main")
+        self.add_pattern("/usr/lib64/haswell/*.so*", "main")
         self.add_pattern("/usr/lib/lib*.so.*", "main")
         self.add_pattern("/usr/lib32/", "32bit")
         self.add_pattern("/usr/lib32/lib*.so.*", "32bit",
                          priority=PRIORITY_DEFAULT+1)
-        self.add_pattern("/usr/lib32/avx2/*.so*", "32bit",
+        self.add_pattern("/usr/lib32/haswell/*.so*", "32bit",
                          priority=PRIORITY_DEFAULT+1)
 
         self.add_pattern("/usr/share/locale", "main")
