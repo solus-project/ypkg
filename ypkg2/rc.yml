@@ -15,14 +15,28 @@ actions:
         cmake -DCMAKE_CFLAGS="${CFLAGS}" -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
         -DCMAKE_LD_FLAGS="${LDFLAGS}" -DCMAKE_LIB_SUFFIX="%LIBSUFFIX%" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=%PREFIX%
+    - cmake_ninja: |
+        function cmake_ninja() {
+            mkdir solusBuildDir && pushd solusBuildDir
+            cmake -G Ninja .. \
+            -DCMAKE_CFLAGS="${CFLAGS}" -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
+            -DCMAKE_LD_FLAGS="${LDFLAGS}" -DCMAKE_LIB_SUFFIX="%LIBSUFFIX%" \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=%PREFIX% $* || exit 1
+            popd
+        }
+        cmake_ninja
     - meson_configure: |
         LC_ALL=en_US.utf8 CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" LDFLAGS="${LDFLAGS}" meson --prefix %PREFIX% --buildtype=plain --libdir="lib%LIBSUFFIX%" --libexecdir="lib%LIBSUFFIX%/%PKGNAME%" --sysconfdir=/etc --localstatedir=/var solusBuildDir
-    - meson_build: |
+    - ninja_build: &ninja_build |
         LC_ALL=en_US.utf8 ninja %JOBS% -C solusBuildDir
-    - meson_install: |
+    - ninja_install: &ninja_install |
         LC_ALL=en_US.utf8 DESTDIR="%installroot%" ninja install %JOBS% -C solusBuildDir
-    - meson_check: |
+    - ninja_check: &ninja_check |
         LC_ALL=en_US.utf8 ninja test %JOBS% -C solusBuildDir
+    # These macros are for backward compatibility only. Please use the ninja ones
+    - meson_build: *ninja_build
+    - meson_install: *ninja_install
+    - meson_check: *ninja_check
     - qmake: |
         qmake QMAKE_CFLAGS_RELEASE="${CFLAGS}" QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS}" QMAKE_LFLAGS="${LDFLAGS}"
     - qmake4: |
@@ -73,7 +87,7 @@ actions:
             if [[ -e Build.PL ]]; then
                 perl Build.PL installdirs=vendor create_packlist=0 $* || exit 1
             else
-                perl Makefile.PL PREFIX=%PREFIX% INSTALLDIRS=vendor DESTDIR="%installroot%" $* || exit 
+                perl Makefile.PL PREFIX=%PREFIX% INSTALLDIRS=vendor DESTDIR="%installroot%" $* || exit
             fi
         }
         perl_setup
