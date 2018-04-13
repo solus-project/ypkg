@@ -170,10 +170,12 @@ class ScriptGenerator:
             self.define_export("LD_AS_NEEDED", "1")
 
         # Handle lto correctly
-        if self.context.spec.pkg_optimize == "speed":
-            self.define_export("AR", "gcc-ar")
-            self.define_export("RANLIB", "gcc-ranlib")
-            self.define_export("NM", "gcc-nm")
+        if self.context.spec.pkg_optimize and not self.context.spec.pkg_clang:
+            if "thin-lto" in self.context.spec.pkg_optimize \
+                    or "lto" in self.context.spec.pkg_optimize:
+                self.define_export("AR", "gcc-ar")
+                self.define_export("RANLIB", "gcc-ranlib")
+                self.define_export("NM", "gcc-nm")
 
         if not console_ui.allow_colors:
             self.define_export("TERM", "dumb")

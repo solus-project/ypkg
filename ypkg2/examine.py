@@ -269,11 +269,13 @@ def strip_file(context, pretty, file, magic_string, mode=None):
     if not context.spec.pkg_strip:
         return
     exports = ["LC_ALL=C"]
-    if context.spec.pkg_optimize == "speed":
-        exports.extend([
-            "AR=\"gcc-ar\"",
-            "RANLIB=\"gcc-ranlib\"",
-            "NM=\"gcc-nm\""])
+    if context.spec.pkg_optimize and not context.spec.pkg_clang:
+        if "thin-lto" in context.spec.pkg_optimize \
+                or "lto" in context.spec.pkg_optimize:
+            exports.extend([
+                "AR=\"gcc-ar\"",
+                "RANLIB=\"gcc-ranlib\"",
+                "NM=\"gcc-nm\""])
 
     cmd = "{} strip {} \"{}\""
     flags = ""
