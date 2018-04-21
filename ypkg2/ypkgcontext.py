@@ -50,8 +50,7 @@ THIN_LTO_FLAGS = "-flto=thin -fuse-ld=gold"
 UNROLL_LOOPS_FLAGS = "-funroll-loops"
 
 # GCC PGO flags
-PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\" " \
-                "-fprofile-update=atomic"
+PGO_GEN_FLAGS = "-fprofile-generate -fprofile-dir=\"{}\" "
 PGO_USE_FLAGS = "-fprofile-use -fprofile-dir=\"{}\" -fprofile-correction"
 
 # Clang can handle parameters to the args unlike GCC
