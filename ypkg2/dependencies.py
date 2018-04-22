@@ -180,6 +180,7 @@ class DependencyResolver:
         if name in self.global_pkgconfigs:
             pkg = self.global_pkgconfigs[name]
             return self.ctx.spec.get_package_name(pkg)
+        return None
 
     def get_pkgconfig_external(self, info, name):
         """ Get the external provider of a pkgconfig name """
@@ -188,8 +189,9 @@ class DependencyResolver:
         if info.emul32:
             if name in self.pkgconfig32_cache:
                 return self.pkgconfig32_cache[name]
-        if name in self.pkgconfig_cache:
-            return self.pkgconfig_cache[name]
+        else:
+            if name in self.pkgconfig_cache:
+                return self.pkgconfig_cache[name]
 
         if info.emul32:
             # InstallDB set
