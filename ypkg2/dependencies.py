@@ -267,7 +267,7 @@ class DependencyResolver:
                 continue
             tgtPkg.depend_packages.add(prov)
 
-            console_ui.emit_info("PKGCONFIG", "{} adds depend on {}".
+            console_ui.emit_info("PKGCONFIG", "{} adds dependency on {}".
                                  format(pkgName, prov))
 
     def handle_pkgconfig_provides(self, packageName, info):
