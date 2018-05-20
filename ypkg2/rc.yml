@@ -80,7 +80,8 @@ actions:
                         --libsubdir="\$compiler/\$pkgid" \
                         --sysconfdir=/etc \
                         --enable-executable-dynamic \
-                        --enable-shared
+                        --enable-shared \
+                        --ghc-options="-O2 -fPIC"
     - cabal_build: |
         cabal build %JOBS%
     - cabal_install: |
