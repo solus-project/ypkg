@@ -42,13 +42,16 @@ actions:
     - qmake4: |
         qmake-qt4 QMAKE_CFLAGS_RELEASE="${CFLAGS}" QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS}" QMAKE_LFLAGS="${LDFLAGS}" QMAKE_LRELEASE=/usr/bin/lrelease-qt4 QMAKE_MOC=/usr/bin/moc-qt4 QMAKE_RCC=/usr/bin/rcc-qt4 QMAKE_UIC=/usr/bin/uic-qt4
     - qml_cache: |
-        pushd $installdir
-        for i in `find -type f -name "*.qml"`; do
-            if ! [ -a "${i}"c ]; then
-                qmlcachegen --target-architecture=x86_64 --target-abi=x86_64-little_endian-lp64 -o "${i}"c "${i}"
-            fi
-        done
-        popd
+        function generate_cache() {
+            pushd $installdir
+            for i in `find -type f -name "*.qml"`; do
+                if ! [ -a "${i}"c ]; then
+                    qmlcachegen -o "${i}"c "${i}" $*
+                fi
+            done
+            popd
+        }
+        generate_cache
     - patch: |
         patch -t -E --no-backup-if-mismatch -f
     # Only works if the user has a series file. They can provide the name to
