@@ -504,7 +504,7 @@ def write_spec(context, gene, outputDir):
             setattr(specPkg, item, getattr(package.package, item))
 
         # Now the fun bit.
-        for f in sorted(gene.packages[pkg].emit_files_by_pattern()):
+        for f in sorted(gene.packages[pkg].emit_files()):
             fc = pisi.specfile.Path()
             fc.path = f
             fc.fileType = get_file_type(f)
